@@ -1,0 +1,20 @@
+name: "Issue"
+description: "Issue principal"
+title: "[DI-] "
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: "Descripción"
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "Criterios de aceptación"
+      placeholder: |
+        - [ ] Criterio 1
+        - [ ] Criterio 2
+    validations:
+      required: false
