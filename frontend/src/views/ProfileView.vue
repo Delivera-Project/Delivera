@@ -15,6 +15,12 @@ const form = ref({
   phone: '',
 })
 
+const changingPassword = ref(false)
+const passwordForm = ref({
+  currentPassword: '',
+  newPassword: '',
+})
+
 function getToken() {
   return localStorage.getItem('token')
 }
@@ -84,6 +90,46 @@ async function saveProfile() {
   }
 }
 
+function startChangingPassword() {
+  changingPassword.value = true
+  success.value = ''
+  error.value = ''
+  passwordForm.value = { currentPassword: '', newPassword: '' }
+}
+
+function cancelChangingPassword() {
+  changingPassword.value = false
+  error.value = ''
+}
+
+async function savePassword() {
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/user/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${getToken()}`,
+      },
+      body: JSON.stringify({
+        currentPassword: passwordForm.value.currentPassword,
+        newPassword: passwordForm.value.newPassword,
+      }),
+    })
+    const data = await response.json()
+    if (response.ok) {
+      changingPassword.value = false
+      success.value = data.message
+    } else {
+      error.value = data.message || 'Error al cambiar la contraseña'
+    }
+  } catch {
+    error.value = 'Error de conexión con el servidor'
+  }
+}
+
 function handleLogout() {
   localStorage.removeItem('token')
   router.push('/')
@@ -135,6 +181,33 @@ onMounted(fetchProfile)
           <button type="button" class="btn-cancel" @click="cancelEditing">Cancelar</button>
         </div>
       </form>
+
+      <!-- Cambiar contraseña -->
+      <div v-if="changingPassword" class="password-section">
+        <h2>Cambiar contraseña</h2>
+        <form @submit.prevent="savePassword">
+          <input
+            v-model="passwordForm.currentPassword"
+            type="password"
+            placeholder="Contraseña actual"
+            required
+          />
+          <input
+            v-model="passwordForm.newPassword"
+            type="password"
+            placeholder="Nueva contraseña"
+            minlength="8"
+            required
+          />
+          <div class="actions">
+            <button type="submit" class="btn-save">Guardar</button>
+            <button type="button" class="btn-cancel" @click="cancelChangingPassword">Cancelar</button>
+          </div>
+        </form>
+      </div>
+      <button v-else-if="!editing" class="btn-password" @click="startChangingPassword">
+        Cambiar contraseña
+      </button>
 
       <button class="btn-logout" @click="handleLogout">Cerrar sesión</button>
     </div>
@@ -234,6 +307,29 @@ button:hover {
 
 .btn-cancel:hover {
   background: #64748b;
+}
+
+.password-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.password-section h2 {
+  font-size: 16px;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+.btn-password {
+  margin-top: 16px;
+  background: transparent;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+}
+
+.btn-password:hover {
+  background: #eff6ff;
 }
 
 .btn-logout {
