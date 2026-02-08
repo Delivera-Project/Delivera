@@ -1,25 +1,34 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
+const confirmPassword = ref('')
 const error = ref('')
-const loggedInAs = ref('')
 
-async function handleLogin() {
+async function handleRegister() {
   error.value = ''
+
+  if (password.value !== confirmPassword.value) {
+    error.value = 'Las contraseñas no coinciden'
+    return
+  }
+
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value, password: password.value }),
     })
+    const data = await response.json()
     if (response.ok) {
-      const data = await response.json()
       localStorage.setItem('token', data.token)
-      loggedInAs.value = data.email
+      router.push('/')
     } else {
-      error.value = 'Correo o contraseña incorrectos'
+      error.value = data.message || 'Error al registrarse'
     }
   } catch {
     error.value = 'Error de conexión con el servidor'
@@ -28,23 +37,28 @@ async function handleLogin() {
 </script>
 
 <template>
-  <div class="login-page">
-    <div v-if="loggedInAs" class="welcome">
-      <h2>Bienvenido, {{ loggedInAs }}</h2>
-    </div>
-    <form v-else @submit.prevent="handleLogin">
+  <div class="register-page">
+    <form @submit.prevent="handleRegister">
       <h1>Delivera</h1>
+      <p class="subtitle">Crear cuenta</p>
       <input v-model="email" type="email" placeholder="Correo" required />
-      <input v-model="password" type="password" placeholder="Contraseña" required />
+      <input v-model="password" type="password" placeholder="Contraseña" minlength="8" required />
+      <input
+        v-model="confirmPassword"
+        type="password"
+        placeholder="Confirmar contraseña"
+        minlength="8"
+        required
+      />
       <p v-if="error" class="error">{{ error }}</p>
-      <button type="submit">Iniciar sesión</button>
-      <p class="link">¿No tienes cuenta? <router-link to="/register">Regístrate</router-link></p>
+      <button type="submit">Registrarse</button>
+      <p class="link">¿Ya tienes cuenta? <router-link to="/">Inicia sesión</router-link></p>
     </form>
   </div>
 </template>
 
 <style scoped>
-.login-page {
+.register-page {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -62,8 +76,14 @@ form {
 }
 
 h1 {
-  margin: 0 0 24px;
+  margin: 0 0 4px;
   color: #1e293b;
+}
+
+.subtitle {
+  color: #64748b;
+  margin: 0 0 24px;
+  font-size: 14px;
 }
 
 input {
