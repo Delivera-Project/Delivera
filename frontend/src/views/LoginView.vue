@@ -1,15 +1,12 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
-const loggedInAs = ref('')
-
-function handleLogout() {
-  localStorage.removeItem('token')
-  loggedInAs.value = ''
-}
 
 async function handleLogin() {
   error.value = ''
@@ -22,7 +19,7 @@ async function handleLogin() {
     if (response.ok) {
       const data = await response.json()
       localStorage.setItem('token', data.token)
-      loggedInAs.value = data.email
+      router.push('/profile')
     } else {
       error.value = 'Correo o contraseña incorrectos'
     }
@@ -34,11 +31,7 @@ async function handleLogin() {
 
 <template>
   <div class="login-page">
-    <div v-if="loggedInAs" class="welcome">
-      <h2>Bienvenido, {{ loggedInAs }}</h2>
-      <button @click="handleLogout">Cerrar sesión</button>
-    </div>
-    <form v-else @submit.prevent="handleLogin">
+    <form @submit.prevent="handleLogin">
       <h1>Delivera</h1>
       <input v-model="email" type="email" placeholder="Correo" required />
       <input v-model="password" type="password" placeholder="Contraseña" required />
