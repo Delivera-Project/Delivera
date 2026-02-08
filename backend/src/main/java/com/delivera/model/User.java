@@ -25,6 +25,15 @@ public class User {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "first_name", length = 100)
+    private String firstName;
+
+    @Column(name = "last_name", length = 100)
+    private String lastName;
+
+    @Column(length = 20)
+    private String phone;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 }
