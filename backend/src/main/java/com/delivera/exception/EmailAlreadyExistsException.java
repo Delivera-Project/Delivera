@@ -1,7 +1,10 @@
 package com.delivera.exception;
 
 public class EmailAlreadyExistsException extends RuntimeException {
-    public EmailAlreadyExistsException(String email) {
-        super("El email ya está registrado: " + email);
+
+	private static final long serialVersionUID = 4173701214004876277L;
+
+	public EmailAlreadyExistsException() {
+        super("Email already exists");
     }
 }

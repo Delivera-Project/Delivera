@@ -1,55 +1,31 @@
 package com.delivera.controller;
 
-import com.delivera.dto.RegisterRequest;
-import com.delivera.dto.RegisterResponse;
-import com.delivera.repository.UserRepository;
+import com.delivera.dto.auth.LoginRequest;
+import com.delivera.dto.auth.LoginResponse;
+import com.delivera.dto.auth.RegisterRequest;
+import com.delivera.dto.auth.RegisterResponse;
 import com.delivera.service.AuthService;
-import com.delivera.service.JwtService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
-@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final AuthService authService;
-
-    public AuthController(UserRepository userRepository,
-                          BCryptPasswordEncoder passwordEncoder,
-                          JwtService jwtService,
-                          AuthService authService) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.jwtService = jwtService;
-        this.authService = authService;
-    }
+    @Autowired
+    private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String password = body.get("password");
-
-        return userRepository.findByEmail(email)
-                .filter(user -> passwordEncoder.matches(password, user.getPasswordHash()))
-                .<ResponseEntity<Map<String, String>>>map(user -> {
-                    String token = jwtService.generateToken(user.getEmail());
-                    return ResponseEntity.ok(Map.of("token", token, "email", user.getEmail()));
-                })
-                .orElse(ResponseEntity.status(401).body(Map.of("message", "Credenciales incorrectas")));
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        LoginResponse response = authService.login(request.email(), request.password());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterResponse response = authService.register(request.email(), request.password());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(response);
     }
 }
