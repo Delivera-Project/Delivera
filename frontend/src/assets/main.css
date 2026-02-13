@@ -1,0 +1,177 @@
+/* === Reset y base === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #1e293b;
+  background: #f3f4f6;
+}
+
+/* === Layout de página centrada === */
+.page-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* === Card === */
+.card {
+  background: white;
+  padding: 40px 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 380px;
+  text-align: center;
+}
+
+/* === Formularios === */
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* === Botones === */
+.btn {
+  width: 100%;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.btn:hover {
+  background: #1d4ed8;
+}
+
+.btn-secondary {
+  background: #94a3b8;
+}
+
+.btn-secondary:hover {
+  background: #64748b;
+}
+
+.btn-outline {
+  background: transparent;
+  color: #2563eb;
+  border: 1px solid #2563eb;
+}
+
+.btn-outline:hover {
+  background: #eff6ff;
+}
+
+.btn-danger {
+  background: transparent;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+}
+
+.btn-danger:hover {
+  background: #fef2f2;
+}
+
+/* === Mensajes === */
+.msg-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.msg-success {
+  color: #16a34a;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+/* === Links === */
+.form-link {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.form-link a {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.form-link a:hover {
+  text-decoration: underline;
+}
+
+/* === Card tipografía === */
+.card h1 {
+  margin: 0 0 24px;
+}
+
+.card .subtitle {
+  color: #64748b;
+  margin: 0 0 24px;
+  font-size: 14px;
+}
+
+/* === Sección cambio de contraseña === */
+.password-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.password-section h2 {
+  font-size: 16px;
+  color: #1e293b;
+  margin: 0 0 16px;
+}
+
+/* === Labels === */
+.field {
+  margin-bottom: 16px;
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field-value {
+  font-size: 15px;
+  color: #1e293b;
+}
+
+/* === Acciones en fila === */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.actions .btn {
+  flex: 1;
+}

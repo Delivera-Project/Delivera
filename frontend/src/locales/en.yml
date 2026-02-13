@@ -1,0 +1,58 @@
+app:
+  name: Delivera
+
+auth:
+  login: Sign in
+  register: Sign up
+  logout: Sign out
+  createAccount: Create account
+  noAccount: "Don't have an account?"
+  hasAccount: Already have an account?
+  signUp: Sign up
+  signIn: Sign in
+
+profile:
+  title: My profile
+  edit: Edit
+  save: Save
+  cancel: Cancel
+  changePassword: Change password
+  updated: Profile updated successfully
+  passwordChanged: Password updated successfully
+
+fields:
+  email: Email
+  password: Password
+  confirmPassword: Confirm password
+  currentPassword: Current password
+  newPassword: New password
+  firstName: First name
+  lastName: Last name
+  phone: Phone
+  empty: "—"
+
+notFound:
+  message: The page you are looking for does not exist
+  goHome: Go to home
+
+validation:
+  required: "{field} is required"
+  email: The email format is not valid
+  minLength: "{field} must be at least {min} characters"
+  maxLength: "{field} cannot exceed {max} characters"
+  passwordsDoNotMatch: Passwords do not match
+  passwordStrength: Password must include uppercase, lowercase and a number
+
+error:
+  connection: Connection error with the server
+  invalidCredentials: Incorrect email or password
+  registerFailed: Registration failed
+  saveFailed: Failed to save
+  passwordChangeFailed: Failed to change password
+  INVALID_CREDENTIALS: Incorrect email or password
+  USER_NOT_FOUND: User not found
+  EMAIL_ALREADY_EXISTS: Email is already registered
+  CURRENT_PASSWORD_INVALID: Current password is incorrect
+  NEW_PASSWORD_SAME_AS_CURRENT: New password cannot be the same as the current one
+  VALIDATION_ERROR: Validation error
+  INTERNAL_ERROR: Internal server error

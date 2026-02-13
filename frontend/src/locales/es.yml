@@ -1,0 +1,58 @@
+app:
+  name: Delivera
+
+auth:
+  login: Iniciar sesión
+  register: Registrarse
+  logout: Cerrar sesión
+  createAccount: Crear cuenta
+  noAccount: "¿No tienes cuenta?"
+  hasAccount: "¿Ya tienes cuenta?"
+  signUp: Regístrate
+  signIn: Inicia sesión
+
+profile:
+  title: Mi perfil
+  edit: Editar
+  save: Guardar
+  cancel: Cancelar
+  changePassword: Cambiar contraseña
+  updated: Perfil actualizado correctamente
+  passwordChanged: Contraseña actualizada correctamente
+
+fields:
+  email: Correo
+  password: Contraseña
+  confirmPassword: Confirmar contraseña
+  currentPassword: Contraseña actual
+  newPassword: Nueva contraseña
+  firstName: Nombre
+  lastName: Apellidos
+  phone: Teléfono
+  empty: "—"
+
+notFound:
+  message: La página que buscas no existe
+  goHome: Volver al inicio
+
+validation:
+  required: "El campo {field} es obligatorio"
+  email: El correo no tiene un formato válido
+  minLength: "{field} debe tener al menos {min} caracteres"
+  maxLength: "{field} no puede superar {max} caracteres"
+  passwordsDoNotMatch: Las contraseñas no coinciden
+  passwordStrength: La contraseña debe incluir mayúscula, minúscula y número
+
+error:
+  connection: Error de conexión con el servidor
+  invalidCredentials: Correo o contraseña incorrectos
+  registerFailed: Error al registrarse
+  saveFailed: Error al guardar
+  passwordChangeFailed: Error al cambiar la contraseña
+  INVALID_CREDENTIALS: Correo o contraseña incorrectos
+  USER_NOT_FOUND: Usuario no encontrado
+  EMAIL_ALREADY_EXISTS: El email ya está registrado
+  CURRENT_PASSWORD_INVALID: La contraseña actual es incorrecta
+  NEW_PASSWORD_SAME_AS_CURRENT: La nueva contraseña no puede ser igual a la actual
+  VALIDATION_ERROR: Error de validación
+  INTERNAL_ERROR: Error interno del servidor
