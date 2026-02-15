@@ -2,7 +2,7 @@
   <img src=".github/assets/Delivera banner.png" alt="Delivera" />
 </p>
 
-Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y operaciones de múltiples empresas.
+Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y operaciones de múltiples empresas. 
 
 ---
 
