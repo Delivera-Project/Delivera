@@ -27,7 +27,7 @@ export function useApi() {
       headers.Authorization = `Bearer ${auth.token}`
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1${endpoint}`, {
       ...options,
       headers,
     })
