@@ -5,7 +5,14 @@ import com.delivera.dto.user.ChangePasswordRequest;
 import com.delivera.dto.user.ProfileResponse;
 import com.delivera.dto.user.UpdateProfileRequest;
 import com.delivera.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -13,17 +20,29 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
+@Tag(name = "Usuario", description = "Endpoints para gestión de perfil de usuario")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
+    @Operation(summary = "Obtener perfil", description = "Obtiene la información del perfil del usuario autenticado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Perfil obtenido exitosamente"),
+        @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
     @GetMapping("/profile")
     public ResponseEntity<ProfileResponse> getProfile(Authentication authentication) {
         ProfileResponse profile = userService.getProfile(authentication.getName());
         return ResponseEntity.ok(profile);
     }
 
+    @Operation(summary = "Actualizar perfil", description = "Actualiza la información del perfil del usuario")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Perfil actualizado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+        @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
     @PutMapping("/profile")
     public ResponseEntity<ProfileResponse> updateProfile(Authentication authentication,
                                                          @Valid @RequestBody UpdateProfileRequest request) {
@@ -31,6 +50,12 @@ public class UserController {
         return ResponseEntity.ok(profile);
     }
 
+    @Operation(summary = "Cambiar contraseña", description = "Cambia la contraseña del usuario autenticado")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Contraseña cambiada exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Contraseña actual incorrecta"),
+        @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
     @PutMapping("/password")
     public ResponseEntity<MessageResponse> changePassword(Authentication authentication,
                                                           @Valid @RequestBody ChangePasswordRequest request) {
