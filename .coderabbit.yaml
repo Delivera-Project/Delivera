@@ -1,0 +1,40 @@
+language: es
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+      - develop
+
+  path_instructions:
+    - path: "backend/**/*.java"
+      instructions: |
+        Revisa siguiendo las convenciones del proyecto:
+        - DTOs como Java Records con Bean Validation
+        - Excepciones personalizadas gestionadas por GlobalExceptionHandler
+        - Seguridad: verifica que los endpoints estén correctamente protegidos según el rol
+        - Migraciones Flyway: comprueba que los cambios de esquema tienen su V-migración correspondiente
+    - path: "frontend/src/**/*.vue"
+      instructions: |
+        Revisa siguiendo las convenciones del proyecto:
+        - Lógica reutilizable en composables (useApi.js, useValidation.js)
+        - Estado global solo en stores Pinia
+        - Todas las cadenas de texto deben ir en locales/es.yml y locales/en.yml
+        - No lógica de negocio directamente en componentes
+    - path: "frontend/src/stores/**"
+      instructions: |
+        Verifica que el store sigue el patrón Pinia del proyecto (un store por dominio).
+    - path: "**/*.sql"
+      instructions: |
+        Verifica que la migración Flyway sigue la numeración V7 en adelante y es compatible con PostgreSQL 16.
+
+chat:
+  auto_reply: true
