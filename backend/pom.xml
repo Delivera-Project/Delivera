@@ -23,11 +23,6 @@
     <!-- Versión de Java -->
     <properties>
         <java.version>21</java.version>
-        <sonar.organization>delivera-project</sonar.organization>
-        <sonar.projectKey>delivera-project_delivera-backend</sonar.projectKey>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.java.source>21</sonar.java.source>
-        <sonar.exclusions>**/config/**,**/exception/**</sonar.exclusions>
     </properties>
 
     <dependencies>
