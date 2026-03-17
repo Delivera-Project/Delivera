@@ -26,8 +26,6 @@
         <sonar.organization>delivera-project</sonar.organization>
         <sonar.projectKey>delivera-project_delivera-backend</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.sources>src/main/java</sonar.sources>
-        <sonar.tests>src/test/java</sonar.tests>
         <sonar.java.source>21</sonar.java.source>
         <sonar.exclusions>**/config/**,**/exception/**</sonar.exclusions>
     </properties>

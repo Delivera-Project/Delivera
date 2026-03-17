@@ -60,9 +60,7 @@ jobs:
         working-directory: frontend
 
       - name: Análisis SonarCloud
-        uses: SonarSource/sonarcloud-github-action@v3
-        with:
-          projectBaseDir: frontend
+        run: npx --yes sonar-scanner -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        working-directory: frontend
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
