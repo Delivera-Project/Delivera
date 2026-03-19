@@ -38,6 +38,7 @@ fields:
   phone: Phone
   empty: "—"
   companyName: Company name
+  organization: Organization
   companyNamePlaceholder: "E.g: Acme Logistics"
 
 notFound:

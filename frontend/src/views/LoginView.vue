@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
+import { useOrganizationDetection } from '@/composables/useOrganizationDetection'
 import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
@@ -17,6 +18,7 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const { organizations, organizationSlug, detectOrganizations } = useOrganizationDetection(email)
 
 async function handleLogin() {
   error.value = ''
@@ -67,8 +69,30 @@ async function handleLogin() {
           :placeholder="t('fields.emailPlaceholder')"
           autocomplete="email"
           required
+          @blur="detectOrganizations"
         />
       </div>
+      <div v-if="organizations.length" class="form-field">
+        <label for="login-org">{{ t('fields.organization') }}</label>
+        <input
+          v-if="organizations.length === 1"
+          id="login-org"
+          :value="organizations[0].name"
+          class="form-input org-detected"
+          type="text"
+          readonly
+        />
+        <select
+          v-else
+          id="login-org"
+          v-model="organizationSlug"
+          class="form-input"
+          @change="auth.setOrganization(organizationSlug)"
+        >
+          <option v-for="org in organizations" :key="org.slug" :value="org.slug">{{ org.name }}</option>
+        </select>
+      </div>
+
       <div class="form-field">
         <label for="login-password">{{ t('fields.password') }}</label>
         <input
