@@ -37,10 +37,13 @@ async function handleLogin() {
     const response = await api.post('/auth/login', {
       email: email.value,
       password: password.value,
+      organizationSlug: auth.organizationSlug || undefined,
     })
     if (response.ok) {
       const data = await response.json()
       auth.setToken(data.token)
+      if (data.role) auth.setRole(data.role)
+      if (data.companyId) auth.setCompanyId(data.companyId)
       router.push('/profile')
     } else {
       const data = await response.json()
