@@ -11,6 +11,6 @@ import java.util.UUID;
 
 public interface WorkerRepository extends JpaRepository<Worker, UUID> {
 
-    @Query("SELECT new com.delivera.dto.auth.OrganizationSummary(o.slug, o.name) FROM Worker w JOIN w.company c JOIN c.organization o JOIN w.user u WHERE u.email = :email")
+    @Query("SELECT DISTINCT new com.delivera.dto.auth.OrganizationSummary(o.slug, o.name) FROM Worker w JOIN w.company c JOIN c.organization o JOIN w.user u WHERE u.email = :email")
     List<OrganizationSummary> findOrganizationsByUserEmail(@Param("email") String email);
 }
