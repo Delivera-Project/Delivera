@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -34,6 +35,8 @@ public class JwtService {
     }
 
     public String generateToken(String email, UUID companyId, WorkerRole role) {
+        Objects.requireNonNull(companyId, "companyId must not be null");
+        Objects.requireNonNull(role, "role must not be null");
         return Jwts.builder()
                 .subject(email)
                 .claim("companyId", companyId.toString())
@@ -44,21 +47,14 @@ public class JwtService {
                 .compact();
     }
 
-    public String parseToken(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
-    }
+    public record TokenClaims(String email, String role) {}
 
-    public String getClaim(String token, String claimName) {
-        return Jwts.parser()
+    public TokenClaims parseTokenWithClaims(String token) {
+        var payload = Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
-                .getPayload()
-                .get(claimName, String.class);
+                .getPayload();
+        return new TokenClaims(payload.getSubject(), payload.get("role", String.class));
     }
 }
