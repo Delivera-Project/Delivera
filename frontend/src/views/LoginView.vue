@@ -17,6 +17,25 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+const organizations = ref([])
+const organizationSlug = ref(null)
+const detectingOrg = ref(false)
+
+async function detectOrganizations() {
+  const val = email.value.trim()
+  if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return
+  detectingOrg.value = true
+  try {
+    const response = await api.get(`/auth/organizations?email=${encodeURIComponent(val)}`)
+    if (response.ok) {
+      organizations.value = await response.json()
+      organizationSlug.value = organizations.value.length === 1 ? organizations.value[0].slug : null
+      auth.setOrganization(organizationSlug.value)
+    }
+  } catch { /* ignorar */ } finally {
+    detectingOrg.value = false
+  }
+}
 
 async function handleLogin() {
   error.value = ''
@@ -67,8 +86,30 @@ async function handleLogin() {
           :placeholder="t('fields.emailPlaceholder')"
           autocomplete="email"
           required
+          @blur="detectOrganizations"
         />
       </div>
+      <div v-if="organizations.length" class="form-field">
+        <label for="login-org">{{ t('fields.organization') }}</label>
+        <input
+          v-if="organizations.length === 1"
+          id="login-org"
+          :value="organizations[0].name"
+          class="form-input org-detected"
+          type="text"
+          readonly
+        />
+        <select
+          v-else
+          id="login-org"
+          v-model="organizationSlug"
+          class="form-input"
+          @change="auth.setOrganization(organizationSlug)"
+        >
+          <option v-for="org in organizations" :key="org.slug" :value="org.slug">{{ org.name }}</option>
+        </select>
+      </div>
+
       <div class="form-field">
         <label for="login-password">{{ t('fields.password') }}</label>
         <input

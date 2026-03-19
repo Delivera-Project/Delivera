@@ -4,9 +4,12 @@ import com.delivera.dto.auth.CompanyRegisterRequest;
 import com.delivera.dto.auth.CompanyRegisterResponse;
 import com.delivera.dto.auth.LoginRequest;
 import com.delivera.dto.auth.LoginResponse;
+import com.delivera.dto.auth.OrganizationSummary;
 import com.delivera.dto.auth.RegisterRequest;
 import com.delivera.dto.auth.RegisterResponse;
 import com.delivera.service.AuthService;
+
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -14,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,6 +52,13 @@ public class AuthController {
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
         RegisterResponse response = authService.register(request.email(), request.password());
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Obtener organizaciones de un usuario", description = "Devuelve las organizaciones a las que pertenece el email indicado")
+    @ApiResponse(responseCode = "200", description = "Lista de organizaciones (puede ser vacía)")
+    @GetMapping("/organizations")
+    public ResponseEntity<List<OrganizationSummary>> getOrganizations(@RequestParam @Email String email) {
+        return ResponseEntity.ok(authService.getOrganizationsByEmail(email));
     }
 
     @Operation(summary = "Registrar empresa", description = "Crear empresa con su organización y cuenta de administrador")

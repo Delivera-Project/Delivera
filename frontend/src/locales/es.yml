@@ -39,6 +39,7 @@ fields:
   empty: "—"
   companyName: Nombre de la empresa
   companyNamePlaceholder: "Ej: Acme Logística"
+  organization: Organización
 
 notFound:
   message: La página que buscas no existe

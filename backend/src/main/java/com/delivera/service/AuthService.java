@@ -3,6 +3,7 @@ package com.delivera.service;
 import com.delivera.dto.auth.CompanyRegisterRequest;
 import com.delivera.dto.auth.CompanyRegisterResponse;
 import com.delivera.dto.auth.LoginResponse;
+import com.delivera.dto.auth.OrganizationSummary;
 import com.delivera.dto.auth.RegisterResponse;
 import com.delivera.exception.EmailAlreadyExistsException;
 import com.delivera.exception.InvalidCredentialsException;
@@ -14,6 +15,7 @@ import com.delivera.repository.UserRepository;
 import com.delivera.repository.WorkerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -63,6 +65,10 @@ public class AuthService {
 
         String token = jwtService.generateToken(user.getEmail());
         return new RegisterResponse(token, user.getEmail());
+    }
+
+    public List<OrganizationSummary> getOrganizationsByEmail(String email) {
+        return workerRepository.findOrganizationsByUserEmail(email);
     }
 
     @Transactional

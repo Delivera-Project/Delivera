@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Se almacena el token en la sesión al hacer login/register
   const token = ref(localStorage.getItem('token') || '')
   const user = ref(null)
+  const organizationSlug = ref(localStorage.getItem('organizationSlug') || null)
 
   // Devuelve el estado del token
   const isAuthenticated = computed(() => !!token.value)
@@ -15,15 +16,23 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('token', newToken)
   }
 
+  function setOrganization(slug) {
+    organizationSlug.value = slug
+    if (slug) localStorage.setItem('organizationSlug', slug)
+    else localStorage.removeItem('organizationSlug')
+  }
+
   function logout() {
     token.value = ''
     user.value = null
+    organizationSlug.value = null
     localStorage.removeItem('token')
+    localStorage.removeItem('organizationSlug')
   }
 
   function setUser(profile) {
     user.value = profile
   }
 
-  return { token, user, isAuthenticated, setToken, setUser, logout }
+  return { token, user, organizationSlug, isAuthenticated, setToken, setUser, setOrganization, logout }
 })

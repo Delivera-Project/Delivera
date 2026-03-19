@@ -43,6 +43,13 @@ body {
   box-sizing: border-box;
 }
 
+.form-input.org-detected {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+  cursor: default;
+}
+
 .form-input:focus {
   outline: none;
   border-color: #2563eb;
