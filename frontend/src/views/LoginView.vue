@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
+import { useOrganizationDetection } from '@/composables/useOrganizationDetection'
 import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
@@ -17,25 +18,7 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
-const organizations = ref([])
-const organizationSlug = ref(null)
-const detectingOrg = ref(false)
-
-async function detectOrganizations() {
-  const val = email.value.trim()
-  if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return
-  detectingOrg.value = true
-  try {
-    const response = await api.get(`/auth/organizations?email=${encodeURIComponent(val)}`)
-    if (response.ok) {
-      organizations.value = await response.json()
-      organizationSlug.value = organizations.value.length === 1 ? organizations.value[0].slug : null
-      auth.setOrganization(organizationSlug.value)
-    }
-  } catch { /* ignorar */ } finally {
-    detectingOrg.value = false
-  }
-}
+const { organizations, organizationSlug, detectOrganizations } = useOrganizationDetection(email)
 
 async function handleLogin() {
   error.value = ''

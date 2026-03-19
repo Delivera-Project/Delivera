@@ -17,8 +17,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setOrganization(slug) {
-    organizationSlug.value = slug
-    if (slug) localStorage.setItem('organizationSlug', slug)
+    const normalized = (slug && typeof slug === 'string') ? slug : null
+    organizationSlug.value = normalized
+    if (normalized) localStorage.setItem('organizationSlug', normalized)
     else localStorage.removeItem('organizationSlug')
   }
 
