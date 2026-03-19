@@ -30,9 +30,10 @@ router.beforeEach((to) => {
     return '/profile'
   }
 
-  // Si la ruta restringe por rol y el usuario no tiene el rol requerido -> Perfil
-  if (to.meta.roles && !to.meta.roles.includes(auth.role)) {
-    return '/profile'
+  // Si la ruta restringe por rol: primero verificar autenticación, luego el rol
+  if (to.meta.roles) {
+    if (!auth.isAuthenticated) return '/'
+    if (!to.meta.roles.includes(auth.role)) return '/profile'
   }
 })
 
