@@ -16,6 +16,7 @@ const { validate, required, email: emailRule, firstError } = useValidation()
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const loading = ref(false)
 
 async function handleLogin() {
   error.value = ''
@@ -29,6 +30,7 @@ async function handleLogin() {
     return
   }
 
+  loading.value = true
   try {
     const response = await api.post('/auth/login', {
       email: email.value,
@@ -44,6 +46,8 @@ async function handleLogin() {
     }
   } catch {
     error.value = t('error.connection')
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -52,12 +56,36 @@ async function handleLogin() {
   <BaseLayout>
     <form class="card" @submit.prevent="handleLogin">
       <h1>{{ t('app.name') }}</h1>
-      <input v-model="email" class="form-input" type="email" :placeholder="t('fields.email')" required />
-      <input v-model="password" class="form-input" type="password" :placeholder="t('fields.password')" required />
+      <p class="subtitle">{{ t('auth.signIn') }}</p>
+      <div class="form-field">
+        <label for="login-email">{{ t('fields.email') }}</label>
+        <input
+          id="login-email"
+          v-model="email"
+          class="form-input"
+          type="email"
+          :placeholder="t('fields.emailPlaceholder')"
+          autocomplete="email"
+          required
+        />
+      </div>
+      <div class="form-field">
+        <label for="login-password">{{ t('fields.password') }}</label>
+        <input
+          id="login-password"
+          v-model="password"
+          class="form-input"
+          type="password"
+          :placeholder="t('fields.password')"
+          autocomplete="current-password"
+          required
+        />
+      </div>
       <p v-if="error" class="msg-error">{{ error }}</p>
-      <button class="btn" type="submit">{{ t('auth.login') }}</button>
+      <button class="btn" type="submit" :disabled="loading">
+        {{ loading ? t('common.loading') : t('auth.login') }}
+      </button>
       <p class="form-link">{{ t('auth.noAccount') }} <router-link to="/register">{{ t('auth.signUp') }}</router-link></p>
     </form>
   </BaseLayout>
 </template>
-
