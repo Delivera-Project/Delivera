@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 @Slf4j
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -41,9 +44,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 String token = authHeader.substring(7);
                 String email = jwtService.parseToken(token);
+                String role = jwtService.getClaim(token, "role");
 
+                List<GrantedAuthority> authorities = role != null
+                        ? List.of(new SimpleGrantedAuthority("ROLE_" + role))
+                        : List.of();
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email,
-                        null, List.of());
+                        null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (ExpiredJwtException e) {
                 log.debug("Expired JWT token");

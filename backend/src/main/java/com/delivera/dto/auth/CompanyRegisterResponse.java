@@ -6,5 +6,6 @@ public record CompanyRegisterResponse(
         String token,
         String email,
         UUID companyId,
-        String organizationSlug
+        String organizationSlug,
+        String role
 ) {}
