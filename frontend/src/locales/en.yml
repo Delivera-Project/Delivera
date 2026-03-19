@@ -39,6 +39,15 @@ fields:
   empty: "—"
   companyName: Company name
   organization: Organization
+  type: Type
+  unitName: Unit name
+  unitNamePlaceholder: "E.g: Main Warehouse"
+  address: Address
+  addressPlaceholder: "E.g: 1 Main St, Madrid"
+  latitude: Latitude
+  latitudePlaceholder: "40.4168"
+  longitude: Longitude
+  longitudePlaceholder: "-3.7038"
   companyNamePlaceholder: "E.g: Acme Logistics"
 
 notFound:
@@ -60,6 +69,18 @@ activity:
   retail: Retail
   transport: Transport
   other: Other
+
+units:
+  title: Operational units
+  new: New unit
+  edit: Edit unit
+  created: Unit created successfully
+  updated: Unit updated successfully
+  empty: No operational units yet. Create the first one to start managing shipments.
+  WAREHOUSE: Warehouse
+  STORE: Store
+  FACTORY: Factory
+  LOGISTICS_CENTER: Logistics center
 
 common:
   back: Back
@@ -91,3 +112,5 @@ error:
   VALIDATION_ERROR: Validation error
   INTERNAL_ERROR: Internal server error
   SLUG_CONFLICT: Could not create the company, please try again
+  UNIT_NAME_CONFLICT: A unit with that name already exists in this company
+  UNIT_NOT_FOUND: Unit not found
