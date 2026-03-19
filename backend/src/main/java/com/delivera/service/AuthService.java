@@ -45,11 +45,20 @@ public class AuthService {
     @Autowired
     private JwtService jwtService;
 
-    public LoginResponse login(String email, String password) {
-        return userRepository.findByEmail(email)
-                .filter(user -> passwordEncoder.matches(password, user.getPassword()))
-                .map(user -> new LoginResponse(jwtService.generateToken(user.getEmail()), user.getEmail()))
+    public LoginResponse login(String email, String password, String organizationSlug) {
+        User user = userRepository.findByEmail(email)
+                .filter(u -> passwordEncoder.matches(password, u.getPassword()))
                 .orElseThrow(InvalidCredentialsException::new);
+
+        if (organizationSlug != null && !organizationSlug.isBlank()) {
+            Worker worker = workerRepository.findByUserEmailAndOrganizationSlug(email, organizationSlug)
+                    .orElseThrow(InvalidCredentialsException::new);
+            String token = jwtService.generateToken(email, worker.getCompany().getId(), worker.getRole());
+            return new LoginResponse(token, email, worker.getCompany().getId(), worker.getRole().name());
+        }
+
+        String token = jwtService.generateToken(user.getEmail());
+        return new LoginResponse(token, email, null, null);
     }
 
     @Transactional
@@ -96,8 +105,8 @@ public class AuthService {
         worker.setRole(WorkerRole.COMPANY_ADMIN);
         workerRepository.save(worker);
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new CompanyRegisterResponse(token, user.getEmail(), company.getId(), organization.getSlug());
+        String token = jwtService.generateToken(user.getEmail(), company.getId(), WorkerRole.COMPANY_ADMIN);
+        return new CompanyRegisterResponse(token, user.getEmail(), company.getId(), organization.getSlug(), WorkerRole.COMPANY_ADMIN.name());
     }
 
     private Organization createOrganizationWithSlug(String name) {

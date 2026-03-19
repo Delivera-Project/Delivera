@@ -29,6 +29,12 @@ router.beforeEach((to) => {
   if (to.meta.guest && auth.isAuthenticated) {
     return '/profile'
   }
+
+  // Si la ruta restringe por rol: primero verificar autenticación, luego el rol
+  if (to.meta.roles) {
+    if (!auth.isAuthenticated) return '/'
+    if (!to.meta.roles.includes(auth.role)) return '/profile'
+  }
 })
 
 export default router

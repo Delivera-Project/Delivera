@@ -57,6 +57,8 @@ export function useCompanyRegistration() {
       }
       if (response.ok && data?.token) {
         auth.setToken(data.token)
+        auth.setRole(data.role ?? null)
+        auth.setCompanyId(data.companyId ?? null)
         router.push('/profile')
       } else {
         error.value = data ? api.translateError(data, 'error.registerFailed') : t('error.registerFailed')
