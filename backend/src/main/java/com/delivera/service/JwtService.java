@@ -47,7 +47,7 @@ public class JwtService {
                 .compact();
     }
 
-    public record TokenClaims(String email, String role) {}
+    public record TokenClaims(String email, String role, String companyId) {}
 
     public TokenClaims parseTokenWithClaims(String token) {
         var payload = Jwts.parser()
@@ -55,6 +55,9 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return new TokenClaims(payload.getSubject(), payload.get("role", String.class));
+        return new TokenClaims(
+                payload.getSubject(),
+                payload.get("role", String.class),
+                payload.get("companyId", String.class));
     }
 }

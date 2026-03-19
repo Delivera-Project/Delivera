@@ -50,6 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         : List.of();
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(claims.email(),
                         null, authorities);
+                authentication.setDetails(claims.companyId());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (ExpiredJwtException e) {
                 log.debug("Expired JWT token");

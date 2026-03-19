@@ -1,6 +1,7 @@
 package com.delivera.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +31,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("GLOBAL_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/units").hasRole("COMPANY_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/units/**").hasRole("COMPANY_ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

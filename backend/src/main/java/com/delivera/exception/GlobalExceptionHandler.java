@@ -41,6 +41,18 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("EMAIL_ALREADY_EXISTS"));
     }
 
+    @ExceptionHandler(UnitNameConflictException.class)
+    public ResponseEntity<ErrorResponse> handleUnitNameConflict(UnitNameConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("UNIT_NAME_CONFLICT"));
+    }
+
+    @ExceptionHandler(UnitNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUnitNotFound(UnitNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("UNIT_NOT_FOUND"));
+    }
+
     @ExceptionHandler(SlugConflictException.class)
     public ResponseEntity<ErrorResponse> handleSlugConflict(SlugConflictException ex) {
         log.error("Slug conflict unresolved after max retries: {}", ex.getMessage());

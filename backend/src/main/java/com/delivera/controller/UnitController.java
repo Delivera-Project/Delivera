@@ -1,0 +1,43 @@
+package com.delivera.controller;
+
+import com.delivera.dto.unit.UnitRequest;
+import com.delivera.dto.unit.UnitResponse;
+import com.delivera.service.UnitService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/units")
+@Tag(name = "Unidades", description = "Gestión de unidades operativas")
+public class UnitController {
+
+    @Autowired
+    private UnitService unitService;
+
+    @Operation(summary = "Listar unidades de la empresa")
+    @GetMapping
+    public ResponseEntity<List<UnitResponse>> list() {
+        return ResponseEntity.ok(unitService.getByCompany());
+    }
+
+    @Operation(summary = "Crear unidad operativa")
+    @PostMapping
+    public ResponseEntity<UnitResponse> create(@Valid @RequestBody UnitRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(unitService.create(request));
+    }
+
+    @Operation(summary = "Editar unidad operativa")
+    @PutMapping("/{id}")
+    public ResponseEntity<UnitResponse> update(@PathVariable UUID id,
+                                               @Valid @RequestBody UnitRequest request) {
+        return ResponseEntity.ok(unitService.update(id, request));
+    }
+}
