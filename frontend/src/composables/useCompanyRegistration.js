@@ -33,7 +33,7 @@ export function useCompanyRegistration() {
   async function submitRegistration() {
     error.value = ''
     const valid = validate({
-      companyName: [required(companyName.value, t('fields.companyName'))],
+      companyName: [required(companyName.value, 'companyName')],
       email: [required(email.value, 'email'), emailRule(email.value)],
       password: [required(password.value, 'password'), minLength(password.value, 8, 'password'), passwordStrength(password.value)],
       confirmPassword: [match(password.value, confirmPassword.value)],
