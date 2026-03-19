@@ -20,7 +20,9 @@ export function useOrganizationDetection(email) {
 
   async function detectOrganizations() {
     const val = email.value.trim()
-    if (!val || val.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+    const atIdx = val.indexOf('@')
+    const looksLikeEmail = val.length <= 254 && atIdx > 0 && atIdx === val.lastIndexOf('@') && val.slice(atIdx + 1).includes('.')
+    if (!val || !looksLikeEmail) {
       resetOrgs()
       return
     }
