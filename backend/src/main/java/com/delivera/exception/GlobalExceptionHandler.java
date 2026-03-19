@@ -41,6 +41,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("EMAIL_ALREADY_EXISTS"));
     }
 
+    @ExceptionHandler(SlugConflictException.class)
+    public ResponseEntity<ErrorResponse> handleSlugConflict(SlugConflictException ex) {
+        log.error("Slug conflict unresolved after max retries: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("SLUG_CONFLICT"));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         var errors = ex.getBindingResult().getFieldErrors().stream()

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
@@ -28,6 +28,19 @@ const changingPassword = ref(false)
 const passwordForm = ref({
   currentPassword: '',
   newPassword: '',
+})
+
+const initials = computed(() => {
+  if (!profile.value) return '?'
+  const f = profile.value.firstName?.[0] || ''
+  const l = profile.value.lastName?.[0] || ''
+  return (f + l).toUpperCase() || profile.value.email?.[0]?.toUpperCase() || '?'
+})
+
+const displayName = computed(() => {
+  if (!profile.value) return ''
+  const parts = [profile.value.firstName, profile.value.lastName].filter(Boolean)
+  return parts.length ? parts.join(' ') : profile.value.email
 })
 
 async function fetchProfile() {
@@ -138,39 +151,55 @@ onMounted(fetchProfile)
     <div v-if="profile" class="card">
       <h1>{{ t('profile.title') }}</h1>
 
+      <!-- Cabecera con avatar -->
+      <div class="profile-header">
+        <div class="avatar">{{ initials }}</div>
+        <div>
+          <div class="profile-name">{{ displayName }}</div>
+          <div class="profile-email">{{ profile.email }}</div>
+        </div>
+      </div>
+
       <p v-if="success" class="msg-success">{{ success }}</p>
       <p v-if="error" class="msg-error">{{ error }}</p>
 
       <!-- Modo vista -->
-      <div v-if="!editing" class="fields">
-        <div class="field">
-          <span class="field-label">{{ t('fields.email') }}</span>
-          <span class="field-value">{{ profile.email }}</span>
+      <template v-if="!editing && !changingPassword">
+        <div class="fields">
+          <div class="field">
+            <span class="field-label">{{ t('fields.firstName') }}</span>
+            <span class="field-value">{{ profile.firstName || t('fields.empty') }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">{{ t('fields.lastName') }}</span>
+            <span class="field-value">{{ profile.lastName || t('fields.empty') }}</span>
+          </div>
+          <div class="field">
+            <span class="field-label">{{ t('fields.phone') }}</span>
+            <span class="field-value">{{ profile.phone || t('fields.empty') }}</span>
+          </div>
         </div>
-        <div class="field">
-          <span class="field-label">{{ t('fields.firstName') }}</span>
-          <span class="field-value">{{ profile.firstName || t('fields.empty') }}</span>
+        <div class="profile-actions">
+          <button class="btn" @click="startEditing">{{ t('profile.edit') }}</button>
+          <button class="btn btn-outline" @click="startChangingPassword">{{ t('profile.changePassword') }}</button>
+          <button class="btn btn-danger" @click="handleLogout">{{ t('auth.logout') }}</button>
         </div>
-        <div class="field">
-          <span class="field-label">{{ t('fields.lastName') }}</span>
-          <span class="field-value">{{ profile.lastName || t('fields.empty') }}</span>
-        </div>
-        <div class="field">
-          <span class="field-label">{{ t('fields.phone') }}</span>
-          <span class="field-value">{{ profile.phone || t('fields.empty') }}</span>
-        </div>
-        <button class="btn" @click="startEditing">{{ t('profile.edit') }}</button>
-      </div>
+      </template>
 
       <!-- Modo edición -->
-      <form v-else @submit.prevent="saveProfile">
-        <div class="field">
-          <span class="field-label">{{ t('fields.email') }}</span>
-          <span class="field-value">{{ profile.email }}</span>
+      <form v-else-if="editing" @submit.prevent="saveProfile">
+        <div class="form-field">
+          <label for="profile-first-name">{{ t('fields.firstName') }}</label>
+          <input id="profile-first-name" v-model="form.firstName" class="form-input" type="text" :placeholder="t('fields.firstName')" maxlength="100" />
         </div>
-        <input v-model="form.firstName" class="form-input" type="text" :placeholder="t('fields.firstName')" maxlength="100" />
-        <input v-model="form.lastName" class="form-input" type="text" :placeholder="t('fields.lastName')" maxlength="100" />
-        <input v-model="form.phone" class="form-input" type="tel" :placeholder="t('fields.phone')" maxlength="20" />
+        <div class="form-field">
+          <label for="profile-last-name">{{ t('fields.lastName') }}</label>
+          <input id="profile-last-name" v-model="form.lastName" class="form-input" type="text" :placeholder="t('fields.lastName')" maxlength="100" />
+        </div>
+        <div class="form-field">
+          <label for="profile-phone">{{ t('fields.phone') }}</label>
+          <input id="profile-phone" v-model="form.phone" class="form-input" type="tel" :placeholder="t('fields.phone')" maxlength="20" />
+        </div>
         <div class="actions">
           <button type="submit" class="btn">{{ t('profile.save') }}</button>
           <button type="button" class="btn btn-secondary" @click="cancelEditing">{{ t('profile.cancel') }}</button>
@@ -178,41 +207,38 @@ onMounted(fetchProfile)
       </form>
 
       <!-- Cambiar contraseña -->
-      <div v-if="changingPassword" class="password-section">
-        <h2>{{ t('profile.changePassword') }}</h2>
+      <div v-else>
+        <p class="profile-section-title">{{ t('profile.changePassword') }}</p>
         <form @submit.prevent="savePassword">
-          <input
-            v-model="passwordForm.currentPassword"
-            class="form-input"
-            type="password"
-            :placeholder="t('fields.currentPassword')"
-            required
-          />
-          <input
-            v-model="passwordForm.newPassword"
-            class="form-input"
-            type="password"
-            :placeholder="t('fields.newPassword')"
-            minlength="8"
-            required
-          />
+          <div class="form-field">
+            <label for="current-password">{{ t('fields.currentPassword') }}</label>
+            <input
+              id="current-password"
+              v-model="passwordForm.currentPassword"
+              class="form-input"
+              type="password"
+              :placeholder="t('fields.currentPassword')"
+              required
+            />
+          </div>
+          <div class="form-field">
+            <label for="new-password">{{ t('fields.newPassword') }}</label>
+            <input
+              id="new-password"
+              v-model="passwordForm.newPassword"
+              class="form-input"
+              type="password"
+              :placeholder="t('fields.passwordHint')"
+              minlength="8"
+              required
+            />
+          </div>
           <div class="actions">
             <button type="submit" class="btn">{{ t('profile.save') }}</button>
             <button type="button" class="btn btn-secondary" @click="cancelChangingPassword">{{ t('profile.cancel') }}</button>
           </div>
         </form>
       </div>
-      <button v-else-if="!editing" class="btn btn-outline" style="margin-top: 16px" @click="startChangingPassword">
-        {{ t('profile.changePassword') }}
-      </button>
-
-      <button class="btn btn-danger" style="margin-top: 24px" @click="handleLogout">{{ t('auth.logout') }}</button>
     </div>
   </BaseLayout>
 </template>
-
-<style scoped>
-.fields {
-  text-align: left;
-}
-</style>

@@ -10,6 +10,11 @@ auth:
   hasAccount: "¿Ya tienes cuenta?"
   signUp: Regístrate
   signIn: Inicia sesión
+  chooseAccountType: "¿Cómo quieres usar Delivera?"
+  individualTitle: Acceso personal
+  individualDesc: Consulta tus pedidos y gestiona tu cuenta
+  companyTitle: Registrar empresa
+  companyDesc: Gestiona envíos, trabajadores y unidades operativas
 
 profile:
   title: Mi perfil
@@ -22,7 +27,9 @@ profile:
 
 fields:
   email: Correo
+  emailPlaceholder: "admin{'@'}empresa.com"
   password: Contraseña
+  passwordHint: "Mín. 8 caracteres, mayúscula y número"
   confirmPassword: Confirmar contraseña
   currentPassword: Contraseña actual
   newPassword: Nueva contraseña
@@ -30,13 +37,39 @@ fields:
   lastName: Apellidos
   phone: Teléfono
   empty: "—"
+  companyName: Nombre de la empresa
+  companyNamePlaceholder: "Ej: Acme Logística"
 
 notFound:
   message: La página que buscas no existe
   goHome: Volver al inicio
 
+register:
+  companyTitle: Registrar empresa
+  activitySubtitle: Elige el tipo de actividad de tu empresa
+  accountSubtitle: Datos de la empresa y cuenta de administrador
+  stepActivity: Actividad
+  stepAccount: Cuenta
+  createCompany: Crear empresa
+
+activity:
+  industry: Industria
+  distribution: Distribución
+  food: Alimentación
+  retail: Retail
+  transport: Transporte
+  other: Otro
+
+common:
+  back: Volver
+  next: Siguiente
+  loading: Cargando...
+  save: Guardar
+  cancel: Cancelar
+
 validation:
   required: "El campo {field} es obligatorio"
+  activityTypeRequired: Selecciona un tipo de actividad
   email: El correo no tiene un formato válido
   minLength: "{field} debe tener al menos {min} caracteres"
   maxLength: "{field} no puede superar {max} caracteres"
@@ -56,3 +89,4 @@ error:
   NEW_PASSWORD_SAME_AS_CURRENT: La nueva contraseña no puede ser igual a la actual
   VALIDATION_ERROR: Error de validación
   INTERNAL_ERROR: Error interno del servidor
+  SLUG_CONFLICT: No se pudo crear la empresa, inténtalo de nuevo

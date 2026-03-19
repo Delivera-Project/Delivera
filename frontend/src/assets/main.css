@@ -46,6 +46,7 @@ body {
 .form-input:focus {
   outline: none;
   border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 /* === Botones === */
@@ -57,12 +58,19 @@ body {
   border: none;
   border-radius: 6px;
   font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
   margin-top: 4px;
+  transition: background 0.15s, opacity 0.15s;
 }
 
 .btn:hover {
   background: #1d4ed8;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-secondary {
@@ -174,4 +182,297 @@ body {
 
 .actions .btn {
   flex: 1;
+}
+
+/* === Card ancha (registro empresa) === */
+.card-wide {
+  width: 520px;
+}
+
+/* === Botón volver === */
+.back-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.back-btn:hover {
+  color: #1e293b;
+}
+
+/* === Selector tipo de registro === */
+.register-type-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 8px 0 24px;
+}
+
+.register-type-option {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px 12px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  background: white;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  display: block;
+}
+
+.register-type-option:hover {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.register-type-option .option-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 10px;
+  color: #2563eb;
+}
+
+.register-type-option .option-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.register-type-option .option-desc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* === Step indicator === */
+.steps {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: #e2e8f0;
+  z-index: 0;
+}
+
+.step-item.done:not(:last-child)::after {
+  background: #2563eb;
+}
+
+.step-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  background: white;
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+}
+
+.step-dot.active {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.step-dot.done {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: white;
+}
+
+.step-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 6px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.step-label.active {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.step-label.done {
+  color: #64748b;
+}
+
+/* === Grid de tipos de actividad === */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.activity-option {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 10px;
+  cursor: pointer;
+  text-align: center;
+  background: white;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.activity-option:hover {
+  border-color: #93c5fd;
+  background: #f8faff;
+}
+
+.activity-option.selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.activity-option svg {
+  width: 28px;
+  height: 28px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.activity-option.selected svg {
+  color: #2563eb;
+}
+
+.activity-option span {
+  font-size: 11px;
+  font-weight: 500;
+  color: #475569;
+}
+
+.activity-option.selected span {
+  color: #1d4ed8;
+}
+
+/* === Campo con label flotante === */
+.form-field {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.form-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.form-field .form-input {
+  margin-bottom: 0;
+}
+
+/* === Campos de solo lectura === */
+.fields {
+  text-align: left;
+}
+
+/* === Perfil: cabecera con avatar === */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+
+.profile-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.profile-email {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.profile-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* === 404 === */
+.not-found-code {
+  font-size: 72px;
+  font-weight: 800;
+  color: #2563eb;
+  line-height: 1;
+  margin-bottom: 8px;
+  letter-spacing: -2px;
+}
+
+.not-found-icon {
+  color: #cbd5e1;
+  margin: 0 auto 16px;
+  display: block;
 }
