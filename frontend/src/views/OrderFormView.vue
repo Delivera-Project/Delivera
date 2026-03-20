@@ -2,7 +2,6 @@
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useOrderForm } from '@/composables/useOrderForm'
-import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -10,67 +9,70 @@ const { units, loadError, originId, destinationId, notes, loading, error, succes
 </script>
 
 <template>
-  <BaseLayout>
-    <form class="card card-wide" @submit.prevent="handleSubmit">
-      <button type="button" class="back-btn" @click="router.push('/units')">
-        ← {{ t('common.back') }}
-      </button>
+  <form class="card card-wide" @submit.prevent="handleSubmit">
+      <PButton
+        type="button"
+        text
+        severity="secondary"
+        icon="pi pi-arrow-left"
+        class="back-btn"
+        @click="router.push('/orders')"
+      />
 
       <h1>{{ t('orders.title') }}</h1>
       <p class="subtitle">{{ t('orders.subtitle') }}</p>
 
-      <p v-if="loadError" class="msg-error">{{ loadError }}</p>
-      <p v-else-if="units.length < 2" class="msg-error">{{ t('orders.noUnits') }}</p>
+      <PMessage v-if="loadError" severity="error" :closable="false" class="form-message">{{ loadError }}</PMessage>
+      <PMessage v-else-if="units.length < 2 && !loadError" severity="warn" :closable="false" class="form-message">{{ t('orders.noUnits') }}</PMessage>
 
-      <template v-else>
+      <template v-else-if="units.length >= 2 && !loadError">
         <div class="form-field">
           <label for="order-origin">{{ t('orders.origin') }}</label>
-          <select
+          <PSelect
             id="order-origin"
             v-model="originId"
-            class="form-input"
-            required
-          >
-            <option value="" disabled>{{ t('orders.originPlaceholder') }}</option>
-            <option v-for="unit in units" :key="unit.id" :value="unit.id">
-              {{ unit.name }}
-            </option>
-          </select>
+            :options="units"
+            option-label="name"
+            option-value="id"
+            :placeholder="t('orders.originPlaceholder')"
+            fluid
+          />
         </div>
 
         <div class="form-field">
           <label for="order-destination">{{ t('orders.destination') }}</label>
-          <select
+          <PSelect
             id="order-destination"
             v-model="destinationId"
-            class="form-input"
-            required
-          >
-            <option value="" disabled>{{ t('orders.destinationPlaceholder') }}</option>
-            <option v-for="unit in destinationOptions" :key="unit.id" :value="unit.id">
-              {{ unit.name }}
-            </option>
-          </select>
+            :options="destinationOptions"
+            option-label="name"
+            option-value="id"
+            :placeholder="t('orders.destinationPlaceholder')"
+            fluid
+          />
         </div>
 
         <div class="form-field">
           <label for="order-notes">{{ t('orders.notes') }}</label>
-          <textarea
+          <PTextarea
             id="order-notes"
             v-model="notes"
-            class="form-input"
             :placeholder="t('orders.notesPlaceholder')"
             rows="3"
+            fluid
           />
         </div>
 
-        <p v-if="error" class="msg-error">{{ error }}</p>
-        <p v-if="success" class="msg-success">{{ success }}</p>
+        <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
+        <PMessage v-if="success" severity="success" :closable="false" class="form-message">{{ success }}</PMessage>
 
-        <button class="btn" type="submit" :disabled="loading">
-          {{ loading ? t('common.loading') : t('common.save') }}
-        </button>
+        <PButton
+          type="submit"
+          :label="loading ? t('common.loading') : t('common.save')"
+          :loading="loading"
+          fluid
+          class="submit-btn"
+        />
       </template>
-    </form>
-  </BaseLayout>
+  </form>
 </template>

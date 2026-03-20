@@ -12,7 +12,7 @@ const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const api = useApi()
-const { validate, required, email: emailRule, firstError } = useValidation()
+const { validate, required, email: emailRule, errors, invalids } = useValidation()
 
 const email = ref('')
 const password = ref('')
@@ -27,10 +27,7 @@ async function handleLogin() {
     email: [required(email.value, 'email'), emailRule(email.value)],
     password: [required(password.value, 'password')],
   })
-  if (!valid) {
-    error.value = firstError()
-    return
-  }
+  if (!valid) return
 
   loading.value = true
   try {
@@ -44,7 +41,8 @@ async function handleLogin() {
       auth.setToken(data.token)
       auth.setRole(data.role ?? null)
       auth.setCompanyId(data.companyId ?? null)
-      router.push('/profile')
+      const companyRoles = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
+      router.push(companyRoles.includes(data.role) ? '/units' : '/profile')
     } else {
       const data = await response.json()
       error.value = api.translateError(data, 'error.invalidCredentials')
@@ -62,57 +60,72 @@ async function handleLogin() {
     <form class="card" @submit.prevent="handleLogin">
       <h1>{{ t('app.name') }}</h1>
       <p class="subtitle">{{ t('auth.signIn') }}</p>
+
       <div class="form-field">
         <label for="login-email">{{ t('fields.email') }}</label>
-        <input
+        <InputText
           id="login-email"
           v-model="email"
-          class="form-input"
           type="email"
           :placeholder="t('fields.emailPlaceholder')"
+          :invalid="!!invalids.email"
           autocomplete="email"
-          required
+          fluid
           @blur="detectOrganizations"
         />
+        <small v-if="errors.email" class="field-error">{{ errors.email }}</small>
       </div>
+
       <div v-if="organizations.length" class="form-field">
         <label for="login-org">{{ t('fields.organization') }}</label>
-        <input
+        <InputText
           v-if="organizations.length === 1"
           id="login-org"
           :value="organizations[0].name"
-          class="form-input org-detected"
-          type="text"
           readonly
+          fluid
+          class="org-detected"
         />
-        <select
+        <PSelect
           v-else
           id="login-org"
           v-model="organizationSlug"
-          class="form-input"
+          :options="organizations"
+          option-label="name"
+          option-value="slug"
+          fluid
           @change="auth.setOrganization(organizationSlug)"
-        >
-          <option v-for="org in organizations" :key="org.slug" :value="org.slug">{{ org.name }}</option>
-        </select>
+        />
       </div>
 
       <div class="form-field">
         <label for="login-password">{{ t('fields.password') }}</label>
-        <input
+        <PPassword
           id="login-password"
           v-model="password"
-          class="form-input"
-          type="password"
+          :feedback="false"
+          toggle-mask
           :placeholder="t('fields.password')"
+          :invalid="!!invalids.password"
           autocomplete="current-password"
-          required
+          fluid
         />
+        <small v-if="errors.password" class="field-error">{{ errors.password }}</small>
       </div>
-      <p v-if="error" class="msg-error">{{ error }}</p>
-      <button class="btn" type="submit" :disabled="loading">
-        {{ loading ? t('common.loading') : t('auth.login') }}
-      </button>
-      <p class="form-link">{{ t('auth.noAccount') }} <router-link to="/register">{{ t('auth.signUp') }}</router-link></p>
+
+      <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
+
+      <PButton
+        type="submit"
+        :label="loading ? t('common.loading') : t('auth.login')"
+        :loading="loading"
+        fluid
+        class="submit-btn"
+      />
+
+      <p class="form-link">
+        {{ t('auth.noAccount') }} <router-link to="/register">{{ t('auth.signUp') }}</router-link>
+      </p>
     </form>
   </BaseLayout>
 </template>

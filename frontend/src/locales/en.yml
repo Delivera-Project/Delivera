@@ -24,6 +24,7 @@ profile:
   changePassword: Change password
   updated: Profile updated successfully
   passwordChanged: Password updated successfully
+  memberSince: Member since
 
 fields:
   email: Email
@@ -83,10 +84,16 @@ units:
   LOGISTICS_CENTER: Logistics center
 
 orders:
+  listTitle: Orders
   title: New order
   new: New order
   subtitle: Create an internal shipment between two units of your company
   created: "Order created: {reference}"
+  empty: No orders yet. Create the first one using the button above.
+  reference: Reference
+  route: Route
+  statusLabel: Status
+  date: Date
   origin: Origin unit
   originPlaceholder: Select origin unit
   destination: Destination unit
@@ -95,6 +102,16 @@ orders:
   notesPlaceholder: Additional instructions (optional)
   noUnits: Not enough units. Create at least two operational units first.
   sameUnit: Origin and destination must be different units
+  status:
+    PENDING: Pending
+    IN_TRANSIT: In transit
+    DELIVERED: Delivered
+    CANCELLED: Cancelled
+
+nav:
+  profile: My profile
+  units: Units
+  orders: Orders
 
 common:
   back: Back

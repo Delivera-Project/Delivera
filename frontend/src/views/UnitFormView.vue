@@ -4,7 +4,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useUnitForm } from '@/composables/useUnitForm'
-import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -18,16 +17,16 @@ const { name, unitType, address, latitude, longitude, error, success, loading, s
 const loadError = ref('')
 
 const UNIT_TYPES = ['WAREHOUSE', 'STORE', 'FACTORY', 'LOGISTICS_CENTER']
+const unitTypeOptions = computed(() =>
+  UNIT_TYPES.map(type => ({ label: t(`units.${type}`), value: type }))
+)
 
 async function loadUnit(id) {
   if (!id) return
   loadError.value = ''
   try {
     const res = await api.get('/units')
-    if (!res.ok) {
-      loadError.value = t('error.connection')
-      return
-    }
+    if (!res.ok) { loadError.value = t('error.connection'); return }
     const units = await res.json()
     const unit = units.find(u => u.id === id)
     if (unit) {
@@ -51,83 +50,85 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BaseLayout>
-    <form class="card card-wide" @submit.prevent="handleSubmit">
-      <button type="button" class="back-btn" @click="router.push('/units')">
-        ← {{ t('common.back') }}
-      </button>
+  <form class="card card-wide" @submit.prevent="handleSubmit">
+      <PButton
+        type="button"
+        text
+        severity="secondary"
+        icon="pi pi-arrow-left"
+        class="back-btn"
+        @click="router.push('/units')"
+      />
 
       <h1>{{ t(isEdit ? 'units.edit' : 'units.new') }}</h1>
 
-      <p v-if="loadError" class="msg-error">{{ loadError }}</p>
+      <PMessage v-if="loadError" severity="error" :closable="false" class="form-message">{{ loadError }}</PMessage>
 
-      <div class="unit-type-grid">
-        <button
-          v-for="type in UNIT_TYPES"
-          :key="type"
-          type="button"
-          class="unit-type-option"
-          :class="{ selected: unitType === type }"
-          @click="unitType = type"
-        >
-          <span class="option-title">{{ t(`units.${type}`) }}</span>
-        </button>
+      <div class="form-field">
+        <label>{{ t('fields.type') }}</label>
+        <SelectButton
+          v-model="unitType"
+          :options="unitTypeOptions"
+          option-label="label"
+          option-value="value"
+          class="unit-type-selector"
+        />
       </div>
 
       <div class="form-field">
         <label for="unit-name">{{ t('fields.unitName') }}</label>
-        <input
+        <InputText
           id="unit-name"
           v-model="name"
-          class="form-input"
-          type="text"
           :placeholder="t('fields.unitNamePlaceholder')"
-          required
+          fluid
         />
       </div>
 
       <div class="form-field">
         <label for="unit-address">{{ t('fields.address') }}</label>
-        <input
+        <InputText
           id="unit-address"
           v-model="address"
-          class="form-input"
-          type="text"
           :placeholder="t('fields.addressPlaceholder')"
+          fluid
         />
       </div>
 
       <div class="actions">
         <div class="form-field" style="flex:1">
           <label for="unit-lat">{{ t('fields.latitude') }}</label>
-          <input
+          <InputText
             id="unit-lat"
             v-model="latitude"
-            class="form-input"
             type="number"
             step="any"
             :placeholder="t('fields.latitudePlaceholder')"
+            fluid
           />
         </div>
         <div class="form-field" style="flex:1">
           <label for="unit-lon">{{ t('fields.longitude') }}</label>
-          <input
+          <InputText
             id="unit-lon"
             v-model="longitude"
-            class="form-input"
             type="number"
             step="any"
             :placeholder="t('fields.longitudePlaceholder')"
+            fluid
           />
         </div>
       </div>
 
-      <p v-if="error" class="msg-error">{{ error }}</p>
-      <p v-if="success" class="msg-success">{{ success }}</p>
+      <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
+      <PMessage v-if="success" severity="success" :closable="false" class="form-message">{{ success }}</PMessage>
 
-      <button class="btn" type="submit" :disabled="loading">
-        {{ loading ? t('common.loading') : t('common.save') }}
-      </button>
-    </form>
-  </BaseLayout>
+      <PButton
+        type="submit"
+        :label="loading ? t('common.loading') : t('common.save')"
+        :loading="loading"
+        fluid
+        class="submit-btn"
+      />
+  </form>
 </template>

@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/orders")
 @Tag(name = "Pedidos", description = "Gestión de pedidos internos")
@@ -19,6 +21,12 @@ public class OrderController {
 
     public OrderController(OrderService orderService) {
         this.orderService = orderService;
+    }
+
+    @Operation(summary = "Listar pedidos de la empresa")
+    @GetMapping
+    public ResponseEntity<List<OrderResponse>> list() {
+        return ResponseEntity.ok(orderService.getByCompany());
     }
 
     @Operation(summary = "Crear pedido interno")

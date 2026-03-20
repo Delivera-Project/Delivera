@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,6 +34,14 @@ public class OrderService {
         this.unitRepository = unitRepository;
         this.companyRepository = companyRepository;
         this.securityUtils = securityUtils;
+    }
+
+    public List<OrderResponse> getByCompany() {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        return orderRepository.findByCompanyIdOrderByCreatedAtDesc(companyId)
+                .stream()
+                .map(OrderResponse::from)
+                .toList();
     }
 
     @Transactional

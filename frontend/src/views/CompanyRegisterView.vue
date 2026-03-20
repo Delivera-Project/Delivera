@@ -1,11 +1,20 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCompanyRegistration } from '@/composables/useCompanyRegistration'
 import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
-const { step, activityType, companyName, email, password, confirmPassword, error, loading, goToStep2, submitRegistration } = useCompanyRegistration()
+const router = useRouter()
+const overlayActive = ref(true)
+
+function handleSignIn() {
+  overlayActive.value = false
+  setTimeout(() => router.push('/'), 300)
+}
+
+const { step, activityType, companyName, email, password, confirmPassword, error, errors, invalids, loading, goToStep2, submitRegistration } = useCompanyRegistration()
 
 const P = (d) => `<path stroke-linecap="round" stroke-linejoin="round" d="${d}" />`
 const SVG = (...paths) =>
@@ -24,7 +33,11 @@ const activityTypes = [
     P('M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z'),
   ),
   makeActivity('FOOD',
-    P('M12 8.25v-1.5m0 1.5c-1.355 0-2.697.056-4.024.166C6.845 8.51 6 9.473 6 10.608v2.513m6-4.87c1.355 0 2.697.055 4.024.165C17.155 8.51 18 9.473 18 10.608v2.513m-3-4.87v-1.5m-6 4.5v3.75m6-3.75v3.75M6 18.75v.75a.75.75 0 00.75.75h10.5a.75.75 0 00.75-.75v-.75m-12 0h12'),
+    P('M4 11h16'),
+    P('M4 11a8 6 0 0 1 16 0'),
+    P('M9 10Q8 7 9 5'),
+    P('M12 10Q11 7 12 5'),
+    P('M15 10Q16 7 15 5'),
   ),
   makeActivity('RETAIL',
     P('M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z'),
@@ -36,13 +49,12 @@ const activityTypes = [
     P('M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z'),
   ),
 ]
-
-
 </script>
 
 <template>
+  <div class="bg-overlay bg-purple" :class="{ active: overlayActive }"></div>
   <BaseLayout>
-    <div class="card card-wide">
+    <div class="card card-wide theme-company">
       <!-- Step indicator -->
       <div class="steps">
         <div class="step-item" :class="{ done: step > 1, active: step === 1 }">
@@ -60,8 +72,17 @@ const activityTypes = [
         </div>
       </div>
 
-      <!-- Step 1: Tipo de actividad -->
+      <!-- Step 1 -->
       <div v-if="step === 1">
+        <PButton
+          type="button"
+          text
+          severity="secondary"
+          icon="pi pi-arrow-left"
+          class="back-btn"
+          rounded
+          @click="router.push('/register')"
+        />
         <h1>{{ t('register.companyTitle') }}</h1>
         <p class="subtitle">{{ t('register.activitySubtitle') }}</p>
 
@@ -79,59 +100,66 @@ const activityTypes = [
           </button>
         </div>
 
-        <p v-if="error" class="msg-error">{{ error }}</p>
-        <button class="btn" type="button" @click="goToStep2">{{ t('common.next') }}</button>
-        <p class="form-link">
-          <router-link to="/register">{{ t('common.back') }}</router-link>
-          · {{ t('auth.hasAccount') }} <router-link to="/">{{ t('auth.signIn') }}</router-link>
-        </p>
+        <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
+        <PButton :label="t('common.next')" icon="pi pi-arrow-right" icon-pos="right" fluid @click="goToStep2" />
+        <p class="form-link">{{ t('auth.hasAccount') }} <a href="/" @click.prevent="handleSignIn">{{ t('auth.signIn') }}</a></p>
       </div>
 
-      <!-- Step 2: Datos de empresa y cuenta -->
+      <!-- Step 2 -->
       <form v-else @submit.prevent="submitRegistration">
-        <button type="button" class="back-btn" @click="step = 1; error = ''">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-          {{ t('common.back') }}
-        </button>
+        <PButton
+          type="button"
+          text
+          severity="secondary"
+          icon="pi pi-arrow-left"
+          class="back-btn"
+          rounded
+          @click="step = 1; error = ''"
+        />
 
         <h1>{{ t('register.companyTitle') }}</h1>
         <p class="subtitle">{{ t('register.accountSubtitle') }}</p>
 
         <div class="form-field">
           <label for="company-name">{{ t('fields.companyName') }}</label>
-          <input
+          <InputText
             id="company-name"
             v-model="companyName"
-            class="form-input"
-            type="text"
             :placeholder="t('fields.companyNamePlaceholder')"
+            :invalid="!!invalids.companyName"
             maxlength="255"
-            required
+            fluid
           />
+          <small v-if="errors.companyName" class="field-error">{{ errors.companyName }}</small>
         </div>
 
         <div class="form-field">
           <label for="company-email">{{ t('fields.email') }}</label>
-          <input id="company-email" v-model="email" class="form-input" type="email" :placeholder="t('fields.emailPlaceholder')" required />
+          <InputText id="company-email" v-model="email" type="email" :placeholder="t('fields.emailPlaceholder')" :invalid="!!invalids.email" fluid />
+          <small v-if="errors.email" class="field-error">{{ errors.email }}</small>
         </div>
 
         <div class="form-field">
           <label for="company-password">{{ t('fields.password') }}</label>
-          <input id="company-password" v-model="password" class="form-input" type="password" :placeholder="t('fields.passwordHint')" minlength="8" required />
+          <PPassword id="company-password" v-model="password" :feedback="false" toggle-mask :placeholder="t('fields.passwordHint')" :invalid="!!invalids.password" fluid />
+          <small v-if="errors.password" class="field-error">{{ errors.password }}</small>
         </div>
 
         <div class="form-field">
           <label for="company-confirm-password">{{ t('fields.confirmPassword') }}</label>
-          <input id="company-confirm-password" v-model="confirmPassword" class="form-input" type="password" :placeholder="t('fields.confirmPassword')" minlength="8" required />
+          <PPassword id="company-confirm-password" v-model="confirmPassword" :feedback="false" toggle-mask :placeholder="t('fields.confirmPassword')" :invalid="!!invalids.confirmPassword" fluid />
+          <small v-if="errors.confirmPassword" class="field-error">{{ errors.confirmPassword }}</small>
         </div>
 
-        <p v-if="error" class="msg-error">{{ error }}</p>
-        <button class="btn" type="submit" :disabled="loading">
-          {{ loading ? t('common.loading') : t('register.createCompany') }}
-        </button>
-        <p class="form-link">{{ t('auth.hasAccount') }} <router-link to="/">{{ t('auth.signIn') }}</router-link></p>
+        <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
+        <PButton
+          type="submit"
+          :label="loading ? t('common.loading') : t('register.createCompany')"
+          :loading="loading"
+          fluid
+          class="submit-btn"
+        />
+        <p class="form-link">{{ t('auth.hasAccount') }} <a href="/" @click.prevent="handleSignIn">{{ t('auth.signIn') }}</a></p>
       </form>
     </div>
   </BaseLayout>

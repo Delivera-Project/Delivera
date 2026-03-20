@@ -24,6 +24,7 @@ profile:
   changePassword: Cambiar contraseña
   updated: Perfil actualizado correctamente
   passwordChanged: Contraseña actualizada correctamente
+  memberSince: Miembro desde
 
 fields:
   email: Correo
@@ -83,10 +84,16 @@ units:
   LOGISTICS_CENTER: Centro logístico
 
 orders:
+  listTitle: Pedidos
   title: Nuevo pedido
   new: Nuevo pedido
   subtitle: Crea un envío interno entre dos unidades de tu empresa
   created: "Pedido creado: {reference}"
+  empty: No hay pedidos todavía. Crea el primero desde el botón de arriba.
+  reference: Referencia
+  route: Ruta
+  statusLabel: Estado
+  date: Fecha
   origin: Unidad de origen
   originPlaceholder: Selecciona la unidad de origen
   destination: Unidad de destino
@@ -95,6 +102,16 @@ orders:
   notesPlaceholder: Instrucciones adicionales (opcional)
   noUnits: No hay suficientes unidades. Crea al menos dos unidades operativas primero.
   sameUnit: El origen y el destino deben ser unidades diferentes
+  status:
+    PENDING: Pendiente
+    IN_TRANSIT: En tránsito
+    DELIVERED: Entregado
+    CANCELLED: Cancelado
+
+nav:
+  profile: Mi perfil
+  units: Unidades
+  orders: Pedidos
 
 common:
   back: Volver

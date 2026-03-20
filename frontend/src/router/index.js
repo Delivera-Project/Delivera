@@ -6,7 +6,9 @@ import ProfileView from '@/views/ProfileView.vue'
 import UnitsView from '@/views/UnitsView.vue'
 import UnitFormView from '@/views/UnitFormView.vue'
 import OrderFormView from '@/views/OrderFormView.vue'
+import OrdersView from '@/views/OrdersView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import AppLayout from '@/components/AppLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -15,11 +17,18 @@ const router = createRouter({
     { path: '/', component: LoginView, meta: { guest: true } },
     { path: '/register', component: RegisterView, meta: { guest: true } },
     { path: '/register/company', component: CompanyRegisterView, meta: { guest: true } },
-    { path: '/profile', component: ProfileView, meta: { requiresAuth: true } },
-    { path: '/units', component: UnitsView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
-    { path: '/units/new', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
-    { path: '/units/:id/edit', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
-    { path: '/orders/new', component: OrderFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
+    {
+      path: '/',
+      component: AppLayout,
+      children: [
+        { path: 'profile', component: ProfileView, meta: { requiresAuth: true } },
+        { path: 'units', component: UnitsView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
+        { path: 'units/new', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
+        { path: 'units/:id/edit', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
+        { path: 'orders', component: OrdersView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
+        { path: 'orders/new', component: OrderFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
+      ],
+    },
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFoundView },
   ],
 })
@@ -32,9 +41,10 @@ router.beforeEach((to) => {
     return '/'
   }
 
-  // Si la ruta es solo para invitados y el usuario tiene token -> Perfil
+  // Si la ruta es solo para invitados y el usuario tiene token -> redirigir según rol
   if (to.meta.guest && auth.isAuthenticated) {
-    return '/profile'
+    const companyRoles = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
+    return companyRoles.includes(auth.role) ? '/units' : '/profile'
   }
 
   // Si la ruta restringe por rol: primero verificar autenticación, luego el rol
