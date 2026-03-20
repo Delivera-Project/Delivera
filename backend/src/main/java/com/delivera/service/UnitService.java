@@ -2,12 +2,14 @@ package com.delivera.service;
 
 import com.delivera.dto.unit.UnitRequest;
 import com.delivera.dto.unit.UnitResponse;
+import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.UnitNameConflictException;
 import com.delivera.exception.UnitNotFoundException;
 import com.delivera.model.OperationalUnit;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.OperationalUnitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,11 +28,11 @@ public class UnitService {
     private CompanyRepository companyRepository;
 
     private UUID getCurrentCompanyId() {
-        Object details = SecurityContextHolder.getContext().getAuthentication().getDetails();
-        if (details instanceof String s && !s.isBlank()) {
-            return UUID.fromString(s);
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getDetails() instanceof UUID companyId)) {
+            throw new CompanyContextException();
         }
-        throw new AccessDeniedException("No company context in token");
+        return companyId;
     }
 
     @Transactional
@@ -48,7 +50,11 @@ public class UnitService {
         unit.setAddress(request.address());
         unit.setLatitude(request.latitude());
         unit.setLongitude(request.longitude());
-        return new UnitResponse(unitRepository.save(unit));
+        try {
+            return UnitResponse.from(unitRepository.save(unit));
+        } catch (DataIntegrityViolationException e) {
+            throw new UnitNameConflictException();
+        }
     }
 
     @Transactional
@@ -64,12 +70,16 @@ public class UnitService {
         unit.setAddress(request.address());
         unit.setLatitude(request.latitude());
         unit.setLongitude(request.longitude());
-        return new UnitResponse(unitRepository.save(unit));
+        try {
+            return UnitResponse.from(unitRepository.save(unit));
+        } catch (DataIntegrityViolationException e) {
+            throw new UnitNameConflictException();
+        }
     }
 
     public List<UnitResponse> getByCompany() {
         return unitRepository.findAllByCompanyId(getCurrentCompanyId()).stream()
-                .map(UnitResponse::new)
+                .map(UnitResponse::from)
                 .toList();
     }
 }

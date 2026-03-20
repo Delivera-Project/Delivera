@@ -13,12 +13,16 @@ const auth = useAuthStore()
 
 const units = ref([])
 const loading = ref(false)
+const error = ref('')
 
 onMounted(async () => {
   loading.value = true
   try {
     const res = await api.get('/units')
     if (res.ok) units.value = await res.json()
+    else error.value = t('error.connection')
+  } catch {
+    error.value = t('error.connection')
   } finally {
     loading.value = false
   }
@@ -32,8 +36,7 @@ onMounted(async () => {
         <h1>{{ t('units.title') }}</h1>
         <button
           v-if="auth.role === 'COMPANY_ADMIN'"
-          class="btn"
-          style="width:auto;padding:8px 16px"
+          class="btn btn-header"
           @click="router.push('/units/new')"
         >
           {{ t('units.new') }}
@@ -41,6 +44,8 @@ onMounted(async () => {
       </div>
 
       <p v-if="loading" class="subtitle">{{ t('common.loading') }}</p>
+
+      <p v-else-if="error" class="msg-error">{{ error }}</p>
 
       <p v-else-if="!units.length" class="subtitle">{{ t('units.empty') }}</p>
 
@@ -51,8 +56,7 @@ onMounted(async () => {
           <span v-if="unit.address" class="unit-address">{{ unit.address }}</span>
           <button
             v-if="auth.role === 'COMPANY_ADMIN'"
-            class="btn btn-outline"
-            style="width:auto;padding:6px 12px;font-size:13px"
+            class="btn btn-outline btn-sm"
             @click="router.push(`/units/${unit.id}/edit`)"
           >
             {{ t('profile.edit') }}

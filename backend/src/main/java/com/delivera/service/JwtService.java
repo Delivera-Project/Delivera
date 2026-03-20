@@ -47,7 +47,7 @@ public class JwtService {
                 .compact();
     }
 
-    public record TokenClaims(String email, String role, String companyId) {}
+    public record TokenClaims(String email, String role, UUID companyId) {}
 
     public TokenClaims parseTokenWithClaims(String token) {
         var payload = Jwts.parser()
@@ -55,9 +55,15 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-        return new TokenClaims(
-                payload.getSubject(),
-                payload.get("role", String.class),
-                payload.get("companyId", String.class));
+        String companyIdStr = payload.get("companyId", String.class);
+        UUID companyId = null;
+        if (companyIdStr != null) {
+            try {
+                companyId = UUID.fromString(companyIdStr);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid companyId in token: " + companyIdStr, e);
+            }
+        }
+        return new TokenClaims(payload.getSubject(), payload.get("role", String.class), companyId);
     }
 }

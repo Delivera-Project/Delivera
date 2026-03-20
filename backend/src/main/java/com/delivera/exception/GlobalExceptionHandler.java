@@ -41,14 +41,23 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("EMAIL_ALREADY_EXISTS"));
     }
 
+    @ExceptionHandler(CompanyContextException.class)
+    public ResponseEntity<ErrorResponse> handleCompanyContext(CompanyContextException ex) {
+        log.warn("Request with no company context in token");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("COMPANY_CONTEXT_MISSING"));
+    }
+
     @ExceptionHandler(UnitNameConflictException.class)
     public ResponseEntity<ErrorResponse> handleUnitNameConflict(UnitNameConflictException ex) {
+        log.warn("Unit name conflict: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("UNIT_NAME_CONFLICT"));
     }
 
     @ExceptionHandler(UnitNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUnitNotFound(UnitNotFoundException ex) {
+        log.warn("Unit not found: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("UNIT_NOT_FOUND"));
     }

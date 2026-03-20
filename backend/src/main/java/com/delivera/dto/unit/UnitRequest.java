@@ -23,4 +23,9 @@ public record UnitRequest(
         @DecimalMin(value = "-180.0")
         @DecimalMax(value = "180.0")
         BigDecimal longitude
-) {}
+) {
+    @AssertTrue(message = "Latitude and longitude must both be provided or both be absent")
+    public boolean isCoordinatesConsistent() {
+        return (latitude == null) == (longitude == null);
+    }
+}

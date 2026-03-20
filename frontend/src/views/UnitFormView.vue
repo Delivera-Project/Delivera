@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import { useUnitForm } from '@/composables/useUnitForm'
 import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
@@ -10,26 +11,25 @@ const router = useRouter()
 const route = useRoute()
 const api = useApi()
 
-const unitId = route.params.id || null
-const isEdit = computed(() => !!unitId)
+const unitId = computed(() => route.params.id || null)
+const isEdit = computed(() => !!unitId.value)
 
-const name = ref('')
-const unitType = ref(null)
-const address = ref('')
-const latitude = ref('')
-const longitude = ref('')
-const error = ref('')
-const success = ref('')
-const loading = ref(false)
+const { name, unitType, address, latitude, longitude, error, success, loading, submitUnit } = useUnitForm()
+const loadError = ref('')
 
 const UNIT_TYPES = ['WAREHOUSE', 'STORE', 'FACTORY', 'LOGISTICS_CENTER']
 
-onMounted(async () => {
-  if (!isEdit.value) return
-  const res = await api.get(`/units`)
-  if (res.ok) {
+async function loadUnit(id) {
+  if (!id) return
+  loadError.value = ''
+  try {
+    const res = await api.get('/units')
+    if (!res.ok) {
+      loadError.value = t('error.connection')
+      return
+    }
     const units = await res.json()
-    const unit = units.find(u => u.id === unitId)
+    const unit = units.find(u => u.id === id)
     if (unit) {
       name.value = unit.name
       unitType.value = unit.type
@@ -37,48 +37,16 @@ onMounted(async () => {
       latitude.value = unit.latitude ?? ''
       longitude.value = unit.longitude ?? ''
     }
-  }
-})
-
-async function handleSubmit() {
-  error.value = ''
-  success.value = ''
-  if (!unitType.value) {
-    error.value = t('validation.required', { field: t('fields.type') })
-    return
-  }
-
-  loading.value = true
-  try {
-    const body = {
-      name: name.value,
-      type: unitType.value,
-      address: address.value || null,
-      latitude: latitude.value !== '' ? Number(latitude.value) : null,
-      longitude: longitude.value !== '' ? Number(longitude.value) : null,
-    }
-    const res = isEdit.value
-      ? await api.put(`/units/${unitId}`, body)
-      : await api.post('/units', body)
-
-    if (res.ok) {
-      success.value = t(isEdit.value ? 'units.updated' : 'units.created')
-      if (!isEdit.value) {
-        name.value = ''
-        unitType.value = null
-        address.value = ''
-        latitude.value = ''
-        longitude.value = ''
-      }
-    } else {
-      const data = await res.json()
-      error.value = api.translateError(data, 'error.saveFailed')
-    }
   } catch {
-    error.value = t('error.connection')
-  } finally {
-    loading.value = false
+    loadError.value = t('error.connection')
   }
+}
+
+watch(unitId, (newId) => loadUnit(newId))
+onMounted(() => loadUnit(unitId.value))
+
+function handleSubmit() {
+  submitUnit({ isEdit: isEdit.value, unitId: unitId.value })
 }
 </script>
 
@@ -90,6 +58,8 @@ async function handleSubmit() {
       </button>
 
       <h1>{{ t(isEdit ? 'units.edit' : 'units.new') }}</h1>
+
+      <p v-if="loadError" class="msg-error">{{ loadError }}</p>
 
       <div class="unit-type-grid">
         <button

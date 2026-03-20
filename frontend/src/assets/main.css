@@ -533,12 +533,36 @@ body {
   white-space: nowrap;
 }
 
+/* === Botones de tamaño compacto === */
+.btn-header {
+  width: auto;
+  padding: 8px 16px;
+}
+
+.btn-sm {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
 /* === Selector de tipo de unidad === */
 .unit-type-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .unit-type-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .unit-type-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .unit-type-option {
