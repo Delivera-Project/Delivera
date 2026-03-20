@@ -3,6 +3,7 @@ package com.delivera.exception;
 import com.delivera.dto.ErrorResponse;
 import com.delivera.dto.ValidationErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,6 +47,23 @@ public class GlobalExceptionHandler {
         log.warn("Request with no company context in token");
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new ErrorResponse("COMPANY_CONTEXT_MISSING"));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
+        Throwable cause = ex.getCause();
+        while (cause != null) {
+            if (cause instanceof java.sql.SQLException sqlEx
+                    && "23514".equals(sqlEx.getSQLState())) {
+                log.warn("Order units company violation: {}", sqlEx.getMessage());
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                        .body(new ErrorResponse("INVALID_ORDER_UNITS"));
+            }
+            cause = cause.getCause();
+        }
+        log.error("Data integrity violation: {}", ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("DATA_INTEGRITY_ERROR"));
     }
 
     @ExceptionHandler(InvalidOrderUnitsException.class)
