@@ -4,7 +4,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useUnitForm } from '@/composables/useUnitForm'
-import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -51,11 +50,9 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BaseLayout>
-    <form class="card card-wide" @submit.prevent="handleSubmit">
+  <form class="card card-wide" @submit.prevent="handleSubmit">
       <PButton
         type="button"
-        :label="t('common.back')"
         text
         severity="secondary"
         icon="pi pi-arrow-left"
@@ -133,6 +130,5 @@ function handleSubmit() {
         fluid
         class="submit-btn"
       />
-    </form>
-  </BaseLayout>
+  </form>
 </template>

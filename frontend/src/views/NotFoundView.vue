@@ -1,14 +1,13 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 </script>
 
 <template>
-  <BaseLayout>
+  <div class="not-found-page">
     <div class="card">
       <svg class="not-found-icon" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="10.5" cy="10.5" r="7.5" />
@@ -19,5 +18,15 @@ const router = useRouter()
       <p class="subtitle">{{ t('notFound.message') }}</p>
       <PButton :label="t('notFound.goHome')" fluid @click="router.push('/')" />
     </div>
-  </BaseLayout>
+  </div>
 </template>
+
+<style scoped>
+.not-found-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+</style>

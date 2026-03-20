@@ -41,7 +41,8 @@ async function handleLogin() {
       auth.setToken(data.token)
       auth.setRole(data.role ?? null)
       auth.setCompanyId(data.companyId ?? null)
-      router.push('/profile')
+      const companyRoles = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
+      router.push(companyRoles.includes(data.role) ? '/units' : '/profile')
     } else {
       const data = await response.json()
       error.value = api.translateError(data, 'error.invalidCredentials')

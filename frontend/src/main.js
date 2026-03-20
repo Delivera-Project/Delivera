@@ -15,6 +15,7 @@ import Tag from 'primevue/tag'
 import SelectButton from 'primevue/selectbutton'
 import Avatar from 'primevue/avatar'
 import Skeleton from 'primevue/skeleton'
+import Tooltip from 'primevue/tooltip'
 import 'primeicons/primeicons.css'
 
 import App from './App.vue'
@@ -59,10 +60,11 @@ app.component('PMessage', Message)
 app.component('PSelect', Select)
 app.component('PTextarea', Textarea)
 app.component('DataTable', DataTable)
-app.component('Column', Column)
+app.component('Column', Column) // eslint-disable-line vue/multi-word-component-names
 app.component('PTag', Tag)
 app.component('SelectButton', SelectButton)
 app.component('PAvatar', Avatar)
 app.component('PSkeleton', Skeleton)
+app.directive('tooltip', Tooltip)
 
 app.mount('#app')

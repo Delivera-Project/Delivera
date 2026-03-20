@@ -2,7 +2,6 @@
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useOrderForm } from '@/composables/useOrderForm'
-import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -10,16 +9,14 @@ const { units, loadError, originId, destinationId, notes, loading, error, succes
 </script>
 
 <template>
-  <BaseLayout>
-    <form class="card card-wide" @submit.prevent="handleSubmit">
+  <form class="card card-wide" @submit.prevent="handleSubmit">
       <PButton
         type="button"
-        :label="t('common.back')"
         text
         severity="secondary"
         icon="pi pi-arrow-left"
         class="back-btn"
-        @click="router.push('/units')"
+        @click="router.push('/orders')"
       />
 
       <h1>{{ t('orders.title') }}</h1>
@@ -77,6 +74,5 @@ const { units, loadError, originId, destinationId, notes, loading, error, succes
           class="submit-btn"
         />
       </template>
-    </form>
-  </BaseLayout>
+  </form>
 </template>

@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
-import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -106,7 +105,7 @@ onMounted(fetchProfile)
 </script>
 
 <template>
-  <BaseLayout>
+  <div>
     <!-- Skeleton mientras carga el perfil -->
     <div v-if="!profile" class="card">
       <PSkeleton width="7rem" height="1.4rem" border-radius="8px" class="mb-4" style="margin-inline:auto" />
@@ -159,6 +158,10 @@ onMounted(fetchProfile)
             <span class="field-label">{{ t('fields.phone') }}</span>
             <span class="field-value">{{ profile.phone || t('fields.empty') }}</span>
           </div>
+          <div class="field">
+            <span class="field-label">{{ t('profile.memberSince') }}</span>
+            <span class="field-value">{{ profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : t('fields.empty') }}</span>
+          </div>
         </div>
         <div class="profile-actions">
           <PButton :label="t('profile.edit')" fluid @click="startEditing" />
@@ -206,5 +209,5 @@ onMounted(fetchProfile)
         </form>
       </div>
     </div>
-  </BaseLayout>
+  </div>
 </template>
