@@ -55,9 +55,12 @@ public class GlobalExceptionHandler {
         while (cause != null) {
             if (cause instanceof java.sql.SQLException sqlEx
                     && "23514".equals(sqlEx.getSQLState())) {
-                log.warn("Order units company violation: {}", sqlEx.getMessage());
-                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                        .body(new ErrorResponse("INVALID_ORDER_UNITS"));
+                String msg = sqlEx.getMessage();
+                if (msg != null && msg.contains("does not belong to company")) {
+                    log.warn("Order units company violation: {}", msg);
+                    return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                            .body(new ErrorResponse("INVALID_ORDER_UNITS"));
+                }
             }
             cause = cause.getCause();
         }

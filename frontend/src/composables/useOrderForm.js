@@ -22,8 +22,12 @@ export function useOrderForm() {
   onMounted(async () => {
     try {
       const res = await api.get('/units')
-      if (res.ok) units.value = await res.json()
-      else loadError.value = t('error.connection')
+      if (res.ok) {
+        units.value = await res.json()
+      } else {
+        const data = await res.json().catch(() => null)
+        loadError.value = api.translateError(data, 'error.connection')
+      }
     } catch {
       loadError.value = t('error.connection')
     }
