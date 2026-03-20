@@ -34,13 +34,22 @@ onMounted(async () => {
     <div class="card card-wide">
       <div class="units-header">
         <h1>{{ t('units.title') }}</h1>
-        <button
-          v-if="auth.role === 'COMPANY_ADMIN'"
-          class="btn btn-header"
-          @click="router.push('/units/new')"
-        >
-          {{ t('units.new') }}
-        </button>
+        <div class="actions">
+          <button
+            v-if="['COMPANY_ADMIN', 'ANALYST'].includes(auth.role)"
+            class="btn btn-outline btn-header"
+            @click="router.push('/orders/new')"
+          >
+            {{ t('orders.new') }}
+          </button>
+          <button
+            v-if="auth.role === 'COMPANY_ADMIN'"
+            class="btn btn-header"
+            @click="router.push('/units/new')"
+          >
+            {{ t('units.new') }}
+          </button>
+        </div>
       </div>
 
       <p v-if="loading" class="subtitle">{{ t('common.loading') }}</p>
