@@ -10,7 +10,7 @@ export function useCompanyRegistration() {
   const router = useRouter()
   const auth = useAuthStore()
   const api = useApi()
-  const { validate, required, email: emailRule, minLength, match, passwordStrength, firstError } = useValidation()
+  const { validate, required, email: emailRule, minLength, match, passwordStrength, errors, invalids } = useValidation()
 
   const step = ref(1)
   const activityType = ref(null)
@@ -38,10 +38,7 @@ export function useCompanyRegistration() {
       password: [required(password.value, 'password'), minLength(password.value, 8, 'password'), passwordStrength(password.value)],
       confirmPassword: [match(password.value, confirmPassword.value)],
     })
-    if (!valid) {
-      error.value = firstError()
-      return
-    }
+    if (!valid) return
     loading.value = true
     try {
       const response = await api.post('/auth/register/company', {
@@ -70,5 +67,5 @@ export function useCompanyRegistration() {
     }
   }
 
-  return { step, activityType, companyName, email, password, confirmPassword, error, loading, goToStep2, submitRegistration }
+  return { step, activityType, companyName, email, password, confirmPassword, error, errors, invalids, loading, goToStep2, submitRegistration }
 }

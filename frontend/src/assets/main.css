@@ -7,10 +7,40 @@
   padding: 0;
 }
 
+/* === Fondo estilo macOS Big Sur — ondas SVG en paleta de marca === */
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #1e293b;
-  background: #f3f4f6;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Crect width='1440' height='900' fill='%230c1445'/%3E%3Cpath fill='%231e3a8a' d='M0 -500 L1440 -500 L1440 1080 C1360 1072 1120 1002 960 1008 C800 1014 620 856 400 844 C280 838 130 762 0 758 Z'/%3E%3Cpath fill='%231d4ed8' d='M0 -500 L1440 -500 L1440 870 C1380 876 1160 908 1000 898 C840 888 640 504 380 516 C250 521 110 600 0 598 Z'/%3E%3Cpath fill='%232563eb' d='M0 -500 L1440 -500 L1440 660 C1400 656 1180 520 960 528 C740 536 540 590 300 584 C190 580 90 476 0 474 Z'/%3E%3Cpath fill='%233b82f6' d='M0 -500 L1440 -500 L1440 542 C1380 546 1140 570 960 560 C780 550 520 228 300 246 C190 252 96 328 0 326 Z'/%3E%3Cpath fill='%2360a5fa' d='M0 -500 L1440 -500 L1440 430 C1400 426 1160 360 980 370 C800 380 560 288 340 276 C220 270 100 198 0 196 Z'/%3E%3Cpath fill='%23bfdbfe' d='M0 -500 L1440 -500 L1440 262 C1380 268 1160 302 960 294 C760 286 540 68 340 80 C220 88 100 70 0 68 Z'/%3E%3Cpath fill='%23eff6ff' d='M0 -500 L1440 -500 L1440 148 C1200 140 600 -56 0 -54 Z'/%3E%3C/svg%3E")
+    center / cover no-repeat fixed;
+  min-height: 100vh;
+}
+
+/* === Overlays de fondo para efectos hover en registro === */
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.bg-overlay.active {
+  opacity: 1;
+}
+
+.bg-celeste {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Crect width='1440' height='900' fill='%23082f49'/%3E%3Cpath fill='%230c4a6e' d='M0 -500 L1440 -500 L1440 1080 C1360 1072 1120 1002 960 1008 C800 1014 620 856 400 844 C280 838 130 762 0 758 Z'/%3E%3Cpath fill='%230369a1' d='M0 -500 L1440 -500 L1440 870 C1380 876 1160 908 1000 898 C840 888 640 504 380 516 C250 521 110 600 0 598 Z'/%3E%3Cpath fill='%230284c7' d='M0 -500 L1440 -500 L1440 660 C1400 656 1180 520 960 528 C740 536 540 590 300 584 C190 580 90 476 0 474 Z'/%3E%3Cpath fill='%230ea5e9' d='M0 -500 L1440 -500 L1440 542 C1380 546 1140 570 960 560 C780 550 520 228 300 246 C190 252 96 328 0 326 Z'/%3E%3Cpath fill='%2338bdf8' d='M0 -500 L1440 -500 L1440 430 C1400 426 1160 360 980 370 C800 380 560 288 340 276 C220 270 100 198 0 196 Z'/%3E%3Cpath fill='%237dd3fc' d='M0 -500 L1440 -500 L1440 262 C1380 268 1160 302 960 294 C760 286 540 68 340 80 C220 88 100 70 0 68 Z'/%3E%3Cpath fill='%23bae6fd' d='M0 -500 L1440 -500 L1440 148 C1200 140 600 -56 0 -54 Z'/%3E%3C/svg%3E")
+    center / cover no-repeat fixed;
+}
+
+.bg-purple {
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Crect width='1440' height='900' fill='%232e1065'/%3E%3Cpath fill='%234c1d95' d='M0 -500 L1440 -500 L1440 1080 C1360 1072 1120 1002 960 1008 C800 1014 620 856 400 844 C280 838 130 762 0 758 Z'/%3E%3Cpath fill='%236d28d9' d='M0 -500 L1440 -500 L1440 870 C1380 876 1160 908 1000 898 C840 888 640 504 380 516 C250 521 110 600 0 598 Z'/%3E%3Cpath fill='%237c3aed' d='M0 -500 L1440 -500 L1440 660 C1400 656 1180 520 960 528 C740 536 540 590 300 584 C190 580 90 476 0 474 Z'/%3E%3Cpath fill='%238b5cf6' d='M0 -500 L1440 -500 L1440 542 C1380 546 1140 570 960 560 C780 550 520 228 300 246 C190 252 96 328 0 326 Z'/%3E%3Cpath fill='%23a78bfa' d='M0 -500 L1440 -500 L1440 430 C1400 426 1160 360 980 370 C800 380 560 288 340 276 C220 270 100 198 0 196 Z'/%3E%3Cpath fill='%23c4b5fd' d='M0 -500 L1440 -500 L1440 262 C1380 268 1160 302 960 294 C760 286 540 68 340 80 C220 88 100 70 0 68 Z'/%3E%3Cpath fill='%23ede9fe' d='M0 -500 L1440 -500 L1440 148 C1200 140 600 -56 0 -54 Z'/%3E%3C/svg%3E")
+    center / cover no-repeat fixed;
 }
 
 /* === Layout de página centrada === */
@@ -19,106 +49,40 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  padding: 24px;
 }
 
-/* === Card === */
+/* === Card — blanco sólido sobre fondo de ondas === */
 .card {
-  background: white;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.9);
   padding: 40px 32px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  width: 380px;
+  border-radius: 20px;
+  box-shadow:
+    0 8px 32px rgba(12, 20, 69, 0.22),
+    0 2px 8px rgba(12, 20, 69, 0.12);
+  width: 400px;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
-/* === Formularios === */
-.form-input {
-  display: block;
-  width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
+.card-wide {
+  width: 560px;
+}
+
+/* === Card tipografía === */
+.card h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.subtitle {
+  color: #64748b;
+  margin: 0 0 24px;
   font-size: 14px;
-  box-sizing: border-box;
-}
-
-.form-input.org-detected {
-  background: #f0f9ff;
-  color: #0369a1;
-  border-color: #bae6fd;
-  cursor: default;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-/* === Botones === */
-.btn {
-  width: 100%;
-  padding: 10px;
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 4px;
-  transition: background 0.15s, opacity 0.15s;
-}
-
-.btn:hover {
-  background: #1d4ed8;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background: #94a3b8;
-}
-
-.btn-secondary:hover {
-  background: #64748b;
-}
-
-.btn-outline {
-  background: transparent;
-  color: #2563eb;
-  border: 1px solid #2563eb;
-}
-
-.btn-outline:hover {
-  background: #eff6ff;
-}
-
-.btn-danger {
-  background: transparent;
-  color: #dc2626;
-  border: 1px solid #dc2626;
-}
-
-.btn-danger:hover {
-  background: #fef2f2;
-}
-
-/* === Mensajes === */
-.msg-error {
-  color: #dc2626;
-  font-size: 14px;
-  margin: 8px 0;
-}
-
-.msg-success {
-  color: #16a34a;
-  font-size: 14px;
-  margin: 8px 0;
 }
 
 /* === Links === */
@@ -131,87 +95,69 @@ body {
 .form-link a {
   color: #2563eb;
   text-decoration: none;
+  transition: color 0.5s ease;
 }
 
 .form-link a:hover {
   text-decoration: underline;
 }
 
-/* === Card tipografía === */
-.card h1 {
-  margin: 0 0 24px;
+/* === Campos de formulario === */
+.form-field {
+  margin-bottom: 14px;
+  text-align: left;
 }
 
-.card .subtitle {
-  color: #64748b;
-  margin: 0 0 24px;
-  font-size: 14px;
-}
-
-/* === Sección cambio de contraseña === */
-.password-section {
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.password-section h2 {
-  font-size: 16px;
-  color: #1e293b;
-  margin: 0 0 16px;
-}
-
-/* === Labels === */
-.field {
-  margin-bottom: 16px;
-}
-
-.field-label {
+.form-field label {
   display: block;
   font-size: 12px;
+  font-weight: 500;
   color: #64748b;
-  margin-bottom: 2px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  margin-bottom: 6px;
 }
 
-.field-value {
-  font-size: 15px;
-  color: #1e293b;
+/* Org detectada: tinte azul claro en el InputText */
+.org-detected.p-inputtext {
+  background: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+/* === Mensajes inline === */
+.form-message {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.field-error {
+  display: block;
+  color: #ef4444;
+  font-size: 11px;
+  margin-top: 3px;
+  text-align: left;
+}
+
+/* === Botón de envío === */
+.submit-btn {
+  margin-top: 4px;
+}
+
+/* === Botón volver === */
+.back-btn {
+  position: absolute !important;
+  top: 10px;
+  left: 10px;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  min-width: unset !important;
 }
 
 /* === Acciones en fila === */
 .actions {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
-}
-
-.actions .btn {
-  flex: 1;
-}
-
-/* === Card ancha (registro empresa) === */
-.card-wide {
-  width: 520px;
-}
-
-/* === Botón volver === */
-.back-btn {
-  background: none;
-  border: none;
-  color: #64748b;
-  font-size: 13px;
-  cursor: pointer;
-  padding: 0;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.back-btn:hover {
-  color: #1e293b;
+  margin-top: 12px;
 }
 
 /* === Selector tipo de registro === */
@@ -223,20 +169,21 @@ body {
 }
 
 .register-type-option {
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
   padding: 20px 12px;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
-  background: white;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  background: #f8fafc;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
   display: block;
 }
 
 .register-type-option:hover {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .register-type-option .option-icon {
@@ -244,6 +191,7 @@ body {
   height: 40px;
   margin: 0 auto 10px;
   color: #2563eb;
+  transition: color 0.7s ease;
 }
 
 .register-type-option .option-title {
@@ -344,12 +292,12 @@ body {
 }
 
 .activity-option {
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
   padding: 14px 10px;
   cursor: pointer;
   text-align: center;
-  background: white;
+  background: #f8fafc;
   transition: border-color 0.15s, background 0.15s;
   display: flex;
   flex-direction: column;
@@ -388,27 +336,68 @@ body {
   color: #1d4ed8;
 }
 
-/* === Campo con label flotante === */
-.form-field {
-  margin-bottom: 12px;
-  text-align: left;
+/* === Temas de registro por rol === */
+.theme-personal {
+  --p-primary-color: #0ea5e9;
+  --p-primary-hover-color: #0284c7;
+  --p-primary-active-color: #0369a1;
+  --p-button-primary-background: #0ea5e9;
+  --p-button-primary-hover-background: #0284c7;
+  --p-button-primary-border-color: #0ea5e9;
+  --p-button-primary-hover-border-color: #0284c7;
+  --p-focus-ring-color: #0ea5e9;
+  --p-inputtext-focus-border-color: #0ea5e9;
+  --p-button-primary-focus-ring-color: #0ea5e9;
 }
 
-.form-field label {
-  display: block;
-  font-size: 12px;
-  font-weight: 500;
-  color: #64748b;
+.theme-personal .form-link a { color: #0ea5e9; }
+
+.theme-company {
+  --p-primary-color: #8b5cf6;
+  --p-primary-hover-color: #7c3aed;
+  --p-primary-active-color: #6d28d9;
+  --p-button-primary-background: #8b5cf6;
+  --p-button-primary-hover-background: #7c3aed;
+  --p-button-primary-border-color: #8b5cf6;
+  --p-button-primary-hover-border-color: #7c3aed;
+  --p-focus-ring-color: #8b5cf6;
+  --p-inputtext-focus-border-color: #8b5cf6;
+  --p-button-primary-focus-ring-color: #8b5cf6;
+}
+
+.theme-company .form-link a { color: #8b5cf6; }
+
+.theme-company .step-dot.active { border-color: #8b5cf6; color: #8b5cf6; }
+.theme-company .step-dot.done { border-color: #8b5cf6; background: #8b5cf6; }
+.theme-company .step-item.done:not(:last-child)::after { background: #8b5cf6; }
+.theme-company .step-label.active { color: #8b5cf6; }
+.theme-company .activity-option:hover { border-color: #ddd6fe; background: #f5f3ff; }
+.theme-company .activity-option.selected { border-color: #8b5cf6; background: #ede9fe; }
+.theme-company .activity-option.selected svg { color: #8b5cf6; }
+.theme-company .activity-option.selected span { color: #6d28d9; }
+
+/* === Campos de solo lectura (perfil) === */
+.fields {
+  text-align: left;
   margin-bottom: 4px;
 }
 
-.form-field .form-input {
-  margin-bottom: 0;
+.field {
+  margin-bottom: 16px;
 }
 
-/* === Campos de solo lectura === */
-.fields {
-  text-align: left;
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field-value {
+  font-size: 15px;
+  color: #1e293b;
 }
 
 /* === Perfil: cabecera con avatar === */
@@ -422,19 +411,11 @@ body {
   text-align: left;
 }
 
-.avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 18px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.profile-avatar {
   flex-shrink: 0;
-  letter-spacing: -0.5px;
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  font-weight: 700;
 }
 
 .profile-name {
@@ -484,114 +465,32 @@ body {
   display: block;
 }
 
-/* === Unidades operativas === */
+/* === Unidades: cabecera === */
 .units-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .units-header h1 {
   margin: 0;
 }
 
-.unit-list {
-  list-style: none;
+/* === Selector de tipo de unidad (SelectButton) === */
+.unit-type-selector {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
 }
 
-.unit-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-}
-
-.unit-name {
-  font-weight: 500;
-  color: #1e293b;
+.unit-type-selector .p-togglebutton {
   flex: 1;
+  min-width: 100px;
 }
 
-.unit-address {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.unit-type-badge {
-  font-size: 11px;
-  font-weight: 600;
-  background: #eff6ff;
-  color: #2563eb;
-  padding: 2px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-
-/* === Botones de tamaño compacto === */
-.btn-header {
-  width: auto;
-  padding: 8px 16px;
-}
-
-.btn-sm {
-  width: auto;
-  padding: 6px 12px;
-  font-size: 13px;
-}
-
-/* === Selector de tipo de unidad === */
-.unit-type-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-@media (max-width: 768px) {
-  .unit-type-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .unit-type-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.unit-type-option {
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 14px 8px;
-  cursor: pointer;
-  text-align: center;
-  background: white;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.unit-type-option:hover {
-  border-color: #93c5fd;
-  background: #f8faff;
-}
-
-.unit-type-option.selected {
-  border-color: #2563eb;
-  background: #eff6ff;
-}
-
-.unit-type-option .option-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
-  display: block;
-}
-
-.unit-type-option.selected .option-title {
-  color: #1d4ed8;
+/* === DataTable ajustes === */
+.unit-table {
+  margin-top: 4px;
 }

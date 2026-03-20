@@ -34,44 +34,54 @@ onMounted(async () => {
     <div class="card card-wide">
       <div class="units-header">
         <h1>{{ t('units.title') }}</h1>
-        <div class="actions">
-          <button
+        <div class="actions" style="margin-top:0">
+          <PButton
             v-if="auth.canCreateOrders"
-            class="btn btn-outline btn-header"
+            :label="t('orders.new')"
+            severity="secondary"
+            outlined
             @click="router.push('/orders/new')"
-          >
-            {{ t('orders.new') }}
-          </button>
-          <button
+          />
+          <PButton
             v-if="auth.isCompanyAdmin"
-            class="btn btn-header"
+            :label="t('units.new')"
+            icon="pi pi-plus"
             @click="router.push('/units/new')"
-          >
-            {{ t('units.new') }}
-          </button>
+          />
         </div>
       </div>
 
-      <p v-if="loading" class="subtitle">{{ t('common.loading') }}</p>
+      <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
-      <p v-else-if="error" class="msg-error">{{ error }}</p>
-
-      <p v-else-if="!units.length" class="subtitle">{{ t('units.empty') }}</p>
-
-      <ul v-else class="unit-list">
-        <li v-for="unit in units" :key="unit.id" class="unit-item">
-          <span class="unit-type-badge">{{ t(`units.${unit.type}`) }}</span>
-          <span class="unit-name">{{ unit.name }}</span>
-          <span v-if="unit.address" class="unit-address">{{ unit.address }}</span>
-          <button
-            v-if="auth.isCompanyAdmin"
-            class="btn btn-outline btn-sm"
-            @click="router.push(`/units/${unit.id}/edit`)"
-          >
-            {{ t('profile.edit') }}
-          </button>
-        </li>
-      </ul>
+      <DataTable
+        :value="units"
+        :loading="loading"
+        :rows="20"
+        striped-rows
+        class="unit-table"
+      >
+        <template #empty>
+          <span class="subtitle">{{ t('units.empty') }}</span>
+        </template>
+        <Column :header="t('fields.type')" style="width:140px">
+          <template #body="{ data }">
+            <PTag :value="t(`units.${data.type}`)" />
+          </template>
+        </Column>
+        <Column field="name" :header="t('fields.unitName')" />
+        <Column field="address" :header="t('fields.address')" />
+        <Column v-if="auth.isCompanyAdmin" style="width:60px">
+          <template #body="{ data }">
+            <PButton
+              icon="pi pi-pencil"
+              text
+              rounded
+              severity="secondary"
+              @click="router.push(`/units/${data.id}/edit`)"
+            />
+          </template>
+        </Column>
+      </DataTable>
     </div>
   </BaseLayout>
 </template>

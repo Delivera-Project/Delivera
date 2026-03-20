@@ -1,8 +1,10 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
+const router = useRouter()
 </script>
 
 <template>
@@ -15,7 +17,7 @@ const { t } = useI18n()
       </svg>
       <div class="not-found-code">404</div>
       <p class="subtitle">{{ t('notFound.message') }}</p>
-      <router-link to="/" class="btn">{{ t('notFound.goHome') }}</router-link>
+      <PButton :label="t('notFound.goHome')" fluid @click="router.push('/')" />
     </div>
   </BaseLayout>
 </template>
