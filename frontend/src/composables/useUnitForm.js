@@ -15,10 +15,35 @@ export function useUnitForm() {
   const success = ref('')
   const loading = ref(false)
 
+  function parseCoord(val) {
+    const trimmed = String(val).trim()
+    if (!trimmed) return null
+    const n = parseFloat(trimmed)
+    return isFinite(n) ? n : NaN
+  }
+
   function validateUnit() {
+    if (!name.value.trim()) {
+      error.value = t('validation.required', { field: t('fields.unitName') })
+      return false
+    }
     if (!unitType.value) {
       error.value = t('validation.required', { field: t('fields.type') })
       return false
+    }
+    const lat = parseCoord(latitude.value)
+    const lon = parseCoord(longitude.value)
+    const hasLat = latitude.value.trim() !== ''
+    const hasLon = longitude.value.trim() !== ''
+    if (hasLat !== hasLon) {
+      error.value = t('validation.coordinatesIncomplete')
+      return false
+    }
+    if (hasLat && hasLon) {
+      if (!isFinite(lat) || !isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        error.value = t('validation.coordinatesInvalid')
+        return false
+      }
     }
     return true
   }
@@ -30,12 +55,14 @@ export function useUnitForm() {
 
     loading.value = true
     try {
+      const lat = parseCoord(latitude.value)
+      const lon = parseCoord(longitude.value)
       const body = {
         name: name.value,
         type: unitType.value,
         address: address.value || null,
-        latitude: latitude.value !== '' ? Number(latitude.value) : null,
-        longitude: longitude.value !== '' ? Number(longitude.value) : null,
+        latitude: isFinite(lat) ? lat : null,
+        longitude: isFinite(lon) ? lon : null,
       }
       const res = isEdit
         ? await api.put(`/units/${unitId}`, body)

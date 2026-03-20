@@ -97,6 +97,8 @@ validation:
   maxLength: "{field} cannot exceed {max} characters"
   passwordsDoNotMatch: Passwords do not match
   passwordStrength: Password must include uppercase, lowercase and a number
+  coordinatesIncomplete: Latitude and longitude must both be provided together
+  coordinatesInvalid: Coordinates out of range (lat -90–90, lon -180–180)
 
 error:
   connection: Connection error with the server

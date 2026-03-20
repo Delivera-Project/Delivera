@@ -8,7 +8,6 @@ import com.delivera.exception.UnitNotFoundException;
 import com.delivera.model.OperationalUnit;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.OperationalUnitRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,11 +20,13 @@ import java.util.UUID;
 @Service
 public class UnitService {
 
-    @Autowired
-    private OperationalUnitRepository unitRepository;
+    private final OperationalUnitRepository unitRepository;
+    private final CompanyRepository companyRepository;
 
-    @Autowired
-    private CompanyRepository companyRepository;
+    public UnitService(OperationalUnitRepository unitRepository, CompanyRepository companyRepository) {
+        this.unitRepository = unitRepository;
+        this.companyRepository = companyRepository;
+    }
 
     private UUID getCurrentCompanyId() {
         var auth = SecurityContextHolder.getContext().getAuthentication();

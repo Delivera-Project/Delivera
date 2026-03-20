@@ -97,6 +97,8 @@ validation:
   maxLength: "{field} no puede superar {max} caracteres"
   passwordsDoNotMatch: Las contraseñas no coinciden
   passwordStrength: La contraseña debe incluir mayúscula, minúscula y número
+  coordinatesIncomplete: La latitud y la longitud deben indicarse juntas
+  coordinatesInvalid: Coordenadas fuera de rango (lat -90–90, lon -180–180)
 
 error:
   connection: Error de conexión con el servidor
