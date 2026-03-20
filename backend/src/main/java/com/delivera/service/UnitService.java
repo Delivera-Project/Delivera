@@ -9,7 +9,6 @@ import com.delivera.model.OperationalUnit;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.OperationalUnitRepository;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +42,7 @@ public class UnitService {
             throw new UnitNameConflictException();
         }
         var company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new AccessDeniedException("Company not found"));
+                .orElseThrow(CompanyContextException::new);
         var unit = new OperationalUnit();
         unit.setCompany(company);
         unit.setName(request.name());

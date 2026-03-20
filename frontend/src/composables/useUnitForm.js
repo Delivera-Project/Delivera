@@ -49,18 +49,23 @@ export function useUnitForm() {
   }
 
   async function submitUnit({ isEdit, unitId }) {
+    if (loading.value) return
     error.value = ''
     success.value = ''
     if (!validateUnit()) return
+    if (isEdit && !unitId) {
+      error.value = t('error.saveFailed')
+      return
+    }
 
     loading.value = true
     try {
       const lat = parseCoord(latitude.value)
       const lon = parseCoord(longitude.value)
       const body = {
-        name: name.value,
+        name: name.value.trim(),
         type: unitType.value,
-        address: address.value || null,
+        address: address.value?.trim() || null,
         latitude: isFinite(lat) ? lat : null,
         longitude: isFinite(lon) ? lon : null,
       }
