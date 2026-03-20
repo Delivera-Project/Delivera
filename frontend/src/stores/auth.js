@@ -12,6 +12,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Devuelve el estado del token
   const isAuthenticated = computed(() => !!token.value)
+  const isCompanyAdmin = computed(() => role.value === 'COMPANY_ADMIN')
+  const canCreateOrders = computed(() => ['COMPANY_ADMIN', 'ANALYST'].includes(role.value))
 
   function setToken(newToken) {
     token.value = newToken
@@ -55,5 +57,5 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = profile
   }
 
-  return { token, user, organizationSlug, role, companyId, isAuthenticated, setToken, setUser, setOrganization, setRole, setCompanyId, logout }
+  return { token, user, organizationSlug, role, companyId, isAuthenticated, isCompanyAdmin, canCreateOrders, setToken, setUser, setOrganization, setRole, setCompanyId, logout }
 })

@@ -34,13 +34,22 @@ onMounted(async () => {
     <div class="card card-wide">
       <div class="units-header">
         <h1>{{ t('units.title') }}</h1>
-        <button
-          v-if="auth.role === 'COMPANY_ADMIN'"
-          class="btn btn-header"
-          @click="router.push('/units/new')"
-        >
-          {{ t('units.new') }}
-        </button>
+        <div class="actions">
+          <button
+            v-if="auth.canCreateOrders"
+            class="btn btn-outline btn-header"
+            @click="router.push('/orders/new')"
+          >
+            {{ t('orders.new') }}
+          </button>
+          <button
+            v-if="auth.isCompanyAdmin"
+            class="btn btn-header"
+            @click="router.push('/units/new')"
+          >
+            {{ t('units.new') }}
+          </button>
+        </div>
       </div>
 
       <p v-if="loading" class="subtitle">{{ t('common.loading') }}</p>
@@ -55,7 +64,7 @@ onMounted(async () => {
           <span class="unit-name">{{ unit.name }}</span>
           <span v-if="unit.address" class="unit-address">{{ unit.address }}</span>
           <button
-            v-if="auth.role === 'COMPANY_ADMIN'"
+            v-if="auth.isCompanyAdmin"
             class="btn btn-outline btn-sm"
             @click="router.push(`/units/${unit.id}/edit`)"
           >

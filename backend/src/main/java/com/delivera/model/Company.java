@@ -27,8 +27,7 @@ public class Company {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "activity_type", nullable = false,
-            columnDefinition = "activity_type")
+    @Column(name = "activity_type", nullable = false)
     private ActivityType activityType;
 
     @Column(name = "created_at", insertable = false, updatable = false)

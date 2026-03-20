@@ -82,6 +82,20 @@ units:
   FACTORY: Factory
   LOGISTICS_CENTER: Logistics center
 
+orders:
+  title: New order
+  new: New order
+  subtitle: Create an internal shipment between two units of your company
+  created: "Order created: {reference}"
+  origin: Origin unit
+  originPlaceholder: Select origin unit
+  destination: Destination unit
+  destinationPlaceholder: Select destination unit
+  notes: Notes
+  notesPlaceholder: Additional instructions (optional)
+  noUnits: Not enough units. Create at least two operational units first.
+  sameUnit: Origin and destination must be different units
+
 common:
   back: Back
   next: Next
@@ -116,3 +130,4 @@ error:
   SLUG_CONFLICT: Could not create the company, please try again
   UNIT_NAME_CONFLICT: A unit with that name already exists in this company
   UNIT_NOT_FOUND: Unit not found
+  INVALID_ORDER_UNITS: The selected units are not valid for this order

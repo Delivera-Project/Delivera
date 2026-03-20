@@ -5,6 +5,7 @@ import CompanyRegisterView from '@/views/CompanyRegisterView.vue'
 import ProfileView from '@/views/ProfileView.vue'
 import UnitsView from '@/views/UnitsView.vue'
 import UnitFormView from '@/views/UnitFormView.vue'
+import OrderFormView from '@/views/OrderFormView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -18,6 +19,7 @@ const router = createRouter({
     { path: '/units', component: UnitsView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
     { path: '/units/new', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
     { path: '/units/:id/edit', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
+    { path: '/orders/new', component: OrderFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFoundView },
   ],
 })
