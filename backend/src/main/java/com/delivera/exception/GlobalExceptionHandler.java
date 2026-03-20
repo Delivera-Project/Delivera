@@ -48,6 +48,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("COMPANY_CONTEXT_MISSING"));
     }
 
+    @ExceptionHandler(InvalidOrderUnitsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOrderUnits(InvalidOrderUnitsException ex) {
+        log.warn("Invalid order units: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("INVALID_ORDER_UNITS"));
+    }
+
     @ExceptionHandler(UnitNameConflictException.class)
     public ResponseEntity<ErrorResponse> handleUnitNameConflict(UnitNameConflictException ex) {
         log.warn("Unit name conflict: {}", ex.getMessage());
