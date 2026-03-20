@@ -28,7 +28,7 @@ public class Worker {
     private Company company;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "worker_role")
+    @Column(nullable = false)
     private WorkerRole role;
 
     @Column(name = "created_at", insertable = false, updatable = false)

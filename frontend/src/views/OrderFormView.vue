@@ -13,6 +13,7 @@ const units = ref([])
 const originId = ref('')
 const destinationId = ref('')
 const notes = ref('')
+const loadError = ref('')
 const error = ref('')
 const success = ref('')
 const loading = ref(false)
@@ -25,9 +26,9 @@ onMounted(async () => {
   try {
     const res = await api.get('/units')
     if (res.ok) units.value = await res.json()
-    else error.value = t('error.connection')
+    else loadError.value = t('error.connection')
   } catch {
-    error.value = t('error.connection')
+    loadError.value = t('error.connection')
   }
 })
 
@@ -76,7 +77,8 @@ async function handleSubmit() {
       <h1>{{ t('orders.title') }}</h1>
       <p class="subtitle">{{ t('orders.subtitle') }}</p>
 
-      <p v-if="units.length < 2 && !error" class="msg-error">{{ t('orders.noUnits') }}</p>
+      <p v-if="loadError" class="msg-error">{{ loadError }}</p>
+      <p v-else-if="units.length < 2" class="msg-error">{{ t('orders.noUnits') }}</p>
 
       <template v-else>
         <div class="form-field">

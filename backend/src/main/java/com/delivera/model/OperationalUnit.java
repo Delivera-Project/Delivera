@@ -28,7 +28,7 @@ public class OperationalUnit {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "unit_type")
+    @Column(nullable = false)
     private UnitType type;
 
     @Column(length = 500)

@@ -36,14 +36,14 @@ onMounted(async () => {
         <h1>{{ t('units.title') }}</h1>
         <div class="actions">
           <button
-            v-if="['COMPANY_ADMIN', 'ANALYST'].includes(auth.role)"
+            v-if="auth.canCreateOrders"
             class="btn btn-outline btn-header"
             @click="router.push('/orders/new')"
           >
             {{ t('orders.new') }}
           </button>
           <button
-            v-if="auth.role === 'COMPANY_ADMIN'"
+            v-if="auth.isCompanyAdmin"
             class="btn btn-header"
             @click="router.push('/units/new')"
           >
@@ -64,7 +64,7 @@ onMounted(async () => {
           <span class="unit-name">{{ unit.name }}</span>
           <span v-if="unit.address" class="unit-address">{{ unit.address }}</span>
           <button
-            v-if="auth.role === 'COMPANY_ADMIN'"
+            v-if="auth.isCompanyAdmin"
             class="btn btn-outline btn-sm"
             @click="router.push(`/units/${unit.id}/edit`)"
           >

@@ -35,7 +35,7 @@ public class Order {
     private OperationalUnit destination;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "order_status")
+    @Column(nullable = false)
     private OrderStatus status;
 
     @Column(columnDefinition = "TEXT")

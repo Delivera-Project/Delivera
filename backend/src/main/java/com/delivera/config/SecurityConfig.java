@@ -19,6 +19,8 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private static final String ROLE_COMPANY_ADMIN = "COMPANY_ADMIN";
+
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -31,9 +33,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("GLOBAL_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/units").hasRole("COMPANY_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/units/**").hasRole("COMPANY_ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyRole("COMPANY_ADMIN", "ANALYST")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/units").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/units/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
