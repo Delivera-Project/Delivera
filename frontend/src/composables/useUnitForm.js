@@ -19,7 +19,7 @@ export function useUnitForm() {
     const trimmed = String(val).trim()
     if (!trimmed) return null
     const n = parseFloat(trimmed)
-    return isFinite(n) ? n : NaN
+    return Number.isFinite(n) ? n : NaN
   }
 
   function validateUnit() {
@@ -40,7 +40,7 @@ export function useUnitForm() {
       return false
     }
     if (hasLat && hasLon) {
-      if (!isFinite(lat) || !isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
         error.value = t('validation.coordinatesInvalid')
         return false
       }
@@ -66,8 +66,8 @@ export function useUnitForm() {
         name: name.value.trim(),
         type: unitType.value,
         address: address.value?.trim() || null,
-        latitude: isFinite(lat) ? lat : null,
-        longitude: isFinite(lon) ? lon : null,
+        latitude: Number.isFinite(lat) ? lat : null,
+        longitude: Number.isFinite(lon) ? lon : null,
       }
       const res = isEdit
         ? await api.put(`/units/${unitId}`, body)
