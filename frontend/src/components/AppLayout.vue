@@ -1,12 +1,13 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 const auth = useAuthStore()
 const api = useApi()
 
@@ -20,11 +21,16 @@ const themeClass = computed(() =>
 
 const navItems = [
   { path: '/units', icon: 'pi-building', labelKey: 'nav.units', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
-  { path: '/orders', icon: 'pi-send', labelKey: 'nav.orders', roles: ['COMPANY_ADMIN', 'ANALYST'] },
+  { path: '/orders', icon: 'pi-send', labelKey: 'nav.orders', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
+  { path: '/loyal-users', icon: 'pi-users', labelKey: 'nav.loyalUsers', roles: ['COMPANY_ADMIN', 'ANALYST'] },
+  { path: '/my-orders', icon: 'pi-inbox', labelKey: 'nav.myOrders', noRole: true },
 ]
 
 const visibleItems = computed(() =>
-  navItems.filter(item => !item.roles || item.roles.includes(auth.role))
+  navItems.filter(item => {
+    if (item.noRole) return !auth.role
+    return !item.roles || item.roles.includes(auth.role)
+  })
 )
 
 const displayName = computed(() => {
@@ -90,7 +96,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
           <RouterLink
             :to="item.path"
             class="sidebar-item"
-            :active-class="'sidebar-item--active'"
+            :class="{ 'sidebar-item--active': route.path.startsWith(item.path) }"
             v-tooltip.right="collapsed ? t(item.labelKey) : null"
           >
             <i :class="['pi', item.icon, 'sidebar-item-icon']" />

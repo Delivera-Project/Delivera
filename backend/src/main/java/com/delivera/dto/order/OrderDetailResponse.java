@@ -3,9 +3,10 @@ package com.delivera.dto.order;
 import com.delivera.model.Order;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
-public record OrderResponse(
+public record OrderDetailResponse(
         UUID id,
         String reference,
         UUID originId,
@@ -16,11 +17,14 @@ public record OrderResponse(
         String recipientName,
         String status,
         String priority,
+        String trackingToken,
         String notes,
-        Instant createdAt) {
+        UUID loyalUserId,
+        Instant createdAt,
+        List<OrderEventResponse> events) {
 
-    public static OrderResponse from(Order order) {
-        return new OrderResponse(
+    public static OrderDetailResponse from(Order order) {
+        return new OrderDetailResponse(
                 order.getId(),
                 order.getReference(),
                 order.getOrigin().getId(),
@@ -31,7 +35,10 @@ public record OrderResponse(
                 order.getRecipientName(),
                 order.getStatus().name(),
                 order.getPriority().name(),
+                order.getTrackingToken(),
                 order.getNotes(),
-                order.getCreatedAt());
+                order.getLoyalUser() != null ? order.getLoyalUser().getId() : null,
+                order.getCreatedAt(),
+                order.getEvents().stream().map(OrderEventResponse::from).toList());
     }
 }

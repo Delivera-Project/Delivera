@@ -1,25 +1,23 @@
 package com.delivera.service;
 
 import com.delivera.config.SecurityUtils;
-import com.delivera.dto.order.OrderRequest;
-import com.delivera.dto.order.OrderResponse;
-import com.delivera.exception.CompanyContextException;
-import com.delivera.exception.InvalidOrderUnitsException;
-import com.delivera.model.Order;
-import com.delivera.model.OrderStatus;
-import com.delivera.repository.CompanyRepository;
-import com.delivera.repository.OperationalUnitRepository;
-import com.delivera.repository.OrderRepository;
+import com.delivera.dto.order.*;
+import com.delivera.exception.*;
+import com.delivera.model.*;
+import com.delivera.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class OrderService {
+
+    private static final Set<OrderStatus> TERMINAL = Set.of(OrderStatus.DELIVERED, OrderStatus.CANCELLED);
 
     private final OrderRepository orderRepository;
     private final OperationalUnitRepository unitRepository;
@@ -45,16 +43,29 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderDetailResponse getDetail(UUID id) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        Order order = orderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(OrderNotFoundException::new);
+        return OrderDetailResponse.from(order);
+    }
+
+    @Transactional
     public OrderResponse create(OrderRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
 
+        boolean isExternal = request.destinationId() == null;
+
         var origin = unitRepository.findByIdAndCompanyId(request.originId(), companyId)
                 .orElseThrow(InvalidOrderUnitsException::new);
-        var destination = unitRepository.findByIdAndCompanyId(request.destinationId(), companyId)
-                .orElseThrow(InvalidOrderUnitsException::new);
 
-        if (origin.getId().equals(destination.getId())) {
-            throw new InvalidOrderUnitsException();
+        OperationalUnit destination = null;
+        if (!isExternal) {
+            destination = unitRepository.findByIdAndCompanyId(request.destinationId(), companyId)
+                    .orElseThrow(InvalidOrderUnitsException::new);
+            if (origin.getId().equals(destination.getId())) {
+                throw new InvalidOrderUnitsException();
+            }
         }
 
         var company = companyRepository.findById(companyId)
@@ -66,9 +77,76 @@ public class OrderService {
         order.setOrigin(origin);
         order.setDestination(destination);
         order.setStatus(OrderStatus.PENDING);
+        order.setPriority(request.priority() != null ? request.priority() : OrderPriority.NORMAL);
         order.setNotes(request.notes() != null ? request.notes().trim() : null);
 
+        if (isExternal && request.recipientEmail() != null) {
+            order.setRecipientEmail(request.recipientEmail().toLowerCase().trim());
+            order.setRecipientName(request.recipientName() != null ? request.recipientName().trim() : null);
+            order.setTrackingToken(UUID.randomUUID().toString().replace("-", ""));
+        }
+
+        var initialEvent = new OrderEvent();
+        initialEvent.setOrder(order);
+        initialEvent.setStatus(OrderStatus.PENDING);
+        initialEvent.setAuthorEmail(securityUtils.getCurrentEmail());
+        order.getEvents().add(initialEvent);
+
         return OrderResponse.from(orderRepository.save(order));
+    }
+
+    @Transactional
+    public OrderDetailResponse updateStatus(UUID id, OrderStatusRequest request) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        String email = securityUtils.getCurrentEmail();
+
+        Order order = orderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(OrderNotFoundException::new);
+
+        validateTransition(order.getStatus(), request.status());
+
+        order.setStatus(request.status());
+
+        var event = new OrderEvent();
+        event.setOrder(order);
+        event.setStatus(request.status());
+        event.setNote(request.note() != null ? request.note().trim() : null);
+        event.setAuthorEmail(email);
+        order.getEvents().add(event);
+
+        return OrderDetailResponse.from(orderRepository.save(order));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        Order order = orderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(OrderNotFoundException::new);
+        orderRepository.delete(order);
+    }
+
+    public PublicOrderResponse getPublicByToken(String token) {
+        Order order = orderRepository.findByTrackingToken(token)
+                .orElseThrow(OrderNotFoundException::new);
+        return PublicOrderResponse.from(order);
+    }
+
+    public PublicOrderResponse getPublicByReference(String reference) {
+        Order order = orderRepository.findByReference(reference.toUpperCase().trim())
+                .orElseThrow(OrderNotFoundException::new);
+        return PublicOrderResponse.from(order);
+    }
+
+    private void validateTransition(OrderStatus current, OrderStatus next) {
+        if (TERMINAL.contains(current)) {
+            throw new InvalidStatusTransitionException();
+        }
+        boolean valid = switch (current) {
+            case PENDING -> next == OrderStatus.IN_TRANSIT || next == OrderStatus.CANCELLED;
+            case IN_TRANSIT -> next == OrderStatus.DELIVERED || next == OrderStatus.CANCELLED;
+            default -> false;
+        };
+        if (!valid) throw new InvalidStatusTransitionException();
     }
 
     private String generateReference() {

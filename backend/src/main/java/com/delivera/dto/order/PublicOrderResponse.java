@@ -3,35 +3,29 @@ package com.delivera.dto.order;
 import com.delivera.model.Order;
 
 import java.time.Instant;
-import java.util.UUID;
+import java.util.List;
 
-public record OrderResponse(
-        UUID id,
+public record PublicOrderResponse(
         String reference,
-        UUID originId,
+        String companyName,
         String originName,
-        UUID destinationId,
         String destinationName,
-        String recipientEmail,
         String recipientName,
         String status,
         String priority,
-        String notes,
-        Instant createdAt) {
+        Instant createdAt,
+        List<OrderEventResponse> events) {
 
-    public static OrderResponse from(Order order) {
-        return new OrderResponse(
-                order.getId(),
+    public static PublicOrderResponse from(Order order) {
+        return new PublicOrderResponse(
                 order.getReference(),
-                order.getOrigin().getId(),
+                order.getCompany().getName(),
                 order.getOrigin().getName(),
-                order.getDestination() != null ? order.getDestination().getId() : null,
                 order.getDestination() != null ? order.getDestination().getName() : null,
-                order.getRecipientEmail(),
                 order.getRecipientName(),
                 order.getStatus().name(),
                 order.getPriority().name(),
-                order.getNotes(),
-                order.getCreatedAt());
+                order.getCreatedAt(),
+                order.getEvents().stream().map(OrderEventResponse::from).toList());
     }
 }

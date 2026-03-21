@@ -56,7 +56,15 @@ export function useApi() {
     return request(endpoint, { method: 'PUT', body: JSON.stringify(body) })
   }
 
-  // TODO: Se pueden ir añadiendo más peticiones
+  // Peticiones PATCH
+  async function patch(endpoint, body) {
+    return request(endpoint, { method: 'PATCH', body: JSON.stringify(body) })
+  }
 
-  return { get, post, put, translateError }
+  // Peticiones DELETE
+  async function del(endpoint) {
+    return request(endpoint, { method: 'DELETE' })
+  }
+
+  return { get, post, put, patch, del, translateError }
 }

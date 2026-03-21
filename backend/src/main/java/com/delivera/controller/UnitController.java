@@ -34,10 +34,23 @@ public class UnitController {
         return ResponseEntity.status(HttpStatus.CREATED).body(unitService.create(request));
     }
 
+    @Operation(summary = "Detalle de una unidad operativa")
+    @GetMapping("/{id}")
+    public ResponseEntity<UnitResponse> detail(@PathVariable UUID id) {
+        return ResponseEntity.ok(unitService.getDetail(id));
+    }
+
     @Operation(summary = "Editar unidad operativa")
     @PutMapping("/{id}")
     public ResponseEntity<UnitResponse> update(@PathVariable UUID id,
                                                @Valid @RequestBody UnitRequest request) {
         return ResponseEntity.ok(unitService.update(id, request));
+    }
+
+    @Operation(summary = "Eliminar unidad operativa")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        unitService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
