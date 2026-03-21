@@ -1,19 +1,26 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
+import { useValidation } from '@/composables/useValidation'
 
 export function useOrderForm() {
   const { t } = useI18n()
+  const router = useRouter()
   const api = useApi()
+  const { validate, required, email: emailRule, errors, invalids } = useValidation()
 
   const units = ref([])
   const loadError = ref('')
   const originId = ref('')
   const destinationId = ref('')
+  const recipientEmail = ref('')
+  const recipientName = ref('')
+  const priority = ref('NORMAL')
   const notes = ref('')
+  const isExternal = ref(false)
   const loading = ref(false)
   const error = ref('')
-  const success = ref('')
 
   const destinationOptions = computed(() =>
     units.value.filter(u => u.id !== originId.value)
@@ -36,26 +43,38 @@ export function useOrderForm() {
   async function handleSubmit() {
     if (loading.value) return
     error.value = ''
-    success.value = ''
 
-    if (originId.value === destinationId.value) {
+    const rules = { originId: [required(originId.value, 'unitName')] }
+    if (!isExternal.value) {
+      rules.destinationId = [required(destinationId.value, 'unitName')]
+    } else {
+      rules.recipientEmail = [required(recipientEmail.value, 'email'), emailRule(recipientEmail.value)]
+    }
+    if (!validate(rules)) return
+
+    if (!isExternal.value && originId.value === destinationId.value) {
       error.value = t('orders.sameUnit')
       return
     }
 
     loading.value = true
     try {
-      const res = await api.post('/orders', {
+      const body = {
         originId: originId.value,
-        destinationId: destinationId.value,
+        priority: priority.value,
         notes: notes.value.trim() || null,
-      })
+      }
+      if (isExternal.value) {
+        body.recipientEmail = recipientEmail.value.trim() || null
+        body.recipientName = recipientName.value.trim() || null
+      } else {
+        body.destinationId = destinationId.value
+      }
+
+      const res = await api.post('/orders', body)
       if (res.ok) {
         const data = await res.json()
-        success.value = t('orders.created', { reference: data.reference })
-        originId.value = ''
-        destinationId.value = ''
-        notes.value = ''
+        router.push({ path: '/orders', query: { created: data.reference } })
       } else {
         const data = await res.json()
         error.value = api.translateError(data, 'error.saveFailed')
@@ -67,5 +86,5 @@ export function useOrderForm() {
     }
   }
 
-  return { units, loadError, originId, destinationId, notes, loading, error, success, destinationOptions, handleSubmit }
+  return { units, loadError, originId, destinationId, recipientEmail, recipientName, priority, notes, isExternal, loading, error, errors, invalids, destinationOptions, handleSubmit }
 }

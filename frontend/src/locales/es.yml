@@ -75,9 +75,12 @@ units:
   title: Unidades operativas
   new: Nueva unidad
   edit: Editar unidad
+  detail: Detalles de la unidad
   created: Unidad creada correctamente
   updated: Unidad actualizada correctamente
   empty: No hay unidades operativas. Crea la primera para poder gestionar envíos.
+  filterAll: Todos
+  noCoords: Sin coordenadas
   WAREHOUSE: Almacén
   STORE: Tienda
   FACTORY: Fábrica
@@ -88,30 +91,79 @@ orders:
   title: Nuevo pedido
   new: Nuevo pedido
   subtitle: Crea un envío interno entre dos unidades de tu empresa
+  subtitleExternal: Crea un envío hacia un destinatario externo
   created: "Pedido creado: {reference}"
   empty: No hay pedidos todavía. Crea el primero desde el botón de arriba.
   reference: Referencia
   route: Ruta
   statusLabel: Estado
+  priorityLabel: Prioridad
   date: Fecha
   origin: Unidad de origen
   originPlaceholder: Selecciona la unidad de origen
   destination: Unidad de destino
   destinationPlaceholder: Selecciona la unidad de destino
+  recipientEmail: Email del destinatario
+  recipientEmailPlaceholder: "destinatario{'@'}ejemplo.com"
+  recipientName: Nombre del destinatario
+  recipientNamePlaceholder: "Ej: Juan García"
+  externalOrder: Envío externo
   notes: Notas
   notesPlaceholder: Instrucciones adicionales (opcional)
   noUnits: No hay suficientes unidades. Crea al menos dos unidades operativas primero.
   sameUnit: El origen y el destino deben ser unidades diferentes
+  timeline: Historial de estados
+  updateStatus: Actualizar estado
+  newStatus: Nuevo estado
+  statusNote: Nota (opcional)
+  statusNotePlaceholder: Motivo del cambio de estado...
+  statusUpdated: Estado actualizado correctamente
+  filterAll: Todos
+  priority:
+    label: Prioridad
+    HIGH: ALTA
+    NORMAL: NORMAL
+    LOW: BAJA
   status:
     PENDING: Pendiente
     IN_TRANSIT: En tránsito
     DELIVERED: Entregado
     CANCELLED: Cancelado
 
+tracking:
+  title: Seguimiento de pedido
+  searchTitle: Buscar pedido
+  searchPlaceholder: "Ej: DEL-20240101-0001"
+  search: Buscar
+  notFound: No se encontró ningún pedido con esa referencia
+  company: Empresa
+  origin: Origen
+  destination: Destino
+  recipient: Destinatario
+  noEvents: Sin movimientos registrados aún
+
+loyalUsers:
+  title: Usuarios fidelizados
+  new: Añadir fidelizado
+  empty: No hay usuarios fidelizados todavía.
+  email: Email
+  registered: Registrado
+  notRegistered: No registrado
+  added: Usuario fidelizado añadido correctamente
+  orders: Pedidos recibidos
+  since: Cliente desde
+  ordersEmpty: Este fidelizado no tiene pedidos todavía.
+
+myOrders:
+  title: Mis pedidos
+  empty: No tienes pedidos recibidos todavía.
+
 nav:
   profile: Mi perfil
   units: Unidades
   orders: Pedidos
+  loyalUsers: Fidelizados
+  myOrders: Mis pedidos
 
 common:
   back: Volver
@@ -148,3 +200,6 @@ error:
   UNIT_NAME_CONFLICT: Ya existe una unidad con ese nombre en la empresa
   UNIT_NOT_FOUND: Unidad no encontrada
   INVALID_ORDER_UNITS: Las unidades seleccionadas no son válidas para este pedido
+  ORDER_NOT_FOUND: Pedido no encontrado
+  INVALID_STATUS_TRANSITION: Transición de estado no permitida
+  LOYAL_USER_ALREADY_EXISTS: Este email ya está registrado como fidelizado en tu empresa

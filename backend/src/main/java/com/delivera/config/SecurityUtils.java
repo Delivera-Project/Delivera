@@ -16,4 +16,9 @@ public class SecurityUtils {
         }
         return companyId;
     }
+
+    public String getCurrentEmail() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null ? (String) auth.getPrincipal() : null;
+    }
 }

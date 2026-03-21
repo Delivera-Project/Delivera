@@ -12,7 +12,10 @@ public record OrderResponse(
         String originName,
         UUID destinationId,
         String destinationName,
+        String recipientEmail,
+        String recipientName,
         String status,
+        String priority,
         String notes,
         Instant createdAt) {
 
@@ -22,9 +25,12 @@ public record OrderResponse(
                 order.getReference(),
                 order.getOrigin().getId(),
                 order.getOrigin().getName(),
-                order.getDestination().getId(),
-                order.getDestination().getName(),
+                order.getDestination() != null ? order.getDestination().getId() : null,
+                order.getDestination() != null ? order.getDestination().getName() : null,
+                order.getRecipientEmail(),
+                order.getRecipientName(),
                 order.getStatus().name(),
+                order.getPriority().name(),
                 order.getNotes(),
                 order.getCreatedAt());
     }

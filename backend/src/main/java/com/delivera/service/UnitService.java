@@ -78,4 +78,18 @@ public class UnitService {
                 .map(UnitResponse::from)
                 .toList();
     }
+
+    public UnitResponse getDetail(UUID id) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        return UnitResponse.from(unitRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new UnitNotFoundException(id)));
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        var unit = unitRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(() -> new UnitNotFoundException(id));
+        unitRepository.delete(unit);
+    }
 }

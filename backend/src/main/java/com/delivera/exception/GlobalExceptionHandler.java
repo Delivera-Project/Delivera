@@ -90,6 +90,27 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("UNIT_NOT_FOUND"));
     }
 
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleOrderNotFound(OrderNotFoundException ex) {
+        log.warn("Order not found");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("ORDER_NOT_FOUND"));
+    }
+
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTransition(InvalidStatusTransitionException ex) {
+        log.warn("Invalid status transition attempt");
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("INVALID_STATUS_TRANSITION"));
+    }
+
+    @ExceptionHandler(LoyalUserConflictException.class)
+    public ResponseEntity<ErrorResponse> handleLoyalUserConflict(LoyalUserConflictException ex) {
+        log.warn("Loyal user already exists");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("LOYAL_USER_ALREADY_EXISTS"));
+    }
+
     @ExceptionHandler(SlugConflictException.class)
     public ResponseEntity<ErrorResponse> handleSlugConflict(SlugConflictException ex) {
         log.error("Slug conflict unresolved after max retries: {}", ex.getMessage());

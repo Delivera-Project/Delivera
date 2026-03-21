@@ -32,10 +32,15 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/orders/public/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("GLOBAL_ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/units").hasRole(ROLE_COMPANY_ADMIN)
                         .requestMatchers(HttpMethod.PUT, "/api/v1/units/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/units/**").hasRole(ROLE_COMPANY_ADMIN)
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/*/status").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST", "OPERATOR")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.POST, "/api/v1/loyal-users").hasRole(ROLE_COMPANY_ADMIN)
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -49,7 +54,7 @@ public class SecurityConfig {
                 "http://localhost:3000",
                 "https://delivera-theta.vercel.app"));
         configuration.setAllowCredentials(true);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

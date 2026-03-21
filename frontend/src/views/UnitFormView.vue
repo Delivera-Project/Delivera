@@ -13,7 +13,7 @@ const api = useApi()
 const unitId = computed(() => route.params.id || null)
 const isEdit = computed(() => !!unitId.value)
 
-const { name, unitType, address, latitude, longitude, error, success, loading, submitUnit } = useUnitForm()
+const { name, unitType, address, latitude, longitude, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
 const loadError = ref('')
 
 const UNIT_TYPES = ['WAREHOUSE', 'STORE', 'FACTORY', 'LOGISTICS_CENTER']
@@ -25,17 +25,14 @@ async function loadUnit(id) {
   if (!id) return
   loadError.value = ''
   try {
-    const res = await api.get('/units')
+    const res = await api.get(`/units/${id}`)
     if (!res.ok) { loadError.value = t('error.connection'); return }
-    const units = await res.json()
-    const unit = units.find(u => u.id === id)
-    if (unit) {
-      name.value = unit.name
-      unitType.value = unit.type
-      address.value = unit.address || ''
-      latitude.value = unit.latitude ?? ''
-      longitude.value = unit.longitude ?? ''
-    }
+    const unit = await res.json()
+    name.value = unit.name
+    unitType.value = unit.type
+    address.value = unit.address || ''
+    latitude.value = unit.latitude ?? ''
+    longitude.value = unit.longitude ?? ''
   } catch {
     loadError.value = t('error.connection')
   }
@@ -66,13 +63,15 @@ function handleSubmit() {
 
       <div class="form-field">
         <label>{{ t('fields.type') }}</label>
-        <SelectButton
-          v-model="unitType"
-          :options="unitTypeOptions"
-          option-label="label"
-          option-value="value"
-          class="unit-type-selector"
-        />
+        <div :class="{ 'selector-invalid': invalids.unitType }">
+          <SelectButton
+            v-model="unitType"
+            :options="unitTypeOptions"
+            option-label="label"
+            option-value="value"
+            class="unit-type-selector"
+          />
+        </div>
       </div>
 
       <div class="form-field">
@@ -81,8 +80,10 @@ function handleSubmit() {
           id="unit-name"
           v-model="name"
           :placeholder="t('fields.unitNamePlaceholder')"
+          :invalid="!!invalids.name"
           fluid
         />
+        <small v-if="errors.name" class="field-error">{{ errors.name }}</small>
       </div>
 
       <div class="form-field">
@@ -132,3 +133,10 @@ function handleSubmit() {
       />
   </form>
 </template>
+
+<style scoped>
+.selector-invalid :deep(.p-selectbutton) {
+  outline: 1px solid #ef4444;
+  border-radius: 6px;
+}
+</style>

@@ -12,6 +12,11 @@ import Textarea from 'primevue/textarea'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
 import Tag from 'primevue/tag'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
+import TabPanel from 'primevue/tabpanel'
 import SelectButton from 'primevue/selectbutton'
 import Avatar from 'primevue/avatar'
 import Skeleton from 'primevue/skeleton'
@@ -62,6 +67,11 @@ app.component('PTextarea', Textarea)
 app.component('DataTable', DataTable)
 app.component('Column', Column) // eslint-disable-line vue/multi-word-component-names
 app.component('PTag', Tag)
+app.component('PTabs', Tabs)
+app.component('PTabList', TabList)
+app.component('PTab', Tab)
+app.component('PTabPanels', TabPanels)
+app.component('PTabPanel', TabPanel)
 app.component('SelectButton', SelectButton)
 app.component('PAvatar', Avatar)
 app.component('PSkeleton', Skeleton)
