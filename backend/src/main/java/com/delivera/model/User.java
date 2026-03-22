@@ -27,6 +27,10 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Size(max = 50)
+    @Column(length = 50, unique = true)
+    private String username;
+
     @NotBlank
     @Column(name = "password_hash", nullable = false)
     private String password;

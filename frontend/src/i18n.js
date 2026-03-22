@@ -2,10 +2,12 @@ import { createI18n } from 'vue-i18n'
 import es from '@/locales/es.yml'
 import en from '@/locales/en.yml'
 
-// Configuración de internacionalización (i18n)
+// Default: idioma del navegador. La preferencia por usuario se aplica en AppLayout tras cargar el perfil.
+const browserLocale = navigator.language?.startsWith('en') ? 'en' : 'es'
+
 const i18n = createI18n({
   legacy: false,
-  locale: 'es', // idioma por defecto
+  locale: browserLocale,
   fallbackLocale: 'es',
   messages: { es, en },
 })

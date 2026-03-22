@@ -5,46 +5,35 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
-import { useOrganizationDetection } from '@/composables/useOrganizationDetection'
 import BaseLayout from '@/components/BaseLayout.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const api = useApi()
-const { validate, required, email: emailRule, errors, invalids } = useValidation()
+const { validate, required, errors, invalids } = useValidation()
 
-const email = ref('')
+const identifier = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
-const { organizations, organizationSlug, detectOrganizations } = useOrganizationDetection(email)
 
 async function handleLogin() {
   error.value = ''
-
-  const valid = validate({
-    email: [required(email.value, 'email'), emailRule(email.value)],
+  if (!validate({
+    identifier: [required(identifier.value, 'loginIdentifier')],
     password: [required(password.value, 'password')],
-  })
-  if (!valid) return
+  })) return
 
   loading.value = true
   try {
-    const response = await api.post('/auth/login', {
-      email: email.value,
-      password: password.value,
-      organizationSlug: organizationSlug.value || undefined,
-    })
-    if (response.ok) {
-      const data = await response.json()
-      auth.setToken(data.token)
-      auth.setRole(data.role ?? null)
-      auth.setCompanyId(data.companyId ?? null)
-      const companyRoles = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
-      router.push(companyRoles.includes(data.role) ? '/units' : '/profile')
+    const res = await api.post('/auth/login', { identifier: identifier.value, password: password.value })
+    if (res.ok) {
+      const data = await res.json()
+      auth.applyLoginData(data)
+      router.push(auth.isWorker ? '/units' : '/profile')
     } else {
-      const data = await response.json()
+      const data = await res.json()
       error.value = api.translateError(data, 'error.invalidCredentials')
     }
   } catch {
@@ -62,40 +51,17 @@ async function handleLogin() {
       <p class="subtitle">{{ t('auth.signIn') }}</p>
 
       <div class="form-field">
-        <label for="login-email">{{ t('fields.email') }}</label>
+        <label for="login-identifier">{{ t('fields.loginIdentifier') }}</label>
         <InputText
-          id="login-email"
-          v-model="email"
-          type="email"
-          :placeholder="t('fields.emailPlaceholder')"
-          :invalid="!!invalids.email"
-          autocomplete="email"
+          id="login-identifier"
+          v-model="identifier"
+          type="text"
+          :placeholder="t('fields.loginIdentifierPlaceholder')"
+          :invalid="!!invalids.identifier"
+          autocomplete="username"
           fluid
-          @blur="detectOrganizations"
         />
-        <small v-if="errors.email" class="field-error">{{ errors.email }}</small>
-      </div>
-
-      <div v-if="organizations.length" class="form-field">
-        <label for="login-org">{{ t('fields.organization') }}</label>
-        <InputText
-          v-if="organizations.length === 1"
-          id="login-org"
-          :value="organizations[0].name"
-          readonly
-          fluid
-          class="org-detected"
-        />
-        <PSelect
-          v-else
-          id="login-org"
-          v-model="organizationSlug"
-          :options="organizations"
-          option-label="name"
-          option-value="slug"
-          fluid
-          @change="auth.setOrganization(organizationSlug)"
-        />
+        <small v-if="errors.identifier" class="field-error">{{ errors.identifier }}</small>
       </div>
 
       <div class="form-field">

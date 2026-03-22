@@ -18,6 +18,7 @@
 # =====================
 # BACKEND (Java/Maven)
 # =====================
+*.tmp.*
 backend/target/
 backend/*.jar
 backend/*.war
@@ -54,3 +55,4 @@ frontend/cypress/screenshots/
 # =====================
 .env.local
 .env.*.local
+scripts/
