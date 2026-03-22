@@ -2,21 +2,18 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useAppConfig } from '@/composables/useAppConfig'
+import { useFormatDate } from '@/composables/useFormatDate'
 
 const { t } = useI18n()
+const { formatDateTime } = useFormatDate()
 const route = useRoute()
+const { load: loadConfig, statusSeverity } = useAppConfig()
 
 const order = ref(null)
 const loading = ref(false)
 const error = ref('')
 const searchRef = ref('')
-
-const statusSeverity = {
-  PENDING: 'warn',
-  IN_TRANSIT: 'info',
-  DELIVERED: 'success',
-  CANCELLED: 'danger',
-}
 
 async function fetchByToken(token) {
   loading.value = true
@@ -50,7 +47,9 @@ async function fetchByReference() {
 }
 
 onMounted(() => {
+  loadConfig()
   if (route.params.token) fetchByToken(route.params.token)
+  else if (route.query.q) { searchRef.value = route.query.q; fetchByReference() }
 })
 </script>
 
@@ -116,7 +115,7 @@ onMounted(() => {
               <div class="timeline-content">
                 <div class="timeline-status">
                   <PTag :value="t(`orders.status.${ev.status}`)" :severity="statusSeverity[ev.status]" size="small" />
-                  <span class="timeline-date">{{ new Date(ev.createdAt).toLocaleString() }}</span>
+                  <span class="timeline-date">{{ formatDateTime(ev.createdAt) }}</span>
                 </div>
                 <div v-if="ev.note" class="timeline-note">{{ ev.note }}</div>
               </div>

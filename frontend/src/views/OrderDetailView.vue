@@ -1,15 +1,19 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
+import { useAppConfig } from '@/composables/useAppConfig'
+import { useFormatDate } from '@/composables/useFormatDate'
 
 const { t } = useI18n()
+const { formatDateTime } = useFormatDate()
 const route = useRoute()
 const router = useRouter()
 const api = useApi()
 const auth = useAuthStore()
+const { load: loadConfig, statusSeverity, prioritySeverity, getNextStatuses } = useAppConfig()
 
 const order = ref(null)
 const loading = ref(false)
@@ -21,29 +25,11 @@ const newStatus = ref('')
 const statusNote = ref('')
 const activeTab = ref(0)
 
-const statusSeverity = {
-  PENDING: 'warn',
-  IN_TRANSIT: 'info',
-  DELIVERED: 'success',
-  CANCELLED: 'danger',
-}
-
-const prioritySeverity = {
-  HIGH: 'danger',
-  NORMAL: 'secondary',
-  LOW: 'info',
-}
-
-const nextStatuses = {
-  PENDING: ['IN_TRANSIT', 'CANCELLED'],
-  IN_TRANSIT: ['DELIVERED', 'CANCELLED'],
-  DELIVERED: [],
-  CANCELLED: [],
-}
-
-const canUpdateStatus = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'].includes(auth.role)
+const availableNextStatuses = computed(() => order.value ? getNextStatuses(order.value.status) : [])
+const canUpdateStatus = computed(() => ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'].includes(auth.role))
 
 onMounted(async () => {
+  loadConfig()
   loading.value = true
   try {
     const res = await api.get(`/orders/${route.params.id}`)
@@ -116,7 +102,7 @@ async function submitStatusUpdate() {
 
       <PTabs v-model:value="activeTab">
         <PTabList>
-          <PTab :value="0">Detalles</PTab>
+          <PTab :value="0">{{ t('orders.details') }}</PTab>
           <PTab :value="1">{{ t('orders.timeline') }}</PTab>
         </PTabList>
 
@@ -134,7 +120,7 @@ async function submitStatusUpdate() {
               </div>
               <div class="info-item info-item--full">
                 <span class="info-label">{{ t('orders.date') }}</span>
-                <span class="info-value">{{ new Date(order.createdAt).toLocaleString() }}</span>
+                <span class="info-value">{{ formatDateTime(order.createdAt) }}</span>
               </div>
               <div v-if="order.notes" class="info-item info-item--full">
                 <span class="info-label">{{ t('orders.notes') }}</span>
@@ -154,7 +140,7 @@ async function submitStatusUpdate() {
                 <div class="timeline-content">
                   <div class="timeline-status">
                     <PTag :value="t(`orders.status.${ev.status}`)" :severity="statusSeverity[ev.status]" size="small" />
-                    <span class="timeline-date">{{ new Date(ev.createdAt).toLocaleString() }}</span>
+                    <span class="timeline-date">{{ formatDateTime(ev.createdAt) }}</span>
                   </div>
                   <div v-if="ev.note" class="timeline-note">{{ ev.note }}</div>
                   <div v-if="ev.authorEmail" class="timeline-author">{{ ev.authorEmail }}</div>
@@ -162,7 +148,7 @@ async function submitStatusUpdate() {
               </div>
             </div>
 
-            <div v-if="canUpdateStatus && nextStatuses[order.status]?.length" class="status-section">
+            <div v-if="canUpdateStatus && availableNextStatuses.length" class="status-section">
               <div class="timeline-divider" />
               <p class="status-section-title">{{ t('orders.updateStatus') }}</p>
               <div class="status-form">
@@ -170,7 +156,7 @@ async function submitStatusUpdate() {
                   <label class="info-label">{{ t('orders.newStatus') }}</label>
                   <PSelect
                     v-model="newStatus"
-                    :options="nextStatuses[order.status].map(s => ({ label: t(`orders.status.${s}`), value: s }))"
+                    :options="availableNextStatuses.map(s => ({ label: t(`orders.status.${s}`), value: s }))"
                     option-label="label"
                     option-value="value"
                     :placeholder="t('orders.newStatus')"

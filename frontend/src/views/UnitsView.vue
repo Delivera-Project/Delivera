@@ -52,13 +52,13 @@ async function load() {
 async function deleteUnit(e, id) {
   e.stopPropagation()
   deleteError.value = ''
-  if (!confirm('¿Eliminar esta unidad?')) return
+  if (!confirm(t('units.deleteConfirm'))) return
   const res = await api.del(`/units/${id}`)
   if (res.ok) {
     units.value = units.value.filter(u => u.id !== id)
   } else {
     deleteError.value = res.status === 409
-      ? 'No se puede eliminar la unidad porque tiene pedidos asociados.'
+      ? t('units.deleteActiveOrders')
       : t('error.connection')
   }
 }
@@ -79,7 +79,7 @@ onMounted(load)
     </div>
 
     <div class="units-filters-wrapper">
-      <span class="filters-label">Filtros:</span>
+      <span class="filters-label">{{ t('common.filters') }}</span>
       <div class="units-filters">
         <div class="filter-row">
           <label class="filter-group-label">{{ t('fields.unitName') }}</label>
@@ -136,7 +136,7 @@ onMounted(load)
       <Column field="address" :header="t('fields.address')" />
       <Column v-if="auth.isCompanyAdmin" style="width:48px;padding:0">
         <template #body="{ data }">
-          <button class="delete-btn" @click="deleteUnit($event, data.id)" title="Eliminar">
+          <button class="delete-btn" @click="deleteUnit($event, data.id)" :title="t('common.delete')">
             <i class="pi pi-times" />
           </button>
         </template>

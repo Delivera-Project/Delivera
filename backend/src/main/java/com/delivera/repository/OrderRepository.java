@@ -1,6 +1,7 @@
 package com.delivera.repository;
 
 import com.delivera.model.Order;
+import com.delivera.model.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -22,4 +23,10 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     Optional<Order> findByReference(String reference);
 
     List<Order> findByLoyalUserIdOrderByCreatedAtDesc(UUID loyalUserId);
+
+    long countByLoyalUserId(UUID loyalUserId);
+
+    boolean existsByCompanyIdAndStatusIn(UUID companyId, List<OrderStatus> statuses);
+
+    List<Order> findByCompanyId(UUID companyId);
 }

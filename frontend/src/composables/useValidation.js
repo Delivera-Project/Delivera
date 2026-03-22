@@ -72,10 +72,19 @@ export function useValidation() {
     }
   }
 
+  function usernameFormat(value) {
+    return () => {
+      if (value && !/^[a-z0-9_-]{3,50}$/.test(value)) {
+        return { message: t('fields.usernameHint'), type: 'format' }
+      }
+      return null
+    }
+  }
+
   function firstError() {
     const keys = Object.keys(errors.value)
     return keys.length > 0 ? errors.value[keys[0]] : ''
   }
 
-  return { errors, invalids, validate, required, email, minLength, match, passwordStrength, firstError }
+  return { errors, invalids, validate, required, email, minLength, match, passwordStrength, usernameFormat, firstError }
 }

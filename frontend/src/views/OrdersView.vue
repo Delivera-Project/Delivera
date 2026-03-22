@@ -4,12 +4,16 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
+import { useAppConfig } from '@/composables/useAppConfig'
+import { useFormatDate } from '@/composables/useFormatDate'
 
 const { t } = useI18n()
+const { formatDate } = useFormatDate()
 const router = useRouter()
 const route = useRoute()
 const api = useApi()
 const auth = useAuthStore()
+const { load: loadConfig, statusSeverity, prioritySeverity } = useAppConfig()
 
 const orders = ref([])
 const loading = ref(false)
@@ -18,19 +22,6 @@ const successMsg = ref(route.query.created ? t('orders.created', { reference: ro
 const filterStatus = ref('ALL')
 const filterPriority = ref('ALL')
 const filterText = ref('')
-
-const statusSeverity = {
-  PENDING: 'warn',
-  IN_TRANSIT: 'info',
-  DELIVERED: 'success',
-  CANCELLED: 'danger',
-}
-
-const prioritySeverity = {
-  HIGH: 'danger',
-  NORMAL: 'secondary',
-  LOW: 'info',
-}
 
 const statusOptions = computed(() => [
   { label: t('orders.filterAll'), value: 'ALL' },
@@ -79,12 +70,12 @@ async function load() {
 
 async function deleteOrder(e, id) {
   e.stopPropagation()
-  if (!confirm('¿Eliminar este pedido?')) return
+  if (!confirm(t('orders.deleteConfirm'))) return
   const res = await api.del(`/orders/${id}`)
   if (res.ok) orders.value = orders.value.filter(o => o.id !== id)
 }
 
-onMounted(load)
+onMounted(() => { loadConfig(); load() })
 </script>
 
 <template>
@@ -100,7 +91,7 @@ onMounted(load)
     </div>
 
     <div class="orders-filters-wrapper">
-      <span class="filters-label">Filtros:</span>
+      <span class="filters-label">{{ t('common.filters') }}</span>
       <div class="orders-filters">
         <div class="filter-row">
           <label class="filter-group-label">{{ t('orders.reference') }}</label>
@@ -185,12 +176,12 @@ onMounted(load)
       </Column>
       <Column :header="t('orders.date')" style="width:120px">
         <template #body="{ data }">
-          {{ new Date(data.createdAt).toLocaleDateString() }}
+          {{ formatDate(data.createdAt) }}
         </template>
       </Column>
       <Column v-if="auth.isCompanyAdmin" style="width:48px;padding:0">
         <template #body="{ data }">
-          <button class="delete-btn" @click="deleteOrder($event, data.id)" title="Eliminar">
+          <button class="delete-btn" @click="deleteOrder($event, data.id)" :title="t('common.delete')">
             <i class="pi pi-times" />
           </button>
         </template>

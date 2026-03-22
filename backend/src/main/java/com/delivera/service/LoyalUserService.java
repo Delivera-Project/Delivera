@@ -41,8 +41,10 @@ public class LoyalUserService {
 
     public List<LoyalUserResponse> getByCompany() {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        return loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(companyId)
-                .stream().map(LoyalUserResponse::from).toList();
+        return loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(companyId).stream()
+                .map(lu -> LoyalUserResponse.from(lu, orderRepository.countByLoyalUserId(lu.getId())))
+                .filter(r -> r.orderCount() > 0)
+                .toList();
     }
 
     @Transactional
@@ -73,7 +75,6 @@ public class LoyalUserService {
                 .stream().map(OrderResponse::from).toList();
     }
 
-    /** Endpoint para el propio usuario fidelizado: obtiene sus pedidos de todas las empresas */
     public List<OrderResponse> getMyOrders() {
         String email = securityUtils.getCurrentEmail();
         return loyalUserRepository.findByEmail(email).stream()

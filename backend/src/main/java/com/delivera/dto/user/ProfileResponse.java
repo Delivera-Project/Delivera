@@ -1,20 +1,28 @@
 package com.delivera.dto.user;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.delivera.model.User;
 
 import java.time.Instant;
 import java.util.UUID;
 
-@Getter
-@Setter
-@NoArgsConstructor
-public class ProfileResponse {
-    private UUID id;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private String phone;
-    private Instant createdAt;
+public record ProfileResponse(
+        UUID id,
+        String email,
+        String username,
+        String firstName,
+        String lastName,
+        String phone,
+        Instant createdAt
+) {
+    public static ProfileResponse from(User user) {
+        return new ProfileResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhone(),
+                user.getCreatedAt()
+        );
+    }
 }

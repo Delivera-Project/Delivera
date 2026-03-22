@@ -11,27 +11,30 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
 public class OrderService {
 
-    private static final Set<OrderStatus> TERMINAL = Set.of(OrderStatus.DELIVERED, OrderStatus.CANCELLED);
-
     private final OrderRepository orderRepository;
     private final OperationalUnitRepository unitRepository;
     private final CompanyRepository companyRepository;
+    private final LoyalUserRepository loyalUserRepository;
     private final SecurityUtils securityUtils;
+    private final AppConfigService appConfigService;
 
     public OrderService(OrderRepository orderRepository,
                         OperationalUnitRepository unitRepository,
                         CompanyRepository companyRepository,
-                        SecurityUtils securityUtils) {
+                        LoyalUserRepository loyalUserRepository,
+                        SecurityUtils securityUtils,
+                        AppConfigService appConfigService) {
         this.orderRepository = orderRepository;
         this.unitRepository = unitRepository;
         this.companyRepository = companyRepository;
+        this.loyalUserRepository = loyalUserRepository;
         this.securityUtils = securityUtils;
+        this.appConfigService = appConfigService;
     }
 
     public List<OrderResponse> getByCompany() {
@@ -81,9 +84,12 @@ public class OrderService {
         order.setNotes(request.notes() != null ? request.notes().trim() : null);
 
         if (isExternal && request.recipientEmail() != null) {
-            order.setRecipientEmail(request.recipientEmail().toLowerCase().trim());
+            String recipientEmail = request.recipientEmail().toLowerCase().trim();
+            order.setRecipientEmail(recipientEmail);
             order.setRecipientName(request.recipientName() != null ? request.recipientName().trim() : null);
             order.setTrackingToken(UUID.randomUUID().toString().replace("-", ""));
+            loyalUserRepository.findByCompanyIdAndEmail(companyId, recipientEmail)
+                    .ifPresent(order::setLoyalUser);
         }
 
         var initialEvent = new OrderEvent();
@@ -138,15 +144,7 @@ public class OrderService {
     }
 
     private void validateTransition(OrderStatus current, OrderStatus next) {
-        if (TERMINAL.contains(current)) {
-            throw new InvalidStatusTransitionException();
-        }
-        boolean valid = switch (current) {
-            case PENDING -> next == OrderStatus.IN_TRANSIT || next == OrderStatus.CANCELLED;
-            case IN_TRANSIT -> next == OrderStatus.DELIVERED || next == OrderStatus.CANCELLED;
-            default -> false;
-        };
-        if (!valid) throw new InvalidStatusTransitionException();
+        appConfigService.validateTransition(current.name(), next.name());
     }
 
     private String generateReference() {

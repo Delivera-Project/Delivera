@@ -3,23 +3,21 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import { useAppConfig } from '@/composables/useAppConfig'
+import { useFormatDate } from '@/composables/useFormatDate'
 
 const { t } = useI18n()
+const { formatDate } = useFormatDate()
 const router = useRouter()
 const api = useApi()
+const { load: loadConfig, statusSeverity } = useAppConfig()
 
 const orders = ref([])
 const loading = ref(false)
 const error = ref('')
 
-const statusSeverity = {
-  PENDING: 'warn',
-  IN_TRANSIT: 'info',
-  DELIVERED: 'success',
-  CANCELLED: 'danger',
-}
-
 onMounted(async () => {
+  loadConfig()
   loading.value = true
   try {
     const res = await api.get('/loyal-users/me/orders')
@@ -39,7 +37,7 @@ onMounted(async () => {
 
     <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
-    <DataTable :value="orders" :loading="loading" striped-rows row-hover @row-click="e => router.push(`/track/${e.data.trackingToken}`)">
+    <DataTable :value="orders" :loading="loading" striped-rows row-hover @row-click="e => router.push(`/track?q=${e.data.reference}`)">
       <template #empty>
         <div class="empty-state">
           <i class="pi pi-inbox empty-icon" />
@@ -61,7 +59,7 @@ onMounted(async () => {
       </Column>
       <Column :header="t('orders.date')" style="width:120px">
         <template #body="{ data }">
-          {{ new Date(data.createdAt).toLocaleDateString() }}
+          {{ formatDate(data.createdAt) }}
         </template>
       </Column>
     </DataTable>

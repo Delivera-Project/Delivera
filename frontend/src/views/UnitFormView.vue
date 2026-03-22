@@ -97,7 +97,7 @@ function handleSubmit() {
       </div>
 
       <div class="actions">
-        <div class="form-field" style="flex:1">
+        <div class="form-field form-field--flex">
           <label for="unit-lat">{{ t('fields.latitude') }}</label>
           <InputText
             id="unit-lat"
@@ -108,7 +108,7 @@ function handleSubmit() {
             fluid
           />
         </div>
-        <div class="form-field" style="flex:1">
+        <div class="form-field form-field--flex">
           <label for="unit-lon">{{ t('fields.longitude') }}</label>
           <InputText
             id="unit-lon"
@@ -138,5 +138,9 @@ function handleSubmit() {
 .selector-invalid :deep(.p-selectbutton) {
   outline: 1px solid #ef4444;
   border-radius: 6px;
+}
+
+.form-field--flex {
+  flex: 1;
 }
 </style>
