@@ -42,6 +42,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("EMAIL_ALREADY_EXISTS"));
     }
 
+    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameAlreadyExists(UsernameAlreadyExistsException ex) {
+        log.warn("Duplicate username registration attempt");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("USERNAME_ALREADY_EXISTS"));
+    }
+
     @ExceptionHandler(CompanyContextException.class)
     public ResponseEntity<ErrorResponse> handleCompanyContext(CompanyContextException ex) {
         log.warn("Request with no company context in token");
@@ -111,11 +118,18 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("LOYAL_USER_ALREADY_EXISTS"));
     }
 
-    @ExceptionHandler(SlugConflictException.class)
-    public ResponseEntity<ErrorResponse> handleSlugConflict(SlugConflictException ex) {
-        log.error("Slug conflict unresolved after max retries: {}", ex.getMessage());
+    @ExceptionHandler(CompanyHasActiveOrdersException.class)
+    public ResponseEntity<ErrorResponse> handleCompanyHasActiveOrders(CompanyHasActiveOrdersException ex) {
+        log.warn("Cannot delete company with active orders: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("SLUG_CONFLICT"));
+                .body(new ErrorResponse("COMPANY_HAS_ACTIVE_ORDERS"));
+    }
+
+    @ExceptionHandler(HandleConflictException.class)
+    public ResponseEntity<ErrorResponse> handleHandleConflict(HandleConflictException ex) {
+        log.error("Handle conflict unresolved after max retries: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("HANDLE_CONFLICT"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -130,6 +144,13 @@ public class GlobalExceptionHandler {
         log.debug("Validation error: {}", errors);
         return ResponseEntity.badRequest()
                 .body(new ValidationErrorResponse("VALIDATION_ERROR", errors));
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex) {
+        log.warn("Forbidden access: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse("FORBIDDEN"));
     }
 
     @ExceptionHandler(Exception.class)

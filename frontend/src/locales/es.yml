@@ -25,19 +25,34 @@ profile:
   updated: Perfil actualizado correctamente
   passwordChanged: Contraseña actualizada correctamente
   memberSince: Miembro desde
+  language: Idioma
 
 fields:
   email: Correo
   emailPlaceholder: "admin{'@'}empresa.com"
+  emailPersonalPlaceholder: "ej: tu{'@'}correo.com"
+  loginIdentifier: Correo o nombre de usuario
+  loginIdentifierPlaceholder: "tu{'@'}correo.com o tu_usuario"
   password: Contraseña
   passwordHint: "Mín. 8 caracteres, mayúscula y número"
   confirmPassword: Confirmar contraseña
   currentPassword: Contraseña actual
   newPassword: Nueva contraseña
+  fullName: Nombre completo
+  username: Nombre de usuario
+  usernamePlaceholder: "ej: juan_garcia"
+  usernameHint: "Mínimo 3 caracteres, solo letras minúsculas, números, guiones y guiones bajos"
   firstName: Nombre
   lastName: Apellidos
   phone: Teléfono
+  phonePlaceholder: "+34 600 000 000"
+  fullNamePlaceholder: "Ej: Juan García"
   empty: "—"
+  orgName: Nombre de la organización
+  orgNamePlaceholder: "Ej: Grupo Acme"
+  orgCode: Código de organización
+  orgCodePlaceholder: "grupo-acme"
+  orgCodeHint: "Lo usarán tus trabajadores para identificar la organización al iniciar sesión"
   companyName: Nombre de la empresa
   companyNamePlaceholder: "Ej: Acme Logística"
   organization: Organización
@@ -56,12 +71,16 @@ notFound:
   goHome: Volver al inicio
 
 register:
+  orgTitle: Crear organización
   companyTitle: Registrar empresa
-  activitySubtitle: Elige el tipo de actividad de tu empresa
-  accountSubtitle: Datos de la empresa y cuenta de administrador
-  stepActivity: Actividad
+  orgSubtitle: Define el nombre y el código de acceso de tu organización
+  companySubtitle: Datos de tu empresa dentro de la organización
+  accountSubtitle: Datos de tu cuenta de administrador
+  stepOrg: Organización
+  stepCompany: Empresa
   stepAccount: Cuenta
   createCompany: Crear empresa
+  registerUserTitle: Registrar usuario
 
 activity:
   industry: Industria
@@ -79,6 +98,8 @@ units:
   created: Unidad creada correctamente
   updated: Unidad actualizada correctamente
   empty: No hay unidades operativas. Crea la primera para poder gestionar envíos.
+  deleteConfirm: "¿Eliminar esta unidad?"
+  deleteActiveOrders: No se puede eliminar la unidad porque tiene pedidos asociados.
   filterAll: Todos
   noCoords: Sin coordenadas
   WAREHOUSE: Almacén
@@ -119,6 +140,8 @@ orders:
   statusNotePlaceholder: Motivo del cambio de estado...
   statusUpdated: Estado actualizado correctamente
   filterAll: Todos
+  deleteConfirm: "¿Eliminar este pedido?"
+  details: Detalles
   priority:
     label: Prioridad
     HIGH: ALTA
@@ -145,7 +168,7 @@ tracking:
 loyalUsers:
   title: Usuarios fidelizados
   new: Añadir fidelizado
-  empty: No hay usuarios fidelizados todavía.
+  empty: No hay usuarios fidelizados con pedidos todavía.
   email: Email
   registered: Registrado
   notRegistered: No registrado
@@ -164,6 +187,7 @@ nav:
   orders: Pedidos
   loyalUsers: Fidelizados
   myOrders: Mis pedidos
+  settings: Configuración
 
 common:
   back: Volver
@@ -171,6 +195,8 @@ common:
   loading: Cargando...
   save: Guardar
   cancel: Cancelar
+  delete: Eliminar
+  filters: "Filtros:"
 
 validation:
   required: "El campo {field} es obligatorio"
@@ -182,24 +208,60 @@ validation:
   passwordStrength: La contraseña debe incluir mayúscula, minúscula y número
   coordinatesIncomplete: La latitud y la longitud deben indicarse juntas
   coordinatesInvalid: Coordenadas fuera de rango (lat -90–90, lon -180–180)
+  orgCodeRequired: Introduce un código de organización
+  orgCodeInvalid: "Solo letras minúsculas, números y guiones (sin empezar ni terminar con guión)"
+  orgCodeTaken: Este código ya está en uso, elige otro
 
 error:
   connection: Error de conexión con el servidor
-  invalidCredentials: Correo o contraseña incorrectos
+  invalidCredentials: Credenciales incorrectas
   registerFailed: Error al registrarse
   saveFailed: Error al guardar
   passwordChangeFailed: Error al cambiar la contraseña
-  INVALID_CREDENTIALS: Correo o contraseña incorrectos
+  INVALID_CREDENTIALS: Credenciales incorrectas
   USER_NOT_FOUND: Usuario no encontrado
   EMAIL_ALREADY_EXISTS: El email ya está registrado
+  USERNAME_ALREADY_EXISTS: El nombre de usuario ya está en uso
   CURRENT_PASSWORD_INVALID: La contraseña actual es incorrecta
   NEW_PASSWORD_SAME_AS_CURRENT: La nueva contraseña no puede ser igual a la actual
   VALIDATION_ERROR: Error de validación
   INTERNAL_ERROR: Error interno del servidor
-  SLUG_CONFLICT: No se pudo crear la empresa, inténtalo de nuevo
+  HANDLE_CONFLICT: Este código de organización ya está en uso
+  handleInvalid: "Solo letras minúsculas, números y guiones (sin empezar ni terminar con guión)"
   UNIT_NAME_CONFLICT: Ya existe una unidad con ese nombre en la empresa
   UNIT_NOT_FOUND: Unidad no encontrada
   INVALID_ORDER_UNITS: Las unidades seleccionadas no son válidas para este pedido
   ORDER_NOT_FOUND: Pedido no encontrado
   INVALID_STATUS_TRANSITION: Transición de estado no permitida
   LOYAL_USER_ALREADY_EXISTS: Este email ya está registrado como fidelizado en tu empresa
+  COMPANY_HAS_ACTIVE_ORDERS: No se puede eliminar la empresa porque tiene pedidos activos
+  FORBIDDEN: Acceso no autorizado
+  DATA_INTEGRITY_ERROR: Error de integridad de datos
+  COMPANY_CONTEXT_MISSING: No hay contexto de empresa en la sesión
+
+orgSelect:
+  title: Selecciona tu organización
+  subtitle: "Tus credenciales son válidas en varias organizaciones. Elige con cuál quieres trabajar ahora."
+  search: Buscar organización...
+  noResults: No se encontró ninguna organización con ese nombre
+
+settings:
+  title: Configuración
+  orgSection: Organización
+  companySection: Empresa
+  orgCode: Código de organización
+  orgCodeHint: "Los trabajadores usan este código para identificar la organización al iniciar sesión"
+  orgCodeCopied: Código copiado al portapapeles
+  editOrg: Editar organización
+  editCompany: Editar empresa
+  addCompany: Añadir empresa
+  newCompany: Nueva empresa en esta organización
+  saved: Guardado correctamente
+  addCompanySuccess: Empresa creada correctamente
+  myCompanies: Mis empresas
+  switchCompany: Cambiar empresa
+  current: Actual
+  deleteCompany: Eliminar empresa
+  deleteConfirm: "¿Seguro que quieres eliminar esta empresa?"
+  deleteActiveOrdersTitle: "Esta empresa tiene pedidos activos"
+  deleteActiveOrdersHint: "Si la eliminas, sus pedidos y datos también serán eliminados. ¿Continuar de todas formas?"

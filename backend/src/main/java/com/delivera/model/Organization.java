@@ -23,7 +23,7 @@ public class Organization {
     private String name;
 
     @Column(nullable = false, unique = true, length = 100)
-    private String slug;
+    private String handle;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
