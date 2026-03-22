@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.time.Instant;
 import java.util.UUID;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,9 +27,8 @@ public class Company {
     @Column(nullable = false)
     private String name;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "activity_type", nullable = false)
-    private ActivityType activityType;
+    @Column(name = "activity_type", nullable = false, length = 50)
+    private String activityType;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
