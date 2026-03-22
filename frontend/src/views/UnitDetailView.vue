@@ -3,8 +3,10 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import { useFormatDate } from '@/composables/useFormatDate'
 
 const { t } = useI18n()
+const { formatDate } = useFormatDate()
 const route = useRoute()
 const router = useRouter()
 const api = useApi()
@@ -67,7 +69,7 @@ onMounted(async () => {
         </div>
         <div class="info-item">
           <span class="info-label">{{ t('orders.date') }}</span>
-          <span class="info-value">{{ unit.createdAt ? new Date(unit.createdAt).toLocaleDateString() : '—' }}</span>
+          <span class="info-value">{{ formatDate(unit.createdAt) ?? '—' }}</span>
         </div>
       </div>
     </template>

@@ -3,8 +3,10 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import { useFormatDate } from '@/composables/useFormatDate'
 
 const { t } = useI18n()
+const { formatDate } = useFormatDate()
 const router = useRouter()
 const api = useApi()
 
@@ -44,6 +46,11 @@ onMounted(load)
         </div>
       </template>
       <Column field="email" :header="t('loyalUsers.email')" />
+      <Column :header="t('loyalUsers.orders')" style="width:130px">
+        <template #body="{ data }">
+          <PTag :value="String(data.orderCount)" severity="info" />
+        </template>
+      </Column>
       <Column :header="t('loyalUsers.registered')" style="width:140px">
         <template #body="{ data }">
           <PTag
@@ -54,7 +61,7 @@ onMounted(load)
       </Column>
       <Column :header="t('loyalUsers.since')" style="width:130px">
         <template #body="{ data }">
-          {{ new Date(data.createdAt).toLocaleDateString() }}
+          {{ formatDate(data.createdAt) }}
         </template>
       </Column>
     </DataTable>

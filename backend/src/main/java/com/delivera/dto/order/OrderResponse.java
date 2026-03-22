@@ -17,6 +17,7 @@ public record OrderResponse(
         String status,
         String priority,
         String notes,
+        String trackingToken,
         Instant createdAt) {
 
     public static OrderResponse from(Order order) {
@@ -32,6 +33,7 @@ public record OrderResponse(
                 order.getStatus().name(),
                 order.getPriority().name(),
                 order.getNotes(),
+                order.getTrackingToken(),
                 order.getCreatedAt());
     }
 }

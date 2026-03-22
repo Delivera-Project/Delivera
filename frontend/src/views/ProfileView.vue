@@ -5,8 +5,21 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
+import { useFormatDate } from '@/composables/useFormatDate'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+const { formatDate } = useFormatDate()
+
+const languageOptions = [
+  { label: 'Español', value: 'es' },
+  { label: 'English', value: 'en' },
+]
+function setLocale(val) {
+  locale.value = val
+  if (auth.user?.email) {
+    localStorage.setItem(`locale_${auth.user.email}`, val)
+  }
+}
 const router = useRouter()
 const auth = useAuthStore()
 const api = useApi()
@@ -17,7 +30,7 @@ const editing = ref(false)
 const error = ref('')
 const success = ref('')
 
-const form = ref({ firstName: '', lastName: '', phone: '' })
+const form = ref({ username: '', firstName: '', lastName: '', phone: '' })
 const changingPassword = ref(false)
 const passwordForm = ref({ currentPassword: '', newPassword: '' })
 
@@ -41,6 +54,7 @@ async function fetchProfile() {
     if (response.ok) {
       profile.value = await response.json()
       auth.setUser(profile.value)
+      form.value.username = profile.value.username || ''
       form.value.firstName = profile.value.firstName || ''
       form.value.lastName = profile.value.lastName || ''
       form.value.phone = profile.value.phone || ''
@@ -53,6 +67,7 @@ async function fetchProfile() {
 function startEditing() { editing.value = true; success.value = '' }
 function cancelEditing() {
   editing.value = false; error.value = ''
+  form.value.username = profile.value.username || ''
   form.value.firstName = profile.value.firstName || ''
   form.value.lastName = profile.value.lastName || ''
   form.value.phone = profile.value.phone || ''
@@ -99,7 +114,11 @@ async function savePassword() {
   }
 }
 
-function handleLogout() { auth.logout(); router.push('/') }
+function handleLogout() {
+  locale.value = navigator.language?.startsWith('en') ? 'en' : 'es'
+  auth.logout()
+  router.push('/')
+}
 
 onMounted(fetchProfile)
 </script>
@@ -111,7 +130,7 @@ onMounted(fetchProfile)
       <PSkeleton width="7rem" height="1.4rem" border-radius="8px" class="mb-4" style="margin-inline:auto" />
       <div class="profile-header">
         <PSkeleton shape="circle" size="3.25rem" />
-        <div style="flex:1; text-align:left">
+        <div class="skeleton-info">
           <PSkeleton width="55%" height="0.9rem" class="mb-2" />
           <PSkeleton width="75%" height="0.75rem" />
         </div>
@@ -147,12 +166,12 @@ onMounted(fetchProfile)
       <template v-if="!editing && !changingPassword">
         <div class="fields">
           <div class="field">
-            <span class="field-label">{{ t('fields.firstName') }}</span>
-            <span class="field-value">{{ profile.firstName || t('fields.empty') }}</span>
+            <span class="field-label">{{ t('fields.username') }}</span>
+            <span class="field-value">{{ profile.username || t('fields.empty') }}</span>
           </div>
           <div class="field">
-            <span class="field-label">{{ t('fields.lastName') }}</span>
-            <span class="field-value">{{ profile.lastName || t('fields.empty') }}</span>
+            <span class="field-label">{{ t('fields.fullName') }}</span>
+            <span class="field-value">{{ [profile.firstName, profile.lastName].filter(Boolean).join(' ') || t('fields.empty') }}</span>
           </div>
           <div class="field">
             <span class="field-label">{{ t('fields.phone') }}</span>
@@ -160,7 +179,11 @@ onMounted(fetchProfile)
           </div>
           <div class="field">
             <span class="field-label">{{ t('profile.memberSince') }}</span>
-            <span class="field-value">{{ profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : t('fields.empty') }}</span>
+            <span class="field-value">{{ formatDate(profile.createdAt) ?? t('fields.empty') }}</span>
+          </div>
+          <div class="field field-language">
+            <span class="field-label">{{ t('profile.language') }}</span>
+            <SelectButton :model-value="locale" :options="languageOptions" option-label="label" option-value="value" @update:model-value="setLocale" />
           </div>
         </div>
         <div class="profile-actions">
@@ -173,6 +196,11 @@ onMounted(fetchProfile)
       <!-- Modo edición -->
       <form v-else-if="editing" @submit.prevent="saveProfile">
         <div class="form-field">
+          <label for="profile-username">{{ t('fields.username') }}</label>
+          <InputText id="profile-username" v-model="form.username" type="text" :placeholder="t('fields.usernamePlaceholder')" maxlength="50" fluid />
+          <small class="field-hint">{{ t('fields.usernameHint') }}</small>
+        </div>
+        <div class="form-field">
           <label for="profile-first-name">{{ t('fields.firstName') }}</label>
           <InputText id="profile-first-name" v-model="form.firstName" :placeholder="t('fields.firstName')" maxlength="100" fluid />
         </div>
@@ -182,7 +210,7 @@ onMounted(fetchProfile)
         </div>
         <div class="form-field">
           <label for="profile-phone">{{ t('fields.phone') }}</label>
-          <InputText id="profile-phone" v-model="form.phone" type="tel" :placeholder="t('fields.phone')" maxlength="20" fluid />
+          <InputText id="profile-phone" v-model="form.phone" type="tel" :placeholder="t('fields.phonePlaceholder')" maxlength="20" fluid />
         </div>
         <div class="actions">
           <PButton type="submit" :label="t('profile.save')" fluid />
@@ -211,3 +239,10 @@ onMounted(fetchProfile)
     </div>
   </div>
 </template>
+
+<style scoped>
+.skeleton-info {
+  flex: 1;
+  text-align: left;
+}
+</style>

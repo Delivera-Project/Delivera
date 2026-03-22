@@ -3,25 +3,23 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import { useFormatDate } from '@/composables/useFormatDate'
+import { useAppConfig } from '@/composables/useAppConfig'
 
 const { t } = useI18n()
+const { formatDate } = useFormatDate()
 const route = useRoute()
 const router = useRouter()
 const api = useApi()
+const { load: loadConfig, statusSeverity } = useAppConfig()
 
 const loyalUser = ref(null)
 const orders = ref([])
 const loading = ref(false)
 const error = ref('')
 
-const statusSeverity = {
-  PENDING: 'warn',
-  IN_TRANSIT: 'info',
-  DELIVERED: 'success',
-  CANCELLED: 'danger',
-}
-
 onMounted(async () => {
+  loadConfig()
   loading.value = true
   try {
     const [luRes, ordersRes] = await Promise.all([
@@ -88,7 +86,7 @@ onMounted(async () => {
         </Column>
         <Column :header="t('orders.date')" style="width:120px">
           <template #body="{ data }">
-            {{ new Date(data.createdAt).toLocaleDateString() }}
+            {{ formatDate(data.createdAt) }}
           </template>
         </Column>
       </DataTable>
