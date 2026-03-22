@@ -12,5 +12,6 @@ public record OrderRequest(
         UUID destinationId,
         @Email @Size(max = 255) String recipientEmail,
         @Size(max = 255) String recipientName,
+        String orderType,
         OrderPriority priority,
         @Size(max = 1000) String notes) {}

@@ -59,6 +59,7 @@ app.use(PrimeVue, {
 })
 
 app.component('InputText', InputText)
+app.component('PInputText', InputText)
 app.component('PPassword', Password)
 app.component('PButton', Button)
 app.component('PMessage', Message)

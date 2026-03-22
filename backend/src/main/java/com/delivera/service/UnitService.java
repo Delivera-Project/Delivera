@@ -1,5 +1,6 @@
 package com.delivera.service;
 
+import com.delivera.dto.unit.B2BUnitResponse;
 import com.delivera.dto.unit.UnitRequest;
 import com.delivera.dto.unit.UnitResponse;
 import com.delivera.config.SecurityUtils;
@@ -76,6 +77,12 @@ public class UnitService {
     public List<UnitResponse> getByCompany() {
         return unitRepository.findAllByCompanyId(securityUtils.getCurrentCompanyId()).stream()
                 .map(UnitResponse::from)
+                .toList();
+    }
+
+    public List<B2BUnitResponse> getExternalUnits() {
+        return unitRepository.findExternalByOrganization(securityUtils.getCurrentCompanyId()).stream()
+                .map(B2BUnitResponse::from)
                 .toList();
     }
 

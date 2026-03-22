@@ -1,19 +1,14 @@
 package com.delivera.service;
 
+import com.delivera.dto.auth.ClaimRegisterRequest;
 import com.delivera.dto.auth.CompanyRegisterRequest;
 import com.delivera.dto.auth.CompanyRegisterResponse;
 import com.delivera.dto.auth.LoginResponse;
 import com.delivera.dto.auth.RegisterRequest;
 import com.delivera.dto.auth.RegisterResponse;
-import com.delivera.exception.EmailAlreadyExistsException;
-import com.delivera.exception.InvalidCredentialsException;
-import com.delivera.exception.HandleConflictException;
-import com.delivera.exception.UsernameAlreadyExistsException;
+import com.delivera.exception.*;
 import com.delivera.model.*;
-import com.delivera.repository.CompanyRepository;
-import com.delivera.repository.OrganizationRepository;
-import com.delivera.repository.UserRepository;
-import com.delivera.repository.WorkerRepository;
+import com.delivera.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +30,8 @@ public class AuthService {
     @Autowired private OrganizationRepository organizationRepository;
     @Autowired private CompanyRepository companyRepository;
     @Autowired private WorkerRepository workerRepository;
+    @Autowired private OrderRepository orderRepository;
+    @Autowired private LoyalUserRepository loyalUserRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private JwtService jwtService;
 
@@ -124,6 +121,45 @@ public class AuthService {
         String token = jwtService.generateToken(user.getEmail(), company.getId(), WorkerRole.COMPANY_ADMIN);
         return new CompanyRegisterResponse(token, user.getEmail(), company.getId(),
                 WorkerRole.COMPANY_ADMIN.name(), company.getName(), organization.getHandle(), organization.getName());
+    }
+
+    @Transactional
+    public LoginResponse claimRegister(String token, ClaimRegisterRequest request) {
+        var order = orderRepository.findByTrackingToken(token)
+                .orElseThrow(OrderNotFoundException::new);
+
+        if (order.getLoyalUser() != null && order.getLoyalUser().getUser() != null) {
+            throw new OrderAlreadyClaimedException();
+        }
+
+        String email = request.email().toLowerCase().trim();
+        if (!email.equalsIgnoreCase(order.getRecipientEmail())) {
+            throw new OrderClaimEmailMismatchException();
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new EmailAlreadyExistsException();
+        }
+
+        User user = buildUser(email, null, request.firstName(), request.lastName(), null, request.password());
+        userRepository.save(user);
+
+        LoyalUser loyalUser = loyalUserRepository
+                .findByCompanyIdAndEmail(order.getCompany().getId(), email)
+                .orElseGet(() -> {
+                    var lu = new LoyalUser();
+                    lu.setCompany(order.getCompany());
+                    lu.setEmail(email);
+                    return lu;
+                });
+        loyalUser.setUser(user);
+        loyalUserRepository.save(loyalUser);
+
+        order.setLoyalUser(loyalUser);
+        orderRepository.save(order);
+
+        String jwtToken = jwtService.generateToken(user.getEmail());
+        return new LoginResponse(jwtToken, user.getEmail(), null, "LOYAL_USER", null, null, null);
     }
 
     private User buildUser(String email, String username, String firstName, String lastName, String phone, String password) {

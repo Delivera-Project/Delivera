@@ -39,7 +39,7 @@ public class OrderService {
 
     public List<OrderResponse> getByCompany() {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        return orderRepository.findByCompanyIdOrderByCreatedAtDesc(companyId)
+        return orderRepository.findSentOrReceivedByCompanyId(companyId)
                 .stream()
                 .map(OrderResponse::from)
                 .toList();
@@ -48,7 +48,7 @@ public class OrderService {
     @Transactional
     public OrderDetailResponse getDetail(UUID id) {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        Order order = orderRepository.findByIdAndCompanyId(id, companyId)
+        Order order = orderRepository.findByIdForCompany(id, companyId)
                 .orElseThrow(OrderNotFoundException::new);
         return OrderDetailResponse.from(order);
     }
@@ -57,6 +57,7 @@ public class OrderService {
     public OrderResponse create(OrderRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
 
+        boolean isB2B = "B2B".equals(request.orderType());
         boolean isExternal = request.destinationId() == null;
 
         var origin = unitRepository.findByIdAndCompanyId(request.originId(), companyId)
@@ -64,10 +65,15 @@ public class OrderService {
 
         OperationalUnit destination = null;
         if (!isExternal) {
-            destination = unitRepository.findByIdAndCompanyId(request.destinationId(), companyId)
-                    .orElseThrow(InvalidOrderUnitsException::new);
-            if (origin.getId().equals(destination.getId())) {
-                throw new InvalidOrderUnitsException();
+            if (isB2B) {
+                destination = unitRepository.findById(request.destinationId())
+                        .orElseThrow(InvalidOrderUnitsException::new);
+            } else {
+                destination = unitRepository.findByIdAndCompanyId(request.destinationId(), companyId)
+                        .orElseThrow(InvalidOrderUnitsException::new);
+                if (origin.getId().equals(destination.getId())) {
+                    throw new InvalidOrderUnitsException();
+                }
             }
         }
 

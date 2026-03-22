@@ -56,6 +56,7 @@ fields:
   companyName: Company name
   organization: Organization
   type: Type
+  company: Destination company
   unitName: Unit name
   unitNamePlaceholder: "E.g: Main Warehouse"
   address: Address
@@ -129,6 +130,20 @@ orders:
   recipientName: Recipient name
   recipientNamePlaceholder: "E.g: John Smith"
   externalOrder: External shipment
+  orderType: Order type
+  type:
+    INTERNAL: Internal transfer
+    B2C: B2C — Individual
+    B2B: B2B — Business
+  destinationCompany: Destination company
+  destinationCompanyPlaceholder: Select destination company
+  destinationUnit: Destination unit
+  destinationUnitPlaceholder: Select destination unit
+  trackingUrl: Tracking URL
+  trackingUrlHint: Share this link with the recipient so they can track the order
+  claimed: Order claimed
+  claimedHint: The recipient has already linked their account to this order
+  loyalUserExists: Known loyal user
   notes: Notes
   notesPlaceholder: Additional instructions (optional)
   noUnits: Not enough units. Create at least two operational units first.
@@ -164,6 +179,20 @@ tracking:
   destination: Destination
   recipient: Recipient
   noEvents: No status updates yet
+  claim:
+    title: "Is this your order?"
+    description: "Create an account to track all your shipments in one place."
+    emailHint: "Email associated with this order: {hint}"
+    firstName: First name
+    lastName: Last name
+    email: Email address
+    password: Password
+    submit: Create account and sign in
+    alreadyClaimed: This order already has a registered account.
+    emailMismatch: The email does not match the order recipient's email.
+    emailExists: This email already has an account. Sign in to view your orders.
+  alreadyClaimed: This order has already been claimed by its recipient.
+  signInToView: Sign in to view your orders
 
 loyalUsers:
   title: Loyal users

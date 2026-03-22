@@ -25,6 +25,12 @@ const newStatus = ref('')
 const statusNote = ref('')
 const activeTab = ref(0)
 
+const viteEnvBase = `${import.meta.env.VITE_APP_URL || window.location.origin}`
+
+function copyTrackingUrl(token) {
+  navigator.clipboard.writeText(`${viteEnvBase}/track/${token}`)
+}
+
 const availableNextStatuses = computed(() => order.value ? getNextStatuses(order.value.status) : [])
 const canUpdateStatus = computed(() => ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'].includes(auth.role))
 
@@ -112,11 +118,13 @@ async function submitStatusUpdate() {
               <div class="info-item">
                 <span class="info-label">{{ t('orders.origin') }}</span>
                 <span class="info-value">{{ order.originName }}</span>
+                <span class="info-sub">{{ order.originCompanyName }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">{{ order.destinationName ? t('orders.destination') : t('tracking.recipient') }}</span>
                 <span class="info-value">{{ order.destinationName || order.recipientName || order.recipientEmail }}</span>
-                <span v-if="!order.destinationName && order.recipientName && order.recipientEmail" class="info-sub">{{ order.recipientEmail }}</span>
+                <span v-if="order.destinationCompanyName" class="info-sub">{{ order.destinationCompanyName }}</span>
+                <span v-else-if="order.recipientName && order.recipientEmail" class="info-sub">{{ order.recipientEmail }}</span>
               </div>
               <div class="info-item info-item--full">
                 <span class="info-label">{{ t('orders.date') }}</span>
@@ -125,6 +133,35 @@ async function submitStatusUpdate() {
               <div v-if="order.notes" class="info-item info-item--full">
                 <span class="info-label">{{ t('orders.notes') }}</span>
                 <span class="info-value info-notes">{{ order.notes }}</span>
+              </div>
+            </div>
+
+            <!-- Tracking URL: solo para B2C con token y sin reclamar -->
+            <div v-if="order.trackingToken && !order.claimed" class="tracking-section">
+              <div class="tracking-header">
+                <i class="pi pi-link" />
+                <div>
+                  <div class="tracking-label">{{ t('orders.trackingUrl') }}</div>
+                  <div class="tracking-hint">{{ t('orders.trackingUrlHint') }}</div>
+                </div>
+              </div>
+              <div class="tracking-url-row">
+                <code class="tracking-url">{{ `${viteEnvBase}/track/${order.trackingToken}` }}</code>
+                <PButton
+                  icon="pi pi-copy"
+                  text
+                  severity="secondary"
+                  size="small"
+                  @click="copyTrackingUrl(order.trackingToken)"
+                />
+              </div>
+            </div>
+            <!-- Ya reclamado -->
+            <div v-else-if="order.trackingToken && order.claimed" class="claimed-section">
+              <i class="pi pi-check-circle" />
+              <div>
+                <div class="claimed-label">{{ t('orders.claimed') }}</div>
+                <div class="claimed-hint">{{ t('orders.claimedHint') }}</div>
               </div>
             </div>
           </PTabPanel>
@@ -280,4 +317,46 @@ async function submitStatusUpdate() {
 .timeline-date { font-size: 12px; color: #94a3b8; }
 .timeline-note { font-size: 13px; color: #475569; margin-bottom: 2px; }
 .timeline-author { font-size: 11px; color: #94a3b8; }
+
+.tracking-section {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+}
+.tracking-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tracking-header .pi { color: #3b82f6; font-size: 16px; margin-top: 2px; }
+.tracking-label { font-weight: 600; font-size: 13px; color: #1e40af; }
+.tracking-hint { font-size: 12px; color: #3b82f6; margin-top: 2px; }
+.tracking-url-row { display: flex; align-items: center; gap: 8px; }
+.tracking-url {
+  flex: 1;
+  font-size: 12px;
+  background: white;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #1e40af;
+  word-break: break-all;
+}
+
+.claimed-section {
+  margin-top: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+}
+.claimed-section .pi { color: #16a34a; font-size: 16px; margin-top: 2px; }
+.claimed-label { font-weight: 600; font-size: 13px; color: #15803d; }
+.claimed-hint { font-size: 12px; color: #166534; margin-top: 2px; }
 </style>

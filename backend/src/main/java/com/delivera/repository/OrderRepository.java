@@ -4,6 +4,7 @@ import com.delivera.model.Order;
 import com.delivera.model.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +17,17 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findByCompanyIdOrderByCreatedAtDesc(UUID companyId);
 
+    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN o.destination dest LEFT JOIN dest.company dc " +
+           "WHERE o.company.id = :companyId " +
+           "OR (dest IS NOT NULL AND dc.id = :companyId AND o.company.id <> :companyId) " +
+           "ORDER BY o.createdAt DESC")
+    List<Order> findSentOrReceivedByCompanyId(@Param("companyId") UUID companyId);
+
     Optional<Order> findByIdAndCompanyId(UUID id, UUID companyId);
+
+    @Query("SELECT o FROM Order o LEFT JOIN o.destination dest LEFT JOIN dest.company dc " +
+           "WHERE o.id = :id AND (o.company.id = :companyId OR (dest IS NOT NULL AND dc.id = :companyId))")
+    Optional<Order> findByIdForCompany(@Param("id") UUID id, @Param("companyId") UUID companyId);
 
     Optional<Order> findByTrackingToken(String trackingToken);
 

@@ -104,7 +104,7 @@ class OrderServiceTest {
 
     @Test
     void create_internalOrder_success() {
-        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
@@ -118,7 +118,7 @@ class OrderServiceTest {
 
     @Test
     void create_sameOriginAndDestination_throws() {
-        OrderRequest req = new OrderRequest(origin.getId(), origin.getId(), null, null, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), origin.getId(), null, null, null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
 
@@ -129,7 +129,7 @@ class OrderServiceTest {
     @Test
     void create_originNotFound_throws() {
         UUID badId = UUID.randomUUID();
-        OrderRequest req = new OrderRequest(badId, destination.getId(), null, null, null, null);
+        OrderRequest req = new OrderRequest(badId, destination.getId(), null, null, null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(unitRepository.findByIdAndCompanyId(badId, companyId)).thenReturn(Optional.empty());
 
@@ -140,7 +140,7 @@ class OrderServiceTest {
     @Test
     void create_destinationNotFound_throws() {
         UUID badId = UUID.randomUUID();
-        OrderRequest req = new OrderRequest(origin.getId(), badId, null, null, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), badId, null, null, null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
         when(unitRepository.findByIdAndCompanyId(badId, companyId)).thenReturn(Optional.empty());
@@ -151,7 +151,7 @@ class OrderServiceTest {
 
     @Test
     void create_externalOrder_success() {
-        OrderRequest req = new OrderRequest(origin.getId(), null, "recipient@test.com", "John", null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), null, "recipient@test.com", "John", null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));

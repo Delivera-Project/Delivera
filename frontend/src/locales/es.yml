@@ -57,6 +57,7 @@ fields:
   companyNamePlaceholder: "Ej: Acme Logística"
   organization: Organización
   type: Tipo
+  company: Empresa de destino
   unitName: Nombre de la unidad
   unitNamePlaceholder: "Ej: Almacén Central"
   address: Dirección
@@ -129,6 +130,20 @@ orders:
   recipientName: Nombre del destinatario
   recipientNamePlaceholder: "Ej: Juan García"
   externalOrder: Envío externo
+  orderType: Tipo de pedido
+  type:
+    INTERNAL: Traslado interno
+    B2C: B2C — Particular
+    B2B: B2B — Empresa
+  destinationCompany: Empresa de destino
+  destinationCompanyPlaceholder: Selecciona la empresa de destino
+  destinationUnit: Unidad de destino
+  destinationUnitPlaceholder: Selecciona la unidad de destino
+  trackingUrl: URL de seguimiento
+  trackingUrlHint: Comparte este enlace con el destinatario para que pueda seguir el pedido
+  claimed: Pedido reclamado
+  claimedHint: El destinatario ya tiene cuenta vinculada a este pedido
+  loyalUserExists: Usuario fidelizado conocido
   notes: Notas
   notesPlaceholder: Instrucciones adicionales (opcional)
   noUnits: No hay suficientes unidades. Crea al menos dos unidades operativas primero.
@@ -164,6 +179,20 @@ tracking:
   destination: Destino
   recipient: Destinatario
   noEvents: Sin movimientos registrados aún
+  claim:
+    title: "¿Es tu pedido?"
+    description: "Regístrate para consultar todos tus envíos en un solo lugar."
+    emailHint: "Email asociado al pedido: {hint}"
+    firstName: Nombre
+    lastName: Apellidos
+    email: Correo electrónico
+    password: Contraseña
+    submit: Crear cuenta y acceder
+    alreadyClaimed: Este pedido ya tiene una cuenta registrada.
+    emailMismatch: El correo no coincide con el del destinatario del pedido.
+    emailExists: Este correo ya tiene una cuenta. Inicia sesión para ver tus pedidos.
+  alreadyClaimed: Este pedido ya ha sido reclamado por su destinatario.
+  signInToView: Inicia sesión para ver tus pedidos
 
 loyalUsers:
   title: Usuarios fidelizados
