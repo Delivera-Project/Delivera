@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { mockAppConfig } from './helpers/auth.js'
 
 const mockOrder = {
   id: 1,
@@ -16,7 +17,7 @@ const mockOrder = {
 
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/v1/app-config', route =>
-    route.fulfill({ json: { orderStatuses: [], orderPriorities: [], roleCapabilities: [] } })
+    route.fulfill({ json: mockAppConfig })
   )
 })
 

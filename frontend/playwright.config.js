@@ -9,6 +9,7 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     screenshot: 'only-on-failure',
+    trace: 'on-first-retry',
     locale: 'es',
   },
   projects: [
@@ -17,6 +18,9 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
+    timeout: 30000,
+    stdout: 'pipe',
+    stderr: 'pipe',
     reuseExistingServer: !process.env.CI,
   },
 })

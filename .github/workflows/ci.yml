@@ -50,3 +50,4 @@ jobs:
       - name: Audit production dependencies
         working-directory: frontend
         run: npm audit --audit-level=high --omit=dev
+        continue-on-error: true

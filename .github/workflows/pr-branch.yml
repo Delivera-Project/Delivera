@@ -11,16 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate branch name
+        env:
+          BRANCH: ${{ github.head_ref }}
         run: |
-          branch="${{ github.head_ref }}"
-          if [[ "$branch" == "develop" || "$branch" == "main" ]]; then
+          if [[ "$BRANCH" == "develop" || "$BRANCH" == "main" ]]; then
             echo "Base branch, skipping check"
             exit 0
           fi
-          if ! echo "$branch" | grep -qE '^(feat|fix|refactor|chore|docs|style|test|perf)/[a-z0-9][a-z0-9-]*[a-z0-9]?$'; then
-            echo "Branch '$branch' does not follow naming convention"
+          if ! printf '%s' "$BRANCH" | grep -qE '^(feat|fix|refactor|chore|docs|style|test|perf)/[a-z0-9][a-z0-9-]*[a-z0-9]?$'; then
+            echo "Branch '$BRANCH' does not follow naming convention"
             echo "Expected: type/description  (e.g. feat/login, fix/order-bug)"
             echo "Allowed types: feat, fix, refactor, chore, docs, style, test, perf"
             exit 1
           fi
-          echo "Branch '$branch' is valid"
+          echo "Branch '$BRANCH' is valid"
