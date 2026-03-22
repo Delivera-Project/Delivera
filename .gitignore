@@ -43,9 +43,10 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Cypress
-frontend/cypress/videos/
-frontend/cypress/screenshots/
+# Playwright
+frontend/playwright-report/
+frontend/test-results/
+frontend/blob-report/
 
 # Vite
 *.timestamp-*-*.mjs

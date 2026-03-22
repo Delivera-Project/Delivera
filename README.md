@@ -108,6 +108,34 @@ ADMIN_EMAIL=otro@email.com ADMIN_PASSWORD=MiPass1 ./scripts/seed-init.sh
 
 `seed-demo.sh` crea una organización con 3 empresas, 8 unidades operativas, 8 fidelizados y 9 pedidos en distintos estados.
 
+## Tests
+
+```bash
+# Backend (H2 in-memory, no requiere PostgreSQL)
+cd backend && mvn test
+
+# Frontend — unitarios
+cd frontend && npm run test:unit
+
+# Frontend — E2E Playwright (no requiere backend)
+cd frontend && npx playwright test
+cd frontend && npx playwright test --grep @auth    # por tag
+```
+
+Tags E2E disponibles: `@auth` · `@navigation` · `@register` · `@profile` · `@units` · `@orders` · `@tracking`
+
+## CI/CD
+
+| Workflow | Cuándo se ejecuta |
+|---|---|
+| `ci.yml` | Push/PR a `main` o `develop` — build+test backend, lint+build frontend |
+| `playwright.yml` | PR + `workflow_dispatch` — 44 tests E2E en Chromium |
+| `sonar.yml` | PR a `main`/`develop` — SonarCloud quality gate |
+| `pr-title.yml` | PR — valida formato `tipo/descripcion` en el título |
+| `pr-branch.yml` | PR — valida nombre de rama `tipo/descripcion` |
+| `pr-commits.yml` | PR — valida mensajes de commit (Conventional Commits) |
+| `release.yml` | `workflow_dispatch` manual — crea tag git + GitHub Release con changelog |
+
 ## Producción
 
 Activa el perfil `prod` con `SPRING_PROFILES_ACTIVE=prod`. Variables de entorno requeridas:

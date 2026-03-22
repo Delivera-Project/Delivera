@@ -136,7 +136,7 @@ const usernameState = computed(() => {
           <label>{{ t('fields.type') }}</label>
           <div class="activity-grid">
             <button
-              v-for="at in activityTypes"
+              v-for="at in activityTypes.value"
               :key="at.value"
               type="button"
               class="activity-option"
