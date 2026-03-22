@@ -57,7 +57,7 @@ export function useCompanyRegistration() {
         const data = await res.json()
         usernameAvailable.value = data.available
       }
-    } catch { } finally {
+    } catch { /* silencioso */ } finally {
       usernameChecking.value = false
     }
   }

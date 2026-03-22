@@ -4,4 +4,4 @@ const router = useRouter()
 router.replace('/')
 </script>
 
-<template></template>
+<template><div /></template>
