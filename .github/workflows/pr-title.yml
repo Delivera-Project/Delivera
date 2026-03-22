@@ -1,0 +1,26 @@
+name: PR Title
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  check:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title format
+        run: |
+          title="$(jq -r .pull_request.title "$GITHUB_EVENT_PATH")"
+          if [[ "$title" == "develop" || "$title" == "main" ]]; then
+            echo "Base branch PR, skipping check"
+            exit 0
+          fi
+          if ! printf '%s' "$title" | grep -qE '^(feat|fix|refactor|chore|docs|style|test|perf)/[a-z0-9][a-z0-9-]*[a-z0-9]?$'; then
+            echo "PR title '$title' does not follow naming convention"
+            echo "Expected: type/description  (e.g. feat/login, fix/order-bug)"
+            echo "Allowed types: feat, fix, refactor, chore, docs, style, test, perf"
+            exit 1
+          fi
+          echo "PR title '$title' is valid"
