@@ -61,3 +61,11 @@ export function useApi() {
 
   return { get, post, put, patch, del, translateError }
 }
+
+export async function fetchPublicOrder(reference) {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/v1/orders/public/search?reference=${encodeURIComponent(reference)}`
+  )
+  if (!res.ok) throw new Error('not_found')
+  return res.json()
+}

@@ -3,10 +3,10 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppConfig } from '@/composables/useAppConfig'
-import { useFormatDate } from '@/composables/useFormatDate'
+import { fetchPublicOrder } from '@/composables/useApi'
+import TimelineList from '@/components/TimelineList.vue'
 
 const { t } = useI18n()
-const { formatDateTime } = useFormatDate()
 const route = useRoute()
 const router = useRouter()
 const { load: loadConfig, statusSeverity } = useAppConfig()
@@ -20,13 +20,9 @@ async function fetchOrder() {
   if (!reference) { error.value = t('tracking.notFound'); return }
   loading.value = true
   try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/v1/orders/public/search?reference=${encodeURIComponent(reference)}`
-    )
-    if (res.ok) order.value = await res.json()
-    else error.value = t('tracking.notFound')
-  } catch {
-    error.value = t('error.connection')
+    order.value = await fetchPublicOrder(reference)
+  } catch (e) {
+    error.value = e.message === 'not_found' ? t('tracking.notFound') : t('error.connection')
   } finally {
     loading.value = false
   }
@@ -74,22 +70,7 @@ onMounted(() => { loadConfig(); fetchOrder() })
       </div>
 
       <h3 class="timeline-heading">{{ t('orders.timeline') }}</h3>
-      <div v-if="!order.events?.length" class="timeline-empty">
-        <i class="pi pi-clock" />
-        <span>{{ t('tracking.noEvents') }}</span>
-      </div>
-      <div v-else class="timeline">
-        <div v-for="ev in order.events" :key="ev.id" class="timeline-item">
-          <div class="timeline-dot" :class="`dot-${ev.status.toLowerCase()}`" />
-          <div class="timeline-content">
-            <div class="timeline-status">
-              <PTag :value="t(`orders.status.${ev.status}`)" :severity="statusSeverity[ev.status]" size="small" />
-              <span class="timeline-date">{{ formatDateTime(ev.createdAt) }}</span>
-            </div>
-            <div v-if="ev.note" class="timeline-note">{{ ev.note }}</div>
-          </div>
-        </div>
-      </div>
+      <TimelineList :events="order.events ?? []" />
     </template>
   </div>
 </template>
@@ -121,33 +102,4 @@ onMounted(() => { loadConfig(); fetchOrder() })
 .info-value { font-size: 14px; font-weight: 500; color: #1e293b; }
 
 .timeline-heading { margin: 0 0 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
-.timeline-empty { display: flex; align-items: center; gap: 8px; color: #94a3b8; font-size: 13px; }
-.timeline { display: flex; flex-direction: column; }
-.timeline-item { display: flex; gap: 14px; position: relative; padding-bottom: 20px; }
-.timeline-item:last-child { padding-bottom: 0; }
-.timeline-item:not(:last-child)::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 16px;
-  bottom: 0;
-  width: 2px;
-  background: #e2e8f0;
-}
-.timeline-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 4px;
-  border: 2px solid currentColor;
-}
-.dot-pending { color: #d97706; background: #fef3c7; }
-.dot-in_transit { color: #2563eb; background: #dbeafe; }
-.dot-delivered { color: #059669; background: #d1fae5; }
-.dot-cancelled { color: #dc2626; background: #fee2e2; }
-.timeline-content { flex: 1; }
-.timeline-status { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.timeline-date { font-size: 12px; color: #94a3b8; }
-.timeline-note { font-size: 13px; color: #475569; }
 </style>

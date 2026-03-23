@@ -91,13 +91,13 @@
   border-radius: 50%;
   flex-shrink: 0;
   margin-top: 4px;
-  border: 2px solid currentColor;
+  border: 2px solid currentcolor;
 }
 
-.dot-pending    { color: #f59e0b; background: #fef3c7; }
-.dot-in_transit { color: #3b82f6; background: #dbeafe; }
-.dot-delivered  { color: #10b981; background: #d1fae5; }
-.dot-cancelled  { color: #ef4444; background: #fee2e2; }
+.dot-pending    { color: #92400e; background: #fef3c7; }
+.dot-in_transit { color: #1d4ed8; background: #dbeafe; }
+.dot-delivered  { color: #065f46; background: #d1fae5; }
+.dot-cancelled  { color: #b91c1c; background: #fee2e2; }
 
 .timeline-content { flex: 1; }
 .timeline-status { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
