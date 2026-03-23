@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useFormatDate } from '@/composables/useFormatDate'
+import EmptyState from '@/components/EmptyState.vue'
 
 const { t } = useI18n()
 const { formatDate } = useFormatDate()
@@ -39,10 +40,7 @@ onMounted(async () => {
 
     <DataTable :value="orders" :loading="loading" striped-rows row-hover @row-click="e => router.push({ path: '/my-orders/detail', query: { q: e.data.reference } })">
       <template #empty>
-        <div class="empty-state">
-          <i class="pi pi-inbox empty-icon" />
-          <p>{{ t('myOrders.empty') }}</p>
-        </div>
+        <EmptyState icon="pi-box" :message="t('myOrders.empty')" />
       </template>
       <Column field="reference" :header="t('orders.reference')" style="font-weight:600;width:170px" />
       <Column :header="t('orders.route')">
@@ -68,7 +66,4 @@ onMounted(async () => {
 
 <style scoped>
 h1 { margin: 0 0 20px; }
-.empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 24px; color: #94a3b8; }
-.empty-icon { font-size: 40px; opacity: 0.4; }
-.empty-state p { margin: 0; font-size: 14px; }
 </style>

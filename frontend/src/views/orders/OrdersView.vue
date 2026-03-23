@@ -6,6 +6,7 @@ import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useFormatDate } from '@/composables/useFormatDate'
+import EmptyState from '@/components/EmptyState.vue'
 
 const { t } = useI18n()
 const { formatDate } = useFormatDate()
@@ -80,7 +81,7 @@ onMounted(() => { loadConfig(); load() })
 
 <template>
   <div class="card card-wide">
-    <div class="orders-header">
+    <div class="list-header">
       <h1>{{ t('orders.listTitle') }}</h1>
       <PButton
         v-if="auth.canCreateOrders"
@@ -90,9 +91,9 @@ onMounted(() => { loadConfig(); load() })
       />
     </div>
 
-    <div class="orders-filters-wrapper">
+    <div class="filters-wrapper">
       <span class="filters-label">{{ t('common.filters') }}</span>
-      <div class="orders-filters">
+      <div class="filters-box">
         <div class="filter-row">
           <label class="filter-group-label">{{ t('orders.reference') }}</label>
           <input
@@ -135,9 +136,7 @@ onMounted(() => { loadConfig(); load() })
       @row-click="e => router.push(`/orders/${e.data.id}`)"
     >
       <template #empty>
-        <div class="empty-state">
-          <i class="pi pi-send empty-icon" />
-          <p>{{ t('orders.empty') }}</p>
+        <EmptyState icon="pi-send" :message="t('orders.empty')">
           <PButton
             v-if="auth.canCreateOrders"
             :label="t('orders.new')"
@@ -145,7 +144,7 @@ onMounted(() => { loadConfig(); load() })
             size="small"
             @click="router.push('/orders/new')"
           />
-        </div>
+        </EmptyState>
       </template>
       <Column field="reference" :header="t('orders.reference')" style="width:170px;font-weight:600" />
       <Column :header="t('orders.route')">
@@ -191,100 +190,8 @@ onMounted(() => { loadConfig(); load() })
 </template>
 
 <style scoped>
-.orders-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.orders-header h1 { margin: 0; }
-
-.orders-filters-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-.filters-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  text-align: left;
-  align-self: flex-start;
-}
-
-.orders-filters {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px 16px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  min-width: 0;
-}
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.filter-group-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.filter-search {
-  flex: 1;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #1e293b;
-  background: #fff;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.filter-search:focus { border-color: #8b5cf6; }
-.filter-search::placeholder { color: #94a3b8; }
 .filter-select { width: 160px; }
-
 .recipient-label { color: #64748b; font-style: italic; }
 .priority-normal { color: #94a3b8; font-size: 13px; }
-
-.delete-btn {
-  opacity: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #ef4444;
-  padding: 6px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.15s, background 0.15s;
-}
-.delete-btn:hover { background: #fee2e2; }
 :deep(tr:hover) .delete-btn { opacity: 1; }
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  color: #94a3b8;
-}
-
-.empty-icon { font-size: 40px; opacity: 0.4; }
-.empty-state p { margin: 0; font-size: 14px; }
 </style>

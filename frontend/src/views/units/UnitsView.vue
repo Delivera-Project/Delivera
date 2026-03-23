@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
+import EmptyState from '@/components/EmptyState.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -68,7 +69,7 @@ onMounted(load)
 
 <template>
   <div class="card card-wide">
-    <div class="units-header">
+    <div class="list-header">
       <h1>{{ t('units.title') }}</h1>
       <PButton
         v-if="auth.isCompanyAdmin"
@@ -78,9 +79,9 @@ onMounted(load)
       />
     </div>
 
-    <div class="units-filters-wrapper">
+    <div class="filters-wrapper">
       <span class="filters-label">{{ t('common.filters') }}</span>
-      <div class="units-filters">
+      <div class="filters-box">
         <div class="filter-row">
           <label class="filter-group-label">{{ t('fields.unitName') }}</label>
           <input
@@ -115,9 +116,7 @@ onMounted(load)
       @row-click="e => router.push(`/units/${e.data.id}`)"
     >
       <template #empty>
-        <div class="empty-state">
-          <i class="pi pi-building empty-icon" />
-          <p>{{ t('units.empty') }}</p>
+        <EmptyState icon="pi-warehouse" :message="t('units.empty')">
           <PButton
             v-if="auth.isCompanyAdmin"
             :label="t('units.new')"
@@ -125,7 +124,7 @@ onMounted(load)
             size="small"
             @click="router.push('/units/new')"
           />
-        </div>
+        </EmptyState>
       </template>
       <Column :header="t('fields.type')" style="width:160px">
         <template #body="{ data }">
@@ -146,97 +145,6 @@ onMounted(load)
 </template>
 
 <style scoped>
-.units-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-.units-header h1 { margin: 0; }
-
-.units-filters-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-.filters-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  text-align: left;
-  align-self: flex-start;
-}
-
-.units-filters {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px 16px;
-  background: #f8fafc;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  min-width: 0;
-}
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.filter-group-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-
-.filter-search {
-  flex: 1;
-  height: 38px;
-  padding: 0 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #1e293b;
-  background: #fff;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.filter-search:focus { border-color: #8b5cf6; }
-.filter-search::placeholder { color: #94a3b8; }
 .filter-select { width: 200px; }
-
-.delete-btn {
-  opacity: 0;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #ef4444;
-  padding: 6px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.15s, background 0.15s;
-}
-.delete-btn:hover { background: #fee2e2; }
 :deep(tr:hover) .delete-btn { opacity: 1; }
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 48px 24px;
-  color: #94a3b8;
-}
-
-.empty-icon { font-size: 40px; opacity: 0.4; }
-.empty-state p { margin: 0; font-size: 14px; }
 </style>

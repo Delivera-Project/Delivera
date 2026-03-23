@@ -186,20 +186,3 @@ async function handleRegister() {
   </BaseLayout>
 </template>
 
-<style scoped>
-.check-field {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.check-badge {
-  position: absolute;
-  right: 10px;
-  font-size: 13px;
-}
-
-.check-checking { color: #94a3b8; }
-.check-ok { color: #16a34a; }
-.check-taken { color: #ef4444; }
-</style>
