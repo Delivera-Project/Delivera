@@ -130,6 +130,20 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handleOrderAlreadyClaimed_returns409() {
+        ResponseEntity<ErrorResponse> response = handler.handleOrderAlreadyClaimed(new OrderAlreadyClaimedException());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getBody().code()).isEqualTo("ORDER_ALREADY_CLAIMED");
+    }
+
+    @Test
+    void handleOrderClaimEmailMismatch_returns422() {
+        ResponseEntity<ErrorResponse> response = handler.handleOrderClaimEmailMismatch(new OrderClaimEmailMismatchException());
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(response.getBody().code()).isEqualTo("ORDER_CLAIM_EMAIL_MISMATCH");
+    }
+
+    @Test
     void handleForbidden_returns403() {
         ResponseEntity<ErrorResponse> response = handler.handleForbidden(new ForbiddenException("test"));
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
