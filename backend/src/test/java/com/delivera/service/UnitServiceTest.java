@@ -125,6 +125,24 @@ class UnitServiceTest {
     }
 
     @Test
+    void getExternalUnits_returnsMappedList() {
+        Company externalCompany = new Company();
+        externalCompany.setId(UUID.randomUUID());
+        externalCompany.setName("External Co");
+
+        OperationalUnit externalUnit = new OperationalUnit();
+        externalUnit.setId(UUID.randomUUID());
+        externalUnit.setName("External Warehouse");
+        externalUnit.setType(UnitType.WAREHOUSE);
+        externalUnit.setCompany(externalCompany);
+
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findExternalByOrganization(companyId)).thenReturn(List.of(externalUnit));
+
+        assertThat(unitService.getExternalUnits()).hasSize(1);
+    }
+
+    @Test
     void getDetail_found() {
         UUID unitId = unit.getId();
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);

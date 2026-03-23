@@ -2,6 +2,7 @@ package com.delivera.service;
 
 import com.delivera.config.SecurityUtils;
 import com.delivera.dto.order.OrderRequest;
+import com.delivera.model.OrderType;
 import com.delivera.dto.order.OrderStatusRequest;
 import com.delivera.exception.InvalidOrderUnitsException;
 import com.delivera.exception.OrderNotFoundException;
@@ -79,7 +80,7 @@ class OrderServiceTest {
     @Test
     void getByCompany_returnsMappedList() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(orderRepository.findByCompanyIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(order));
+        when(orderRepository.findSentOrReceivedByCompanyId(companyId)).thenReturn(List.of(order));
 
         assertThat(orderService.getByCompany()).hasSize(1);
     }
@@ -87,7 +88,7 @@ class OrderServiceTest {
     @Test
     void getDetail_found() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(orderRepository.findByIdAndCompanyId(order.getId(), companyId)).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdForCompany(order.getId(), companyId)).thenReturn(Optional.of(order));
 
         assertThat(orderService.getDetail(order.getId())).isNotNull();
     }
@@ -96,7 +97,7 @@ class OrderServiceTest {
     void getDetail_notFound_throws() {
         UUID id = UUID.randomUUID();
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(orderRepository.findByIdAndCompanyId(id, companyId)).thenReturn(Optional.empty());
+        when(orderRepository.findByIdForCompany(id, companyId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> orderService.getDetail(id))
                 .isInstanceOf(OrderNotFoundException.class);
@@ -104,7 +105,7 @@ class OrderServiceTest {
 
     @Test
     void create_internalOrder_success() {
-        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, OrderType.INTERNAL, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
@@ -118,7 +119,7 @@ class OrderServiceTest {
 
     @Test
     void create_sameOriginAndDestination_throws() {
-        OrderRequest req = new OrderRequest(origin.getId(), origin.getId(), null, null, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), origin.getId(), null, null, OrderType.INTERNAL, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
 
@@ -129,7 +130,7 @@ class OrderServiceTest {
     @Test
     void create_originNotFound_throws() {
         UUID badId = UUID.randomUUID();
-        OrderRequest req = new OrderRequest(badId, destination.getId(), null, null, null, null);
+        OrderRequest req = new OrderRequest(badId, destination.getId(), null, null, OrderType.INTERNAL, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(unitRepository.findByIdAndCompanyId(badId, companyId)).thenReturn(Optional.empty());
 
@@ -140,7 +141,7 @@ class OrderServiceTest {
     @Test
     void create_destinationNotFound_throws() {
         UUID badId = UUID.randomUUID();
-        OrderRequest req = new OrderRequest(origin.getId(), badId, null, null, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), badId, null, null, OrderType.INTERNAL, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
         when(unitRepository.findByIdAndCompanyId(badId, companyId)).thenReturn(Optional.empty());
@@ -150,8 +151,26 @@ class OrderServiceTest {
     }
 
     @Test
+    void create_b2bOrder_success() {
+        Company destCompany = new Company();
+        destCompany.setId(UUID.randomUUID());
+        destination.setCompany(destCompany);
+
+        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, OrderType.B2B, null, null);
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
+        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
+        when(unitRepository.findById(destination.getId())).thenReturn(Optional.of(destination));
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(orderRepository.nextReferenceSeq()).thenReturn(1L);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        assertThat(orderService.create(req)).isNotNull();
+    }
+
+    @Test
     void create_externalOrder_success() {
-        OrderRequest req = new OrderRequest(origin.getId(), null, "recipient@test.com", "John", null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), null, "recipient@test.com", "John", OrderType.B2C, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));

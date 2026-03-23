@@ -1,6 +1,9 @@
 package com.delivera.controller;
 
+import com.delivera.dto.auth.ClaimRegisterRequest;
+import com.delivera.dto.auth.LoginResponse;
 import com.delivera.dto.order.*;
+import com.delivera.service.AuthService;
 import com.delivera.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,9 +21,11 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderService orderService;
+    private final AuthService authService;
 
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, AuthService authService) {
         this.orderService = orderService;
+        this.authService = authService;
     }
 
     @Operation(summary = "Listar pedidos de la empresa")
@@ -65,5 +70,12 @@ public class OrderController {
     @GetMapping("/public/search")
     public ResponseEntity<PublicOrderResponse> trackByReference(@RequestParam String reference) {
         return ResponseEntity.ok(orderService.getPublicByReference(reference));
+    }
+
+    @Operation(summary = "Registro de destinatario a través del token de seguimiento")
+    @PostMapping("/public/track/{token}/register")
+    public ResponseEntity<LoginResponse> claimRegister(@PathVariable String token,
+                                                       @Valid @RequestBody ClaimRegisterRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.claimRegister(token, request));
     }
 }

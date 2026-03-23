@@ -14,6 +14,7 @@ import OrderDetailView from '@/views/OrderDetailView.vue'
 import LoyalUsersView from '@/views/LoyalUsersView.vue'
 import LoyalUserDetailView from '@/views/LoyalUserDetailView.vue'
 import MyOrdersView from '@/views/MyOrdersView.vue'
+import MyOrderDetailView from '@/views/MyOrderDetailView.vue'
 import TrackingView from '@/views/TrackingView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import AppLayout from '@/components/AppLayout.vue'
@@ -34,6 +35,7 @@ const router = createRouter({
       children: [
         { path: 'profile', component: ProfileView, meta: { requiresAuth: true } },
         { path: 'my-orders', component: MyOrdersView, meta: { requiresAuth: true } },
+        { path: 'my-orders/detail', component: MyOrderDetailView, meta: { requiresAuth: true } },
         { path: 'units', component: UnitsView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'units/new', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
         { path: 'units/:id', component: UnitDetailView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },

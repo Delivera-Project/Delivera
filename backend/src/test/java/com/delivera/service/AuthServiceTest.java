@@ -28,6 +28,8 @@ class AuthServiceTest {
     @Mock private OrganizationRepository organizationRepository;
     @Mock private CompanyRepository companyRepository;
     @Mock private WorkerRepository workerRepository;
+    @Mock private OrderRepository orderRepository;
+    @Mock private LoyalUserRepository loyalUserRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private JwtService jwtService;
     @InjectMocks private AuthService authService;
@@ -36,6 +38,8 @@ class AuthServiceTest {
     private Company company;
     private Organization organization;
     private Worker worker;
+    private Order claimOrder;
+    private ClaimRegisterRequest claimRequest;
 
     @BeforeEach
     void setUp() {
@@ -57,6 +61,13 @@ class AuthServiceTest {
         worker.setUser(user);
         worker.setCompany(company);
         worker.setRole(WorkerRole.COMPANY_ADMIN);
+
+        claimOrder = new Order();
+        claimOrder.setTrackingToken("testtoken");
+        claimOrder.setRecipientEmail("juan@gmail.com");
+        claimOrder.setCompany(company);
+
+        claimRequest = new ClaimRegisterRequest("Juan", "García", "juan@gmail.com", "Password1");
     }
 
     // --- login ---
@@ -205,6 +216,100 @@ class AuthServiceTest {
         when(userRepository.existsByUsername("takenuser")).thenReturn(true);
         assertThatThrownBy(() -> authService.registerCompany(req))
                 .isInstanceOf(UsernameAlreadyExistsException.class);
+    }
+
+    // --- claimRegister ---
+
+    @Test
+    void claimRegister_success_noExistingLoyalUser() {
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompanyIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("Password1")).thenReturn("hashed");
+        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(orderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(jwtService.generateToken("juan@gmail.com")).thenReturn("jwt-token");
+
+        LoginResponse result = authService.claimRegister("testtoken", claimRequest);
+
+        assertThat(result.token()).isEqualTo("jwt-token");
+        assertThat(result.email()).isEqualTo("juan@gmail.com");
+        assertThat(result.companyId()).isNull();
+        verify(loyalUserRepository).save(any(LoyalUser.class));
+        verify(orderRepository).save(claimOrder);
+    }
+
+    @Test
+    void claimRegister_success_existingLoyalUserWithoutAccount() {
+        LoyalUser existingLu = new LoyalUser();
+        existingLu.setEmail("juan@gmail.com");
+        existingLu.setCompany(company);
+
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompanyIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.of(existingLu));
+        when(passwordEncoder.encode("Password1")).thenReturn("hashed");
+        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(loyalUserRepository.save(existingLu)).thenReturn(existingLu);
+        when(orderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(jwtService.generateToken("juan@gmail.com")).thenReturn("jwt-token");
+
+        LoginResponse result = authService.claimRegister("testtoken", claimRequest);
+
+        assertThat(result.token()).isEqualTo("jwt-token");
+        verify(loyalUserRepository).save(existingLu);
+    }
+
+    @Test
+    void claimRegister_tokenNotFound_throws() {
+        when(orderRepository.findByTrackingToken("badtoken")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authService.claimRegister("badtoken", claimRequest))
+                .isInstanceOf(OrderNotFoundException.class);
+    }
+
+    @Test
+    void claimRegister_alreadyClaimed_throws() {
+        User claimedUser = new User();
+        LoyalUser loyalUser = new LoyalUser();
+        loyalUser.setUser(claimedUser);
+        claimOrder.setLoyalUser(loyalUser);
+
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        assertThatThrownBy(() -> authService.claimRegister("testtoken", claimRequest))
+                .isInstanceOf(OrderAlreadyClaimedException.class);
+    }
+
+    @Test
+    void claimRegister_emailMismatch_throws() {
+        ClaimRegisterRequest mismatch = new ClaimRegisterRequest("Juan", "García", "otro@gmail.com", "Password1");
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        assertThatThrownBy(() -> authService.claimRegister("testtoken", mismatch))
+                .isInstanceOf(OrderClaimEmailMismatchException.class);
+    }
+
+    @Test
+    void claimRegister_emailAlreadyRegistered_throws() {
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.of(new User()));
+        assertThatThrownBy(() -> authService.claimRegister("testtoken", claimRequest))
+                .isInstanceOf(EmailAlreadyExistsException.class);
+    }
+
+    @Test
+    void claimRegister_emailCaseInsensitive_succeeds() {
+        ClaimRegisterRequest upperCase = new ClaimRegisterRequest("Juan", "García", "JUAN@GMAIL.COM", "Password1");
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompanyIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode("Password1")).thenReturn("hashed");
+        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(orderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(jwtService.generateToken("juan@gmail.com")).thenReturn("jwt-token");
+
+        LoginResponse result = authService.claimRegister("testtoken", upperCase);
+        assertThat(result.email()).isEqualTo("juan@gmail.com");
     }
 
     // --- availability checks ---

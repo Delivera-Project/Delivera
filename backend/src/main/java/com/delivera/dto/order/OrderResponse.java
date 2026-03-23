@@ -18,9 +18,12 @@ public record OrderResponse(
         String priority,
         String notes,
         String trackingToken,
+        boolean claimed,
         Instant createdAt) {
 
     public static OrderResponse from(Order order) {
+        var lu = order.getLoyalUser();
+        boolean claimed = lu != null && lu.getUser() != null;
         return new OrderResponse(
                 order.getId(),
                 order.getReference(),
@@ -34,6 +37,7 @@ public record OrderResponse(
                 order.getPriority().name(),
                 order.getNotes(),
                 order.getTrackingToken(),
+                claimed,
                 order.getCreatedAt());
     }
 }

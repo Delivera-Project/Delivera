@@ -1,4 +1,4 @@
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
@@ -11,14 +11,18 @@ export function useOrderForm() {
   const { validate, required, email: emailRule, errors, invalids } = useValidation()
 
   const units = ref([])
+  const externalUnits = ref([])
+  const loyalUsers = ref([])
   const loadError = ref('')
+  const orderType = ref('INTERNAL') // 'INTERNAL' | 'B2C' | 'B2B'
   const originId = ref('')
   const destinationId = ref('')
+  const b2bCompanyId = ref('')
+  const b2bDestinationId = ref('')
   const recipientEmail = ref('')
   const recipientName = ref('')
   const priority = ref('NORMAL')
   const notes = ref('')
-  const isExternal = ref(false)
   const loading = ref(false)
   const error = ref('')
 
@@ -26,15 +30,45 @@ export function useOrderForm() {
     units.value.filter(u => u.id !== originId.value)
   )
 
+  const b2bCompanies = computed(() => {
+    const seen = new Set()
+    return externalUnits.value
+      .filter(u => { if (seen.has(u.companyId)) return false; seen.add(u.companyId); return true })
+      .map(u => ({ id: u.companyId, name: u.companyName }))
+  })
+
+  const b2bUnitOptions = computed(() =>
+    externalUnits.value.filter(u => u.companyId === b2bCompanyId.value)
+  )
+
+  const loyalUserMatch = computed(() => {
+    if (orderType.value !== 'B2C' || !recipientEmail.value) return null
+    return loyalUsers.value.find(lu => lu.email.toLowerCase() === recipientEmail.value.toLowerCase().trim()) || null
+  })
+
+  watch(b2bCompanyId, () => { b2bDestinationId.value = '' })
+
+  watch(recipientEmail, () => {
+    if (orderType.value !== 'B2C') return
+    if (!recipientEmail.value) recipientName.value = ''
+  })
+
   onMounted(async () => {
     try {
-      const res = await api.get('/units')
-      if (res.ok) {
-        units.value = await res.json()
-      } else {
-        const data = await res.json().catch(() => null)
+      const [unitsRes, externalRes, luRes] = await Promise.all([
+        api.get('/units'),
+        api.get('/units/external'),
+        api.get('/loyal-users'),
+      ])
+      if (unitsRes.ok) units.value = await unitsRes.json()
+      else {
+        const data = await unitsRes.json().catch(() => null)
         loadError.value = api.translateError(data, 'error.connection')
       }
+      if (externalRes.ok) externalUnits.value = await externalRes.json()
+      else console.error('Failed to load external units:', externalRes.status)
+      if (luRes.ok) loyalUsers.value = await luRes.json()
+      else console.error('Failed to load loyal users:', luRes.status)
     } catch {
       loadError.value = t('error.connection')
     }
@@ -45,14 +79,17 @@ export function useOrderForm() {
     error.value = ''
 
     const rules = { originId: [required(originId.value, 'unitName')] }
-    if (!isExternal.value) {
+    if (orderType.value === 'INTERNAL') {
       rules.destinationId = [required(destinationId.value, 'unitName')]
-    } else {
+    } else if (orderType.value === 'B2C') {
       rules.recipientEmail = [required(recipientEmail.value, 'email'), emailRule(recipientEmail.value)]
+    } else if (orderType.value === 'B2B') {
+      rules.b2bCompanyId = [required(b2bCompanyId.value, 'company')]
+      rules.b2bDestinationId = [required(b2bDestinationId.value, 'unitName')]
     }
     if (!validate(rules)) return
 
-    if (!isExternal.value && originId.value === destinationId.value) {
+    if (orderType.value === 'INTERNAL' && originId.value === destinationId.value) {
       error.value = t('orders.sameUnit')
       return
     }
@@ -61,14 +98,17 @@ export function useOrderForm() {
     try {
       const body = {
         originId: originId.value,
+        orderType: orderType.value,
         priority: priority.value,
         notes: notes.value.trim() || null,
       }
-      if (isExternal.value) {
-        body.recipientEmail = recipientEmail.value.trim() || null
-        body.recipientName = recipientName.value.trim() || null
-      } else {
+      if (orderType.value === 'INTERNAL') {
         body.destinationId = destinationId.value
+      } else if (orderType.value === 'B2B') {
+        body.destinationId = b2bDestinationId.value
+      } else {
+        body.recipientName = recipientName.value.trim() || null
+        body.recipientEmail = recipientEmail.value.trim() || null
       }
 
       const res = await api.post('/orders', body)
@@ -86,5 +126,11 @@ export function useOrderForm() {
     }
   }
 
-  return { units, loadError, originId, destinationId, recipientEmail, recipientName, priority, notes, isExternal, loading, error, errors, invalids, destinationOptions, handleSubmit }
+  return {
+    units, externalUnits, loyalUsers, loyalUserMatch, loadError,
+    orderType, originId, destinationId, b2bCompanyId, b2bDestinationId,
+    recipientEmail, recipientName,
+    priority, notes, loading, error, errors, invalids,
+    destinationOptions, b2bCompanies, b2bUnitOptions, handleSubmit,
+  }
 }

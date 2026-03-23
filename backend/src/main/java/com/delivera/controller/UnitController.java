@@ -1,5 +1,6 @@
 package com.delivera.controller;
 
+import com.delivera.dto.unit.B2BUnitResponse;
 import com.delivera.dto.unit.UnitRequest;
 import com.delivera.dto.unit.UnitResponse;
 import com.delivera.service.UnitService;
@@ -26,6 +27,12 @@ public class UnitController {
     @GetMapping
     public ResponseEntity<List<UnitResponse>> list() {
         return ResponseEntity.ok(unitService.getByCompany());
+    }
+
+    @Operation(summary = "Listar unidades de otras empresas de la misma organización (B2B)")
+    @GetMapping("/external")
+    public ResponseEntity<List<B2BUnitResponse>> listExternal() {
+        return ResponseEntity.ok(unitService.getExternalUnits());
     }
 
     @Operation(summary = "Crear unidad operativa")

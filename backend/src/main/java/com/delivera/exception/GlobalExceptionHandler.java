@@ -146,6 +146,20 @@ public class GlobalExceptionHandler {
                 .body(new ValidationErrorResponse("VALIDATION_ERROR", errors));
     }
 
+    @ExceptionHandler(OrderAlreadyClaimedException.class)
+    public ResponseEntity<ErrorResponse> handleOrderAlreadyClaimed(OrderAlreadyClaimedException ex) {
+        log.warn("Order already claimed");
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("ORDER_ALREADY_CLAIMED"));
+    }
+
+    @ExceptionHandler(OrderClaimEmailMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleOrderClaimEmailMismatch(OrderClaimEmailMismatchException ex) {
+        log.warn("Order claim email mismatch");
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("ORDER_CLAIM_EMAIL_MISMATCH"));
+    }
+
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex) {
         log.warn("Forbidden access: {}", ex.getMessage());
