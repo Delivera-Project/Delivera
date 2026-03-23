@@ -25,10 +25,14 @@ const newStatus = ref('')
 const statusNote = ref('')
 const activeTab = ref(0)
 
-const viteEnvBase = `${import.meta.env.VITE_APP_URL || window.location.origin}`
+const viteEnvBase = `${import.meta.env.VITE_APP_URL || globalThis.location?.origin || ''}`
 
-function copyTrackingUrl(token) {
-  navigator.clipboard.writeText(`${viteEnvBase}/track/${token}`)
+async function copyTrackingUrl(token) {
+  try {
+    await navigator.clipboard.writeText(`${viteEnvBase}/track/${token}`)
+  } catch {
+    // clipboard not available (non-secure context or permission denied)
+  }
 }
 
 const availableNextStatuses = computed(() => order.value ? getNextStatuses(order.value.status) : [])

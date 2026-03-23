@@ -133,7 +133,7 @@ public class AuthService {
         }
 
         String email = request.email().toLowerCase().trim();
-        if (!email.equalsIgnoreCase(order.getRecipientEmail())) {
+        if (!email.equals(order.getRecipientEmail())) {
             throw new OrderClaimEmailMismatchException();
         }
 
@@ -159,7 +159,7 @@ public class AuthService {
         orderRepository.save(order);
 
         String jwtToken = jwtService.generateToken(user.getEmail());
-        return new LoginResponse(jwtToken, user.getEmail(), null, "LOYAL_USER", null, null, null);
+        return new LoginResponse(jwtToken, user.getEmail(), null, WorkerRole.LOYAL_USER.name(), null, null, null);
     }
 
     private User buildUser(String email, String username, String firstName, String lastName, String phone, String password) {

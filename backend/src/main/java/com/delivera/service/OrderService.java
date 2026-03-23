@@ -57,7 +57,7 @@ public class OrderService {
     public OrderResponse create(OrderRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
 
-        boolean isB2B = "B2B".equals(request.orderType());
+        boolean isB2B = request.orderType() == OrderType.B2B;
         boolean isExternal = request.destinationId() == null;
 
         var origin = unitRepository.findByIdAndCompanyId(request.originId(), companyId)

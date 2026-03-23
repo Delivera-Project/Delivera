@@ -142,10 +142,10 @@ onMounted(() => { loadConfig(); fetchOrder() })
   margin-top: 4px;
   border: 2px solid currentColor;
 }
-.dot-pending { color: #f59e0b; background: #fef3c7; }
-.dot-in_transit { color: #3b82f6; background: #dbeafe; }
-.dot-delivered { color: #10b981; background: #d1fae5; }
-.dot-cancelled { color: #ef4444; background: #fee2e2; }
+.dot-pending { color: #d97706; background: #fef3c7; }
+.dot-in_transit { color: #2563eb; background: #dbeafe; }
+.dot-delivered { color: #059669; background: #d1fae5; }
+.dot-cancelled { color: #dc2626; background: #fee2e2; }
 .timeline-content { flex: 1; }
 .timeline-status { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .timeline-date { font-size: 12px; color: #94a3b8; }

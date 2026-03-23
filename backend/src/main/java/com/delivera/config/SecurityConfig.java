@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/orders/public/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("GLOBAL_ADMIN")
                         .requestMatchers("/api/v1/settings/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/units/external").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
                         .requestMatchers(HttpMethod.POST, "/api/v1/units").hasRole(ROLE_COMPANY_ADMIN)
                         .requestMatchers(HttpMethod.PUT, "/api/v1/units/**").hasRole(ROLE_COMPANY_ADMIN)
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/units/**").hasRole(ROLE_COMPANY_ADMIN)

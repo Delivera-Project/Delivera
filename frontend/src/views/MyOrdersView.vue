@@ -37,7 +37,7 @@ onMounted(async () => {
 
     <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
-    <DataTable :value="orders" :loading="loading" striped-rows row-hover @row-click="e => router.push(`/my-orders/detail?q=${e.data.reference}`)">
+    <DataTable :value="orders" :loading="loading" striped-rows row-hover @row-click="e => router.push({ path: '/my-orders/detail', query: { q: e.data.reference } })">
       <template #empty>
         <div class="empty-state">
           <i class="pi pi-inbox empty-icon" />

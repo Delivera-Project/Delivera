@@ -112,4 +112,11 @@ class PublicOrderResponseTest {
         PublicOrderResponse response = PublicOrderResponse.from(order);
         assertThat(response.recipientEmailHint()).isNull();
     }
+
+    @Test
+    void hint_invalidEmailNoAt_returnsAsterisks() {
+        Order order = buildB2cOrder("invalidemail", "abc123");
+        PublicOrderResponse response = PublicOrderResponse.from(order);
+        assertThat(response.recipientEmailHint()).isEqualTo("***");
+    }
 }

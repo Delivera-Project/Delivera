@@ -171,7 +171,7 @@ onMounted(() => {
             <i class="pi pi-lock" />
             <div>
               <div class="claimed-notice-title">{{ t('tracking.alreadyClaimed') }}</div>
-              <a class="claimed-notice-link" href="/">{{ t('tracking.signInToView') }}</a>
+              <RouterLink class="claimed-notice-link" to="/">{{ t('tracking.signInToView') }}</RouterLink>
             </div>
           </div>
         </template>
@@ -191,21 +191,21 @@ onMounted(() => {
             <form class="claim-form" @submit.prevent="submitClaim">
               <div class="claim-row">
                 <div class="claim-field">
-                  <label>{{ t('tracking.claim.firstName') }}</label>
-                  <PInputText v-model="claimFirstName" required fluid />
+                  <label for="claim-first-name">{{ t('tracking.claim.firstName') }}</label>
+                  <PInputText id="claim-first-name" v-model="claimFirstName" required fluid />
                 </div>
                 <div class="claim-field">
-                  <label>{{ t('tracking.claim.lastName') }}</label>
-                  <PInputText v-model="claimLastName" required fluid />
+                  <label for="claim-last-name">{{ t('tracking.claim.lastName') }}</label>
+                  <PInputText id="claim-last-name" v-model="claimLastName" required fluid />
                 </div>
               </div>
               <div class="claim-field">
-                <label>{{ t('tracking.claim.email') }}</label>
-                <PInputText v-model="claimEmail" type="email" required fluid />
+                <label for="claim-email">{{ t('tracking.claim.email') }}</label>
+                <PInputText id="claim-email" v-model="claimEmail" type="email" required fluid />
               </div>
               <div class="claim-field">
-                <label>{{ t('tracking.claim.password') }}</label>
-                <PPassword v-model="claimPassword" :feedback="false" toggle-mask required fluid />
+                <label for="claim-password">{{ t('tracking.claim.password') }}</label>
+                <PPassword id="claim-password" v-model="claimPassword" :feedback="false" toggle-mask required fluid />
               </div>
               <PMessage v-if="claimError" severity="error" :closable="false" class="claim-msg">{{ claimError }}</PMessage>
               <PButton

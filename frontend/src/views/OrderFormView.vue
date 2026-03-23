@@ -46,8 +46,8 @@ const priorityOptions = computed(() => [
     <template v-else>
       <!-- Tipo de pedido -->
       <div class="form-field">
-        <label>{{ t('orders.orderType') }}</label>
-        <SelectButton v-model="orderType" :options="typeOptions" option-label="label" option-value="value" />
+        <label for="order-type">{{ t('orders.orderType') }}</label>
+        <SelectButton id="order-type" v-model="orderType" :options="typeOptions" option-label="label" option-value="value" />
       </div>
 
       <!-- Origen (siempre) -->
