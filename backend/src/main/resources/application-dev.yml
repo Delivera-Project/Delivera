@@ -16,3 +16,5 @@ app:
   jwt:
     secret: delivera-jwt-secret-key-para-desarrollo
     expiration: 86400
+  cors:
+    allowed-origins: http://localhost:3000

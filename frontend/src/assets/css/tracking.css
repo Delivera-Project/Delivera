@@ -1,0 +1,58 @@
+/* === Vista pública de tracking === */
+
+.tracking-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+}
+
+.tracking-card {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 0 4px 24px rgba(0,0,0,.07);
+}
+
+.tracking-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 24px;
+}
+.tracking-brand .pi { font-size: 22px; color: #3b82f6; }
+
+.tracking-card h1 { margin: 0 0 8px; font-size: 22px; }
+.tracking-subtitle { color: #64748b; margin: 0 0 20px; }
+.search-row { display: flex; gap: 10px; margin-bottom: 20px; }
+.tracking-loading { display: flex; justify-content: center; padding: 40px; color: #94a3b8; }
+
+.tracking-summary { display: flex; align-items: center; gap: 12px; margin: 20px 0 16px; }
+.tracking-ref { font-size: 20px; font-weight: 700; color: #1e293b; }
+
+.tracking-info {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.info-row { display: flex; justify-content: space-between; font-size: 14px; }
+.info-row .info-label { color: #94a3b8; }
+
+.tracking-timeline h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}

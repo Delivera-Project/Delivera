@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import TrackingView from '@/views/TrackingView.vue'
+import TrackingView from '@/views/public/TrackingView.vue'
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 

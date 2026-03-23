@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
-import MyOrderDetailView from '@/views/MyOrderDetailView.vue'
+import MyOrderDetailView from '@/views/orders/MyOrderDetailView.vue'
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 

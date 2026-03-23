@@ -26,7 +26,13 @@ import 'primeicons/primeicons.css'
 import App from './App.vue'
 import router from './router'
 import i18n from './i18n'
+import EmptyState from './components/EmptyState.vue'
+import TimelineList from './components/TimelineList.vue'
 import './assets/main.css'
+import './assets/css/detail.css'
+import './assets/css/list.css'
+import './assets/css/forms.css'
+import './assets/css/tracking.css'
 
 const DeliverPreset = definePreset(Aura, {
   semantic: {
@@ -77,5 +83,7 @@ app.component('SelectButton', SelectButton)
 app.component('PAvatar', Avatar)
 app.component('PSkeleton', Skeleton)
 app.directive('tooltip', Tooltip)
+app.component('EmptyState', EmptyState)
+app.component('TimelineList', TimelineList)
 
 app.mount('#app')

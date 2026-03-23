@@ -46,7 +46,7 @@ onMounted(async () => {
       text
       severity="secondary"
       icon="pi pi-arrow-left"
-      class="back-btn"
+      class="detail-back-btn"
       @click="router.push('/loyal-users')"
     />
 
@@ -73,10 +73,7 @@ onMounted(async () => {
 
       <DataTable :value="orders" striped-rows row-hover @row-click="e => router.push(`/orders/${e.data.id}`)">
         <template #empty>
-          <div class="empty-state">
-            <i class="pi pi-send empty-icon" />
-            <p>{{ t('loyalUsers.ordersEmpty') }}</p>
-          </div>
+          <EmptyState icon="pi-send" :message="t('loyalUsers.ordersEmpty')" />
         </template>
         <Column field="reference" :header="t('orders.reference')" style="font-weight:600;width:170px" />
         <Column :header="t('orders.statusLabel')" style="width:130px">
@@ -95,13 +92,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.back-btn { margin-bottom: 16px; }
-.loading-state { display: flex; justify-content: center; padding: 60px; color: #94a3b8; }
 .lu-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
 .lu-avatar { width: 56px; height: 56px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #64748b; }
 .lu-header h1 { margin: 0 0 6px; }
 .section-title { font-size: 13px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin: 0 0 12px; }
-.empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 24px; color: #94a3b8; }
-.empty-icon { font-size: 40px; opacity: 0.4; }
-.empty-state p { margin: 0; font-size: 14px; }
 </style>

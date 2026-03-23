@@ -32,7 +32,7 @@ onMounted(load)
 
 <template>
   <div class="card card-wide">
-    <div class="header-row">
+    <div class="list-header">
       <h1>{{ t('loyalUsers.title') }}</h1>
     </div>
 
@@ -40,10 +40,7 @@ onMounted(load)
 
     <DataTable :value="loyalUsers" :loading="loading" striped-rows row-hover @row-click="e => router.push(`/loyal-users/${e.data.id}`)">
       <template #empty>
-        <div class="empty-state">
-          <i class="pi pi-users empty-icon" />
-          <p>{{ t('loyalUsers.empty') }}</p>
-        </div>
+        <EmptyState icon="pi-users" :message="t('loyalUsers.empty')" />
       </template>
       <Column field="email" :header="t('loyalUsers.email')" />
       <Column :header="t('loyalUsers.orders')" style="width:130px">
@@ -68,12 +65,3 @@ onMounted(load)
   </div>
 </template>
 
-<style scoped>
-.header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.header-row h1 { margin: 0; }
-.add-form { background: #f8fafc; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
-.add-actions { display: flex; gap: 8px; }
-.empty-state { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 24px; color: #94a3b8; }
-.empty-icon { font-size: 40px; opacity: 0.4; }
-.empty-state p { margin: 0; font-size: 14px; }
-</style>

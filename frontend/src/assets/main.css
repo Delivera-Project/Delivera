@@ -480,18 +480,6 @@ body {
   display: block;
 }
 
-/* === Unidades: cabecera === */
-.units-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.units-header h1 {
-  margin: 0;
-}
-
 /* === Selector de tipo de unidad (SelectButton) === */
 .unit-type-selector {
   display: flex;

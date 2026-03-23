@@ -36,7 +36,7 @@ onMounted(async () => {
       text
       severity="secondary"
       icon="pi pi-arrow-left"
-      class="back-btn"
+      class="detail-back-btn"
       @click="router.push('/units')"
     />
 
@@ -47,7 +47,7 @@ onMounted(async () => {
     <PMessage v-else-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
     <template v-else-if="unit">
-      <h1 class="detail-name">{{ unit.name }}</h1>
+      <h1 class="detail-title">{{ unit.name }}</h1>
 
       <div class="detail-badges">
         <div class="badge-group">
@@ -78,48 +78,5 @@ onMounted(async () => {
 
 <style scoped>
 .card { text-align: left; }
-.back-btn { margin-bottom: 16px; }
-.loading-state { display: flex; justify-content: center; padding: 60px; color: #94a3b8; }
-
-.detail-name {
-  margin: 0 0 16px;
-  font-size: 22px;
-  font-weight: 700;
-  text-align: center;
-}
-
-.detail-badges {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 24px;
-  margin-bottom: 20px;
-}
-
-.badge-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px 40px;
-  padding: 20px 0 24px;
-  border-top: 1px solid #f1f5f9;
-}
-
-.info-item--full { grid-column: 1 / -1; }
-.info-item { display: flex; flex-direction: column; gap: 5px; }
-
-.info-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #94a3b8;
-}
-
-.info-value { font-size: 15px; font-weight: 500; color: #1e293b; }
+.info-grid { border-top: 1px solid #f1f5f9; border-bottom: none; }
 </style>
