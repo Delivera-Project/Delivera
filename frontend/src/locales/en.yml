@@ -10,6 +10,11 @@ auth:
   hasAccount: Already have an account?
   signUp: Sign up
   signIn: Sign in
+  chooseAccountType: How do you want to use Delivera?
+  individualTitle: Personal access
+  individualDesc: Track your orders and manage your account
+  companyTitle: Register a company
+  companyDesc: Manage shipments, workers and operational units
 
 profile:
   title: My profile
@@ -19,40 +24,273 @@ profile:
   changePassword: Change password
   updated: Profile updated successfully
   passwordChanged: Password updated successfully
+  memberSince: Member since
+  language: Language
 
 fields:
   email: Email
+  emailPlaceholder: "admin{'@'}company.com"
+  emailPersonalPlaceholder: "e.g: your{'@'}email.com"
+  loginIdentifier: Email or username
+  loginIdentifierPlaceholder: "your{'@'}email.com or your_username"
   password: Password
+  passwordHint: "Min. 8 chars, uppercase and number"
   confirmPassword: Confirm password
   currentPassword: Current password
   newPassword: New password
+  fullName: Full name
+  username: Username
+  usernamePlaceholder: "e.g: john_smith"
+  usernameHint: "At least 3 characters, only lowercase letters, numbers, hyphens and underscores"
   firstName: First name
   lastName: Last name
   phone: Phone
+  phonePlaceholder: "+1 555 000 0000"
+  fullNamePlaceholder: "E.g: John Smith"
   empty: "—"
+  orgName: Organization name
+  orgNamePlaceholder: "E.g: Acme Group"
+  orgCode: Organization code
+  orgCodePlaceholder: "acme-group"
+  orgCodeHint: "Workers will use this code to identify the organization when signing in"
+  companyName: Company name
+  organization: Organization
+  type: Type
+  company: Destination company
+  unitName: Unit name
+  unitNamePlaceholder: "E.g: Main Warehouse"
+  address: Address
+  addressPlaceholder: "E.g: 1 Main St, Madrid"
+  latitude: Latitude
+  latitudePlaceholder: "40.4168"
+  longitude: Longitude
+  longitudePlaceholder: "-3.7038"
+  companyNamePlaceholder: "E.g: Acme Logistics"
 
 notFound:
   message: The page you are looking for does not exist
   goHome: Go to home
 
+register:
+  orgTitle: Create organization
+  companyTitle: Register company
+  orgSubtitle: Set the name and access code for your organization
+  companySubtitle: Your company details within the organization
+  accountSubtitle: Admin account details
+  stepOrg: Organization
+  stepCompany: Company
+  stepAccount: Account
+  createCompany: Create company
+  registerUserTitle: Register user
+
+activity:
+  industry: Industry
+  distribution: Distribution
+  food: Food
+  retail: Retail
+  transport: Transport
+  other: Other
+
+units:
+  title: Operational units
+  new: New unit
+  edit: Edit unit
+  detail: Unit details
+  created: Unit created successfully
+  updated: Unit updated successfully
+  empty: No operational units yet. Create the first one to start managing shipments.
+  deleteConfirm: Delete this unit?
+  deleteActiveOrders: Cannot delete unit because it has associated orders.
+  filterAll: All
+  noCoords: No coordinates
+  WAREHOUSE: Warehouse
+  STORE: Store
+  FACTORY: Factory
+  LOGISTICS_CENTER: Logistics center
+
+orders:
+  listTitle: Orders
+  title: New order
+  new: New order
+  subtitle: Create an internal shipment between two units of your company
+  subtitleExternal: Create a shipment to an external recipient
+  created: "Order created: {reference}"
+  empty: No orders yet. Create the first one using the button above.
+  reference: Reference
+  route: Route
+  statusLabel: Status
+  priorityLabel: Priority
+  date: Date
+  origin: Origin unit
+  originPlaceholder: Select origin unit
+  destination: Destination unit
+  destinationPlaceholder: Select destination unit
+  recipientEmail: Recipient email
+  recipientEmailPlaceholder: "recipient{'@'}example.com"
+  recipientName: Recipient name
+  recipientNamePlaceholder: "E.g: John Smith"
+  externalOrder: External shipment
+  orderType: Order type
+  type:
+    INTERNAL: Internal transfer
+    B2C: B2C — Individual
+    B2B: B2B — Business
+  destinationCompany: Destination company
+  destinationCompanyPlaceholder: Select destination company
+  destinationUnit: Destination unit
+  destinationUnitPlaceholder: Select destination unit
+  trackingUrl: Tracking URL
+  trackingUrlHint: Share this link with the recipient so they can track the order
+  claimed: Order claimed
+  claimedHint: The recipient has already linked their account to this order
+  loyalUserExists: Known loyal user
+  notes: Notes
+  notesPlaceholder: Additional instructions (optional)
+  noUnits: Not enough units. Create at least two operational units first.
+  sameUnit: Origin and destination must be different units
+  timeline: Status history
+  updateStatus: Update status
+  newStatus: New status
+  statusNote: Note (optional)
+  statusNotePlaceholder: Reason for status change...
+  statusUpdated: Status updated successfully
+  filterAll: All
+  deleteConfirm: Delete this order?
+  details: Details
+  priority:
+    label: Priority
+    HIGH: HIGH
+    NORMAL: NORMAL
+    LOW: LOW
+  status:
+    PENDING: Pending
+    IN_TRANSIT: In transit
+    DELIVERED: Delivered
+    CANCELLED: Cancelled
+
+tracking:
+  title: Order tracking
+  searchTitle: Track an order
+  searchPlaceholder: "E.g: DEL-20240101-0001"
+  search: Search
+  notFound: No order found with that reference
+  company: Company
+  origin: Origin
+  destination: Destination
+  recipient: Recipient
+  noEvents: No status updates yet
+  claim:
+    title: "Is this your order?"
+    description: "Create an account to track all your shipments in one place."
+    emailHint: "Email associated with this order: {hint}"
+    firstName: First name
+    lastName: Last name
+    email: Email address
+    password: Password
+    submit: Create account and sign in
+    alreadyClaimed: This order already has a registered account.
+    emailMismatch: The email does not match the order recipient's email.
+    emailExists: This email already has an account. Sign in to view your orders.
+  alreadyClaimed: This order has already been claimed by its recipient.
+  signInToView: Sign in to view your orders
+
+loyalUsers:
+  title: Loyal users
+  new: Add loyal user
+  empty: No loyal users with orders yet.
+  email: Email
+  registered: Registered
+  notRegistered: Not registered
+  added: Loyal user added successfully
+  orders: Received orders
+  since: Customer since
+  ordersEmpty: This loyal user has no orders yet.
+
+myOrders:
+  title: My orders
+  empty: You have no received orders yet.
+
+nav:
+  profile: My profile
+  units: Units
+  orders: Orders
+  loyalUsers: Loyal users
+  myOrders: My orders
+  settings: Settings
+
+common:
+  back: Back
+  next: Next
+  loading: Loading...
+  save: Save
+  cancel: Cancel
+  delete: Delete
+  filters: "Filters:"
+
 validation:
   required: "{field} is required"
+  activityTypeRequired: Please select an activity type
   email: The email format is not valid
   minLength: "{field} must be at least {min} characters"
   maxLength: "{field} cannot exceed {max} characters"
   passwordsDoNotMatch: Passwords do not match
   passwordStrength: Password must include uppercase, lowercase and a number
+  coordinatesIncomplete: Latitude and longitude must both be provided together
+  coordinatesInvalid: Coordinates out of range (lat -90–90, lon -180–180)
+  orgCodeRequired: Enter an organization code
+  orgCodeInvalid: "Only lowercase letters, numbers and hyphens (cannot start or end with a hyphen)"
+  orgCodeTaken: This code is already in use, please choose another
 
 error:
   connection: Connection error with the server
-  invalidCredentials: Incorrect email or password
+  invalidCredentials: Incorrect credentials
   registerFailed: Registration failed
   saveFailed: Failed to save
   passwordChangeFailed: Failed to change password
-  INVALID_CREDENTIALS: Incorrect email or password
+  INVALID_CREDENTIALS: Incorrect credentials
   USER_NOT_FOUND: User not found
   EMAIL_ALREADY_EXISTS: Email is already registered
+  USERNAME_ALREADY_EXISTS: Username is already taken
   CURRENT_PASSWORD_INVALID: Current password is incorrect
   NEW_PASSWORD_SAME_AS_CURRENT: New password cannot be the same as the current one
   VALIDATION_ERROR: Validation error
   INTERNAL_ERROR: Internal server error
+  HANDLE_CONFLICT: This organization code is already in use
+  handleInvalid: "Only lowercase letters, numbers and hyphens (cannot start or end with a hyphen)"
+  UNIT_NAME_CONFLICT: A unit with that name already exists in this company
+  UNIT_NOT_FOUND: Unit not found
+  ORDER_NOT_FOUND: Order not found
+  INVALID_STATUS_TRANSITION: Status transition not allowed
+  LOYAL_USER_ALREADY_EXISTS: This email is already registered as a loyal user in your company
+  INVALID_ORDER_UNITS: Selected units are not valid for this order
+  COMPANY_HAS_ACTIVE_ORDERS: Cannot delete company because it has active orders
+  FORBIDDEN: Unauthorized access
+  DATA_INTEGRITY_ERROR: Data integrity error
+  COMPANY_CONTEXT_MISSING: No company context in session
+
+orgSelect:
+  title: Select your organization
+  subtitle: "Your credentials are valid in multiple organizations. Choose which one you want to work with now."
+  search: Search organization...
+  noResults: No organization found with that name
+
+settings:
+  title: Settings
+  orgSection: Organization
+  companySection: Company
+  orgCode: Organization code
+  orgCodeHint: "Workers use this code to identify the organization when signing in"
+  orgCodeCopied: Code copied to clipboard
+  editOrg: Edit organization
+  editCompany: Edit company
+  addCompany: Add company
+  newCompany: New company in this organization
+  saved: Saved successfully
+  addCompanySuccess: Company created successfully
+  myCompanies: My companies
+  switchCompany: Switch company
+  current: Current
+  deleteCompany: Delete company
+  deleteConfirm: "Are you sure you want to delete this company?"
+  deleteActiveOrdersTitle: "This company has active orders"
+  deleteActiveOrdersHint: "Deleting it will also remove all its orders and data. Continue anyway?"

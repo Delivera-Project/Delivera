@@ -7,7 +7,6 @@ export function useApi() {
   const router = useRouter()
   const { t, te } = useI18n()
 
-  // Función que devuelve el código de error traducido con i18n
   function translateError(data, fallbackKey) {
     if (data?.code && te(`error.${data.code}`)) {
       return t(`error.${data.code}`)
@@ -19,7 +18,6 @@ export function useApi() {
   }
 
 
-  // Realiza la request a la API junto al header y el token JWT
   async function request(endpoint, options = {}) {
     const headers = { 'Content-Type': 'application/json', ...options.headers }
 
@@ -41,22 +39,33 @@ export function useApi() {
     return response
   }
 
-  // Peticiones GET
   async function get(endpoint) {
     return request(endpoint)
   }
 
-  // Peticiones POST
   async function post(endpoint, body) {
     return request(endpoint, { method: 'POST', body: JSON.stringify(body) })
   }
 
-  // Peticiones PUT
   async function put(endpoint, body) {
     return request(endpoint, { method: 'PUT', body: JSON.stringify(body) })
   }
 
-  // TODO: Se pueden ir añadiendo más peticiones
+  async function patch(endpoint, body) {
+    return request(endpoint, { method: 'PATCH', body: JSON.stringify(body) })
+  }
 
-  return { get, post, put, translateError }
+  async function del(endpoint) {
+    return request(endpoint, { method: 'DELETE' })
+  }
+
+  return { get, post, put, patch, del, translateError }
+}
+
+export async function fetchPublicOrder(reference) {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/api/v1/orders/public/search?reference=${encodeURIComponent(reference)}`
+  )
+  if (!res.ok) throw new Error('not_found')
+  return res.json()
 }

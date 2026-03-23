@@ -10,6 +10,11 @@ auth:
   hasAccount: "¿Ya tienes cuenta?"
   signUp: Regístrate
   signIn: Inicia sesión
+  chooseAccountType: "¿Cómo quieres usar Delivera?"
+  individualTitle: Acceso personal
+  individualDesc: Consulta tus pedidos y gestiona tu cuenta
+  companyTitle: Registrar empresa
+  companyDesc: Gestiona envíos, trabajadores y unidades operativas
 
 profile:
   title: Mi perfil
@@ -19,40 +24,273 @@ profile:
   changePassword: Cambiar contraseña
   updated: Perfil actualizado correctamente
   passwordChanged: Contraseña actualizada correctamente
+  memberSince: Miembro desde
+  language: Idioma
 
 fields:
   email: Correo
+  emailPlaceholder: "admin{'@'}empresa.com"
+  emailPersonalPlaceholder: "ej: tu{'@'}correo.com"
+  loginIdentifier: Correo o nombre de usuario
+  loginIdentifierPlaceholder: "tu{'@'}correo.com o tu_usuario"
   password: Contraseña
+  passwordHint: "Mín. 8 caracteres, mayúscula y número"
   confirmPassword: Confirmar contraseña
   currentPassword: Contraseña actual
   newPassword: Nueva contraseña
+  fullName: Nombre completo
+  username: Nombre de usuario
+  usernamePlaceholder: "ej: juan_garcia"
+  usernameHint: "Mínimo 3 caracteres, solo letras minúsculas, números, guiones y guiones bajos"
   firstName: Nombre
   lastName: Apellidos
   phone: Teléfono
+  phonePlaceholder: "+34 600 000 000"
+  fullNamePlaceholder: "Ej: Juan García"
   empty: "—"
+  orgName: Nombre de la organización
+  orgNamePlaceholder: "Ej: Grupo Acme"
+  orgCode: Código de organización
+  orgCodePlaceholder: "grupo-acme"
+  orgCodeHint: "Lo usarán tus trabajadores para identificar la organización al iniciar sesión"
+  companyName: Nombre de la empresa
+  companyNamePlaceholder: "Ej: Acme Logística"
+  organization: Organización
+  type: Tipo
+  company: Empresa de destino
+  unitName: Nombre de la unidad
+  unitNamePlaceholder: "Ej: Almacén Central"
+  address: Dirección
+  addressPlaceholder: "Ej: Calle Mayor 1, Madrid"
+  latitude: Latitud
+  latitudePlaceholder: "40.4168"
+  longitude: Longitud
+  longitudePlaceholder: "-3.7038"
 
 notFound:
   message: La página que buscas no existe
   goHome: Volver al inicio
 
+register:
+  orgTitle: Crear organización
+  companyTitle: Registrar empresa
+  orgSubtitle: Define el nombre y el código de acceso de tu organización
+  companySubtitle: Datos de tu empresa dentro de la organización
+  accountSubtitle: Datos de tu cuenta de administrador
+  stepOrg: Organización
+  stepCompany: Empresa
+  stepAccount: Cuenta
+  createCompany: Crear empresa
+  registerUserTitle: Registrar usuario
+
+activity:
+  industry: Industria
+  distribution: Distribución
+  food: Alimentación
+  retail: Retail
+  transport: Transporte
+  other: Otro
+
+units:
+  title: Unidades operativas
+  new: Nueva unidad
+  edit: Editar unidad
+  detail: Detalles de la unidad
+  created: Unidad creada correctamente
+  updated: Unidad actualizada correctamente
+  empty: No hay unidades operativas. Crea la primera para poder gestionar envíos.
+  deleteConfirm: "¿Eliminar esta unidad?"
+  deleteActiveOrders: No se puede eliminar la unidad porque tiene pedidos asociados.
+  filterAll: Todos
+  noCoords: Sin coordenadas
+  WAREHOUSE: Almacén
+  STORE: Tienda
+  FACTORY: Fábrica
+  LOGISTICS_CENTER: Centro logístico
+
+orders:
+  listTitle: Pedidos
+  title: Nuevo pedido
+  new: Nuevo pedido
+  subtitle: Crea un envío interno entre dos unidades de tu empresa
+  subtitleExternal: Crea un envío hacia un destinatario externo
+  created: "Pedido creado: {reference}"
+  empty: No hay pedidos todavía. Crea el primero desde el botón de arriba.
+  reference: Referencia
+  route: Ruta
+  statusLabel: Estado
+  priorityLabel: Prioridad
+  date: Fecha
+  origin: Unidad de origen
+  originPlaceholder: Selecciona la unidad de origen
+  destination: Unidad de destino
+  destinationPlaceholder: Selecciona la unidad de destino
+  recipientEmail: Email del destinatario
+  recipientEmailPlaceholder: "destinatario{'@'}ejemplo.com"
+  recipientName: Nombre del destinatario
+  recipientNamePlaceholder: "Ej: Juan García"
+  externalOrder: Envío externo
+  orderType: Tipo de pedido
+  type:
+    INTERNAL: Traslado interno
+    B2C: B2C — Particular
+    B2B: B2B — Empresa
+  destinationCompany: Empresa de destino
+  destinationCompanyPlaceholder: Selecciona la empresa de destino
+  destinationUnit: Unidad de destino
+  destinationUnitPlaceholder: Selecciona la unidad de destino
+  trackingUrl: URL de seguimiento
+  trackingUrlHint: Comparte este enlace con el destinatario para que pueda seguir el pedido
+  claimed: Pedido reclamado
+  claimedHint: El destinatario ya tiene cuenta vinculada a este pedido
+  loyalUserExists: Usuario fidelizado conocido
+  notes: Notas
+  notesPlaceholder: Instrucciones adicionales (opcional)
+  noUnits: No hay suficientes unidades. Crea al menos dos unidades operativas primero.
+  sameUnit: El origen y el destino deben ser unidades diferentes
+  timeline: Historial de estados
+  updateStatus: Actualizar estado
+  newStatus: Nuevo estado
+  statusNote: Nota (opcional)
+  statusNotePlaceholder: Motivo del cambio de estado...
+  statusUpdated: Estado actualizado correctamente
+  filterAll: Todos
+  deleteConfirm: "¿Eliminar este pedido?"
+  details: Detalles
+  priority:
+    label: Prioridad
+    HIGH: ALTA
+    NORMAL: NORMAL
+    LOW: BAJA
+  status:
+    PENDING: Pendiente
+    IN_TRANSIT: En tránsito
+    DELIVERED: Entregado
+    CANCELLED: Cancelado
+
+tracking:
+  title: Seguimiento de pedido
+  searchTitle: Buscar pedido
+  searchPlaceholder: "Ej: DEL-20240101-0001"
+  search: Buscar
+  notFound: No se encontró ningún pedido con esa referencia
+  company: Empresa
+  origin: Origen
+  destination: Destino
+  recipient: Destinatario
+  noEvents: Sin movimientos registrados aún
+  claim:
+    title: "¿Es tu pedido?"
+    description: "Regístrate para consultar todos tus envíos en un solo lugar."
+    emailHint: "Email asociado al pedido: {hint}"
+    firstName: Nombre
+    lastName: Apellidos
+    email: Correo electrónico
+    password: Contraseña
+    submit: Crear cuenta y acceder
+    alreadyClaimed: Este pedido ya tiene una cuenta registrada.
+    emailMismatch: El correo no coincide con el del destinatario del pedido.
+    emailExists: Este correo ya tiene una cuenta. Inicia sesión para ver tus pedidos.
+  alreadyClaimed: Este pedido ya ha sido reclamado por su destinatario.
+  signInToView: Inicia sesión para ver tus pedidos
+
+loyalUsers:
+  title: Usuarios fidelizados
+  new: Añadir fidelizado
+  empty: No hay usuarios fidelizados con pedidos todavía.
+  email: Email
+  registered: Registrado
+  notRegistered: No registrado
+  added: Usuario fidelizado añadido correctamente
+  orders: Pedidos recibidos
+  since: Cliente desde
+  ordersEmpty: Este fidelizado no tiene pedidos todavía.
+
+myOrders:
+  title: Mis pedidos
+  empty: No tienes pedidos recibidos todavía.
+
+nav:
+  profile: Mi perfil
+  units: Unidades
+  orders: Pedidos
+  loyalUsers: Fidelizados
+  myOrders: Mis pedidos
+  settings: Configuración
+
+common:
+  back: Volver
+  next: Siguiente
+  loading: Cargando...
+  save: Guardar
+  cancel: Cancelar
+  delete: Eliminar
+  filters: "Filtros:"
+
 validation:
   required: "El campo {field} es obligatorio"
+  activityTypeRequired: Selecciona un tipo de actividad
   email: El correo no tiene un formato válido
   minLength: "{field} debe tener al menos {min} caracteres"
   maxLength: "{field} no puede superar {max} caracteres"
   passwordsDoNotMatch: Las contraseñas no coinciden
   passwordStrength: La contraseña debe incluir mayúscula, minúscula y número
+  coordinatesIncomplete: La latitud y la longitud deben indicarse juntas
+  coordinatesInvalid: Coordenadas fuera de rango (lat -90–90, lon -180–180)
+  orgCodeRequired: Introduce un código de organización
+  orgCodeInvalid: "Solo letras minúsculas, números y guiones (sin empezar ni terminar con guión)"
+  orgCodeTaken: Este código ya está en uso, elige otro
 
 error:
   connection: Error de conexión con el servidor
-  invalidCredentials: Correo o contraseña incorrectos
+  invalidCredentials: Credenciales incorrectas
   registerFailed: Error al registrarse
   saveFailed: Error al guardar
   passwordChangeFailed: Error al cambiar la contraseña
-  INVALID_CREDENTIALS: Correo o contraseña incorrectos
+  INVALID_CREDENTIALS: Credenciales incorrectas
   USER_NOT_FOUND: Usuario no encontrado
   EMAIL_ALREADY_EXISTS: El email ya está registrado
+  USERNAME_ALREADY_EXISTS: El nombre de usuario ya está en uso
   CURRENT_PASSWORD_INVALID: La contraseña actual es incorrecta
   NEW_PASSWORD_SAME_AS_CURRENT: La nueva contraseña no puede ser igual a la actual
   VALIDATION_ERROR: Error de validación
   INTERNAL_ERROR: Error interno del servidor
+  HANDLE_CONFLICT: Este código de organización ya está en uso
+  handleInvalid: "Solo letras minúsculas, números y guiones (sin empezar ni terminar con guión)"
+  UNIT_NAME_CONFLICT: Ya existe una unidad con ese nombre en la empresa
+  UNIT_NOT_FOUND: Unidad no encontrada
+  INVALID_ORDER_UNITS: Las unidades seleccionadas no son válidas para este pedido
+  ORDER_NOT_FOUND: Pedido no encontrado
+  INVALID_STATUS_TRANSITION: Transición de estado no permitida
+  LOYAL_USER_ALREADY_EXISTS: Este email ya está registrado como fidelizado en tu empresa
+  COMPANY_HAS_ACTIVE_ORDERS: No se puede eliminar la empresa porque tiene pedidos activos
+  FORBIDDEN: Acceso no autorizado
+  DATA_INTEGRITY_ERROR: Error de integridad de datos
+  COMPANY_CONTEXT_MISSING: No hay contexto de empresa en la sesión
+
+orgSelect:
+  title: Selecciona tu organización
+  subtitle: "Tus credenciales son válidas en varias organizaciones. Elige con cuál quieres trabajar ahora."
+  search: Buscar organización...
+  noResults: No se encontró ninguna organización con ese nombre
+
+settings:
+  title: Configuración
+  orgSection: Organización
+  companySection: Empresa
+  orgCode: Código de organización
+  orgCodeHint: "Los trabajadores usan este código para identificar la organización al iniciar sesión"
+  orgCodeCopied: Código copiado al portapapeles
+  editOrg: Editar organización
+  editCompany: Editar empresa
+  addCompany: Añadir empresa
+  newCompany: Nueva empresa en esta organización
+  saved: Guardado correctamente
+  addCompanySuccess: Empresa creada correctamente
+  myCompanies: Mis empresas
+  switchCompany: Cambiar empresa
+  current: Actual
+  deleteCompany: Eliminar empresa
+  deleteConfirm: "¿Seguro que quieres eliminar esta empresa?"
+  deleteActiveOrdersTitle: "Esta empresa tiene pedidos activos"
+  deleteActiveOrdersHint: "Si la eliminas, sus pedidos y datos también serán eliminados. ¿Continuar de todas formas?"

@@ -5,16 +5,17 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record UpdateProfileRequest(
+        @Size(min = 3, max = 50)
+        @Pattern(regexp = "^[a-z0-9_-]+$", message = "Username only allows lowercase letters, numbers, hyphens and underscores")
+        String username,
+
         @NotBlank
         @Size(max = 100)
         String firstName,
 
-        @NotBlank
         @Size(max = 100)
         String lastName,
 
-        @NotBlank
         @Size(max = 20)
-        @Pattern(regexp = "^\\+?[0-9][0-9\\s\\-()]{5,}$")
         String phone
 ) {}

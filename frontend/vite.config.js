@@ -10,7 +10,7 @@ import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
+    ...(process.env.NODE_ENV !== 'production' ? [vueDevTools()] : []),
     VueI18nPlugin({
       include: resolve(dirname(fileURLToPath(import.meta.url)), './src/locales/**'),
     }),
@@ -23,10 +23,10 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
+      '/api': { target: 'http://localhost:8080', changeOrigin: true },
+      '/swagger-ui': { target: 'http://localhost:8080', changeOrigin: true },
+      '/v3': { target: 'http://localhost:8080', changeOrigin: true },
+      '/webjars': { target: 'http://localhost:8080', changeOrigin: true },
     },
   },
 })

@@ -22,6 +22,15 @@ export default defineConfig([
     },
   },
 
+  {
+    files: ['playwright.config.js', 'e2e/**/*.js', '*.config.*'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+
   js.configs.recommended,
   ...pluginVue.configs['flat/essential'],
 

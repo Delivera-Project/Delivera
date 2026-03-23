@@ -2,7 +2,7 @@
   <img src=".github/assets/Delivera banner.png" alt="Delivera" />
 </p>
 
-Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y operaciones de múltiples empresas. 
+Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y operaciones de múltiples empresas.
 
 ---
 
@@ -11,15 +11,13 @@ Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y ope
 | Capa | Tecnologías |
 |---|---|
 | Backend | Java 21, Spring Boot 3.2, Tomcat 10.1 (embedded), Lombok |
-| ORM / Migraciones | Hibernate/JPA, Flyway |
-| Base de datos | PostgreSQL 16 (dev/prod), H2 (tests), HikariCP |
-| Autenticación | BCrypt (spring-security-crypto), JWT HS256 (jjwt 0.12) |
-| Frontend | Vue 3, Vite 7, Vue Router 4, Pinia |
-| Testing | Vitest, Vue Test Utils |
-| Linting / Formato | ESLint, Prettier, Oxlint |
+| ORM / Migraciones | Hibernate/JPA, Flyway (V24) |
+| Base de datos | PostgreSQL 16 |
+| Autenticación | Argon2 (Bouncy Castle), JWT HS256 (jjwt 0.12) |
+| Frontend | Vue 3, Vite 7, Vue Router 4, Pinia, Vue i18n |
+| Linting | ESLint, Oxlint |
 | Infraestructura | Docker, docker-compose |
 | Gestores de dependencias | Maven (backend), npm (frontend) |
-| IDE | VSCode (recomendado) |
 
 ## Estructura
 
@@ -27,19 +25,21 @@ Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y ope
 delivera/
 ├── backend/          Spring Boot — API REST
 ├── frontend/         Vue 3 — SPA
-└── docker/           docker-compose (PostgreSQL)
+├── docker/           docker-compose (PostgreSQL)
+└── scripts/          Scripts de seed de base de datos
 ```
 
 ## Requisitos
 
 - Java 21
 - Maven
-- Node.js >= 20 (si tienes nvm, el `.nvmrc` del frontend te pone la versión)
+- Node.js >= 20
 - Docker Desktop
+- `jq` (para los scripts de seed)
 
 ## Arranque local
 
-Abre tres consolas y ejecuta esto en este orden:
+Abre tres consolas y ejecuta en este orden:
 
 **1. Base de datos**
 
@@ -52,7 +52,7 @@ docker compose up -d
 
 ```bash
 cd backend
-mvn spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 **3. Frontend**
@@ -65,56 +65,80 @@ npm run dev
 
 ## Puertos
 
-| Servicio | Puerto | Dónde cambiarlo |
-|---|---|---|
-| PostgreSQL (host) | 5433 | `docker/docker-compose.yml` → `ports` (el número de la izquierda) |
-| Spring Boot | 8080 | `backend/src/main/resources/application-dev.yml` → añadir `server.port` |
-| Vite dev server | 3000 | `frontend/vite.config.js` → `server.port` |
+| Servicio | Puerto |
+|---|---|
+| PostgreSQL (host) | 5433 |
+| Spring Boot | 8080 |
+| Vite dev server | 3000 |
+| Swagger UI | http://localhost:8080/api/v1/swagger-ui.html |
 
-En desarrollo, Vite actúa de proxy y reenvía las peticiones a `/api/*` directamente al backend, así que no hace falta configurar nada de CORS. Si cambias el puerto de Spring Boot, actualiza también el `target` del proxy en `vite.config.js` para que apunte al nuevo puerto.
+El proxy de Vite reenvía `/api/*` al backend, por lo que no hace falta configurar CORS en desarrollo. Si cambias el puerto de Spring Boot, actualiza también el `target` del proxy en `vite.config.js`.
 
-### Base de datos (nombre, usuario y contraseña)
+### Base de datos
 
-Estos valores están en dos sitios:
+Las credenciales están en dos sitios sincronizados:
 
-- `docker/docker-compose.yml` → variables `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
-- `backend/src/main/resources/application-dev.yml` → `spring.datasource` (url, username, password)
+- `docker/docker-compose.yml` → `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
+- `backend/src/main/resources/application-dev.yml` → `spring.datasource`
 
-## API
+## Seed de datos
 
-### POST /api/auth/login
+Los scripts de seed se encuentran en `scripts/` y requieren que el backend esté arrancado:
 
-Recibe email y contraseña, y devuelve un JWT si las credenciales son correctas.
+```bash
+# 1. Datos iniciales (admin + organización)
+./scripts/seed-init.sh
 
-```json
-// Request
-{ "email": "admin@delivera.com", "password": "admin123" }
-
-// Response 200
-{ "email": "admin@delivera.com", "token": "<jwt>" }
-
-// Response 401
-{ "message": "Credenciales incorrectas" }
+# 2. Datos de demo encima
+./scripts/seed-demo.sh
 ```
 
-El token tiene una expiración de 24h. El secret para firmarlo está en `application-dev.yml`, bajo `app.jwt.secret`.
+**Credenciales por defecto del seed:**
 
-## Usuarios de ejemplo
+| Rol | Email | Contraseña |
+|---|---|---|
+| Admin empresa | `seed@delivera.com` | `Admin1234` |
+| Usuario fidelizado | `user@delivera.com` | `User1234` |
 
-Estos usuarios se crean automáticamente con la migración `V3__seed_users.sql` cuando se levanta la base de datos por primera vez.
+Se pueden sobreescribir con variables de entorno:
 
-| Email | Contraseña |
+```bash
+ADMIN_EMAIL=otro@email.com ADMIN_PASSWORD=MiPass1 ./scripts/seed-init.sh
+```
+
+`seed-demo.sh` crea una organización con 3 empresas, 8 unidades operativas, 8 fidelizados y 9 pedidos en distintos estados.
+
+## Tests
+
+```bash
+# Backend (H2 in-memory, no requiere PostgreSQL)
+cd backend && mvn test
+
+# Frontend — unitarios
+cd frontend && npm run test:unit
+
+# Frontend — E2E Playwright (no requiere backend)
+cd frontend && npx playwright test
+cd frontend && npx playwright test --grep @auth    # por tag
+```
+
+Tags E2E disponibles: `@auth` · `@navigation` · `@register` · `@profile` · `@units` · `@orders` · `@tracking`
+
+## CI/CD
+
+| Workflow | Cuándo se ejecuta |
 |---|---|
-| admin@delivera.com | admin123 |
-| usuario@delivera.com | usuario123 |
-
-## Migraciones
-
-Las migraciones las gestiona Flyway y están en `backend/src/main/resources/db/migration/`. Para añadir una nueva, crea un archivo con el nombre `V{n}__descripcion.sql`.
+| `ci.yml` | Push/PR a `main` o `develop` — build+test backend, lint+build frontend |
+| `playwright.yml` | PR + `workflow_dispatch` — 44 tests E2E en Chromium |
+| `sonar.yml` | PR a `main`/`develop` — SonarCloud quality gate |
+| `pr-title.yml` | PR — valida formato `tipo/descripcion` en el título |
+| `pr-branch.yml` | PR — valida nombre de rama `tipo/descripcion` |
+| `pr-commits.yml` | PR — valida mensajes de commit (Conventional Commits) |
+| `release.yml` | `workflow_dispatch` manual — crea tag git + GitHub Release con changelog |
 
 ## Producción
 
-Para producción, activa el perfil `prod` con `SPRING_PROFILES_ACTIVE=prod`. Estas variables de entorno tienen que estar definidas en el sistema y **no deben subirse al repositorio**:
+Activa el perfil `prod` con `SPRING_PROFILES_ACTIVE=prod`. Variables de entorno requeridas:
 
 | Variable | Uso |
 |---|---|
@@ -123,4 +147,8 @@ Para producción, activa el perfil `prod` con `SPRING_PROFILES_ACTIVE=prod`. Est
 | `DATABASE_PASSWORD` | Contraseña de la base de datos |
 | `JWT_SECRET` | Secret para firmar los tokens JWT |
 
-`application-prod.yml` las recoge automáticamente.
+## Migraciones
+
+Flyway gestiona el esquema desde `backend/src/main/resources/db/migration/`. Versión actual: **V24**. Para añadir una nueva migración, crea un archivo `V{n}__descripcion.sql`.
+
+Las migraciones V1–V6 cubren la infraestructura base; V7–V18 el multi-tenant, pedidos y fidelizados; V19–V22 configuración extensible (status, prioridad, roles); V23 completa filas de `worker_role_config`; V24 renombra `slug` → `handle` en `organizations`.

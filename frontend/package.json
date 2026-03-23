@@ -8,6 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
@@ -15,13 +18,17 @@
   },
   "dependencies": {
     "@intlify/unplugin-vue-i18n": "^11.0.3",
+    "@primevue/themes": "^4.5.4",
     "pinia": "^3.0.4",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.5.4",
     "vue": "^3.5.27",
     "vue-i18n": "^11.2.8",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@playwright/test": "^1.58.2",
     "@vitejs/plugin-vue": "^6.0.3",
     "@vitest/eslint-plugin": "^1.6.6",
     "@vue/test-utils": "^2.4.6",
@@ -35,6 +42,7 @@
     "oxlint": "~1.42.0",
     "prettier": "3.8.1",
     "vite": "^7.3.1",
+    "@vitest/coverage-v8": "^4.0.18",
     "vite-plugin-vue-devtools": "^8.0.5",
     "vitest": "^4.0.18"
   },
