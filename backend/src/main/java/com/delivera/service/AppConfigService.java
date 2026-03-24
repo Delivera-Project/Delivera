@@ -11,9 +11,12 @@ import java.util.List;
 @Service
 public class AppConfigService {
 
-    @Autowired private OrderStatusConfigRepository statusConfigRepository;
-    @Autowired private OrderPriorityConfigRepository priorityConfigRepository;
-    @Autowired private WorkerRoleConfigRepository roleConfigRepository;
+    @Autowired
+    private OrderStatusConfigRepository statusConfigRepository;
+    @Autowired
+    private OrderPriorityConfigRepository priorityConfigRepository;
+    @Autowired
+    private WorkerRoleConfigRepository roleConfigRepository;
 
     public AppConfigResponse getConfig() {
         List<OrderStatusConfigDto> statuses = statusConfigRepository.findAllByOrderBySortOrderAsc()

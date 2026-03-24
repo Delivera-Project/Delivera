@@ -18,7 +18,7 @@ reviews:
     - path: "backend/**/*.java"
       instructions: |
         Revisa siguiendo las convenciones del proyecto:
-        - DTOs como Java Records con Bean Validation
+        - DTOs de entrada: Java Records con Bean Validation. DTOs de salida: clases Lombok (@Getter @Setter @NoArgsConstructor)
         - Excepciones personalizadas gestionadas por GlobalExceptionHandler
         - Seguridad: verifica que los endpoints estén correctamente protegidos según el rol
         - Migraciones Flyway: comprueba que los cambios de esquema tienen su V-migración correspondiente
@@ -34,7 +34,7 @@ reviews:
         Verifica que el store sigue el patrón Pinia del proyecto (un store por dominio).
     - path: "**/*.sql"
       instructions: |
-        Verifica que la migración Flyway sigue la numeración V7 en adelante y es compatible con PostgreSQL 16.
+        Verifica que la migración Flyway sigue la numeración correcta (sin saltos ni duplicados) y es compatible con PostgreSQL 16.
 
 chat:
   auto_reply: true

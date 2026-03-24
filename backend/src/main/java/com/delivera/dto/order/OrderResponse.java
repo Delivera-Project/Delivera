@@ -8,6 +8,7 @@ import java.util.UUID;
 public record OrderResponse(
         UUID id,
         String reference,
+        String orderType,
         UUID originId,
         String originName,
         UUID destinationId,
@@ -27,6 +28,7 @@ public record OrderResponse(
         return new OrderResponse(
                 order.getId(),
                 order.getReference(),
+                order.getOrderType().name(),
                 order.getOrigin().getId(),
                 order.getOrigin().getName(),
                 order.getDestination() != null ? order.getDestination().getId() : null,

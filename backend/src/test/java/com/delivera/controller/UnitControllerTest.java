@@ -18,8 +18,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UnitControllerTest {
 
-    @Mock private UnitService unitService;
-    @InjectMocks private UnitController unitController;
+    @Mock
+    private UnitService unitService;
+    @InjectMocks
+    private UnitController unitController;
 
     @Test
     void listExternal_returns200WithList() {

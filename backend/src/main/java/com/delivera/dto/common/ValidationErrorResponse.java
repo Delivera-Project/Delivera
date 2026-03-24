@@ -1,4 +1,4 @@
-package com.delivera.dto;
+package com.delivera.dto.common;
 
 import java.util.List;
 

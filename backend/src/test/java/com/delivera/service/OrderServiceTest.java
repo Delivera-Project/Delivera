@@ -1,6 +1,6 @@
 package com.delivera.service;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.order.OrderRequest;
 import com.delivera.model.OrderType;
 import com.delivera.dto.order.OrderStatusRequest;
@@ -27,13 +27,20 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    @Mock private OrderRepository orderRepository;
-    @Mock private OperationalUnitRepository unitRepository;
-    @Mock private CompanyRepository companyRepository;
-    @Mock private LoyalUserRepository loyalUserRepository;
-    @Mock private SecurityUtils securityUtils;
-    @Mock private AppConfigService appConfigService;
-    @InjectMocks private OrderService orderService;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private OperationalUnitRepository unitRepository;
+    @Mock
+    private CompanyRepository companyRepository;
+    @Mock
+    private LoyalUserRepository loyalUserRepository;
+    @Mock
+    private SecurityUtils securityUtils;
+    @Mock
+    private AppConfigService appConfigService;
+    @InjectMocks
+    private OrderService orderService;
 
     private UUID companyId;
     private Company company;
@@ -75,6 +82,7 @@ class OrderServiceTest {
         order.setDestination(destination);
         order.setStatus(OrderStatus.PENDING);
         order.setPriority(OrderPriority.NORMAL);
+        order.setOrderType(OrderType.INTERNAL);
     }
 
     @Test
@@ -176,7 +184,7 @@ class OrderServiceTest {
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
         when(orderRepository.nextReferenceSeq()).thenReturn(1L);
-        when(loyalUserRepository.findByCompanyIdAndEmail(companyId, "recipient@test.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "recipient@test.com")).thenReturn(Optional.empty());
         when(orderRepository.save(any())).thenReturn(order);
 
         assertThat(orderService.create(req)).isNotNull();

@@ -4,16 +4,23 @@
 .DS_Store
 *.local
 *.log
+hs_err_pid*.log
+replay_pid*.log
 
 # =====================
 # IDE
 # =====================
 .idea
+.metadata
+.sonarlint
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.settings/
+.classpath
+.project
 
 # =====================
 # BACKEND (Java/Maven)

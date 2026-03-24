@@ -1,6 +1,6 @@
 package com.delivera.controller;
 
-import com.delivera.dto.AvailabilityCheckResponse;
+import com.delivera.dto.common.AvailabilityCheckResponse;
 import com.delivera.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Organizaciones", description = "Endpoints públicos de organizaciones")
 public class OrganizationController {
 
-    @Autowired private AuthService authService;
+    @Autowired
+    private AuthService authService;
 
     @Operation(summary = "Comprobar disponibilidad de handle de organización")
     @GetMapping("/check-handle")

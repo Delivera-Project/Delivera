@@ -17,9 +17,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrderControllerTest {
 
-    @Mock private OrderService orderService;
-    @Mock private AuthService authService;
-    @InjectMocks private OrderController orderController;
+    @Mock
+    private OrderService orderService;
+    @Mock
+    private AuthService authService;
+    @InjectMocks
+    private OrderController orderController;
 
     @Test
     void claimRegister_returns201WithLoginResponse() {

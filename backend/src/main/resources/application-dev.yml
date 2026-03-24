@@ -3,18 +3,20 @@ spring:
     url: jdbc:postgresql://127.0.0.1:5433/delivera_dev
     username: delivera_user
     password: delivera_pass
-    hikari:
-      minimum-idle: 5
-      idle-timeout: 300000
 
   jpa:
     hibernate:
       ddl-auto: validate
     show-sql: true
 
+management:
+  endpoint:
+    health:
+      show-details: always
+
 app:
   jwt:
-    secret: delivera-jwt-secret-key-para-desarrollo
+    secret: delivera-jwt-secret-key-para-desarrollo # TODO: Esto se puede mejorar
     expiration: 86400
   cors:
     allowed-origins: http://localhost:3000

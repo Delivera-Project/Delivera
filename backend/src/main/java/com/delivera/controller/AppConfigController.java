@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "App Config", description = "Configuración dinámica de la aplicación")
 public class AppConfigController {
 
-    @Autowired private AppConfigService appConfigService;
+    @Autowired
+    private AppConfigService appConfigService;
 
     @Operation(summary = "Obtener configuración de la aplicación")
     @GetMapping

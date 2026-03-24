@@ -1,9 +1,15 @@
 package com.delivera.model;
 
 import jakarta.persistence.*;
-import java.util.Arrays;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "order_status_config")
 public class OrderStatusConfig {
@@ -23,13 +29,8 @@ public class OrderStatusConfig {
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
-    public String getStatus() { return status; }
-    public String getUiSeverity() { return uiSeverity; }
-    public boolean isTerminal() { return terminal; }
-    public int getSortOrder() { return sortOrder; }
-
     public List<String> getAllowedTransitionsList() {
         if (allowedTransitions == null || allowedTransitions.isBlank()) return List.of();
-        return Arrays.asList(allowedTransitions.split(","));
+        return List.of(allowedTransitions.split(","));
     }
 }

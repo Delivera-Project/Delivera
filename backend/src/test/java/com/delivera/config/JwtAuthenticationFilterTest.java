@@ -24,9 +24,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JwtAuthenticationFilterTest {
 
-    @Mock private JwtService jwtService;
-    @Mock private FilterChain filterChain;
-    @InjectMocks private JwtAuthenticationFilter filter;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private FilterChain filterChain;
+    @InjectMocks
+    private JwtAuthenticationFilter filter;
 
     @AfterEach
     void clearContext() {

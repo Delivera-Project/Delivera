@@ -1,6 +1,6 @@
 package com.delivera.controller;
 
-import com.delivera.dto.MessageResponse;
+import com.delivera.dto.common.MessageResponse;
 import com.delivera.dto.user.ChangePasswordRequest;
 import com.delivera.dto.user.ProfileResponse;
 import com.delivera.dto.user.UpdateProfileRequest;

@@ -25,7 +25,7 @@ export function useApi() {
       headers.Authorization = `Bearer ${auth.token}`
     }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1${endpoint}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v2${endpoint}`, {
       ...options,
       headers,
     })
@@ -64,7 +64,7 @@ export function useApi() {
 
 export async function fetchPublicOrder(reference) {
   const res = await fetch(
-    `${import.meta.env.VITE_API_URL}/api/v1/orders/public/search?reference=${encodeURIComponent(reference)}`
+    `${import.meta.env.VITE_API_URL}/api/v2/orders/public/search?reference=${encodeURIComponent(reference)}`
   )
   if (!res.ok) throw new Error('not_found')
   return res.json()

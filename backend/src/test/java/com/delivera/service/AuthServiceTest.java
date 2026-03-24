@@ -4,6 +4,7 @@ import com.delivera.dto.auth.*;
 import com.delivera.exception.*;
 import com.delivera.model.*;
 import com.delivera.repository.*;
+import com.delivera.repository.ActivityTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,15 +25,26 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private OrganizationRepository organizationRepository;
-    @Mock private CompanyRepository companyRepository;
-    @Mock private WorkerRepository workerRepository;
-    @Mock private OrderRepository orderRepository;
-    @Mock private LoyalUserRepository loyalUserRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtService jwtService;
-    @InjectMocks private AuthService authService;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private OrganizationRepository organizationRepository;
+    @Mock
+    private CompanyRepository companyRepository;
+    @Mock
+    private WorkerRepository workerRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private LoyalUserRepository loyalUserRepository;
+    @Mock
+    private ActivityTypeRepository activityTypeRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
+    @InjectMocks
+    private AuthService authService;
 
     private User user;
     private Company company;
@@ -45,7 +57,7 @@ class AuthServiceTest {
     void setUp() {
         user = new User();
         user.setEmail("admin@test.com");
-        user.setPassword("hashed");
+        user.setPasswordHash("hashed");
 
         organization = new Organization();
         organization.setId(UUID.randomUUID());
@@ -180,6 +192,8 @@ class AuthServiceTest {
         when(passwordEncoder.encode("Password1")).thenReturn("hashed");
         when(userRepository.save(any())).thenReturn(user);
         when(organizationRepository.saveAndFlush(any())).thenReturn(organization);
+        ActivityType transport = new ActivityType(); transport.setCode("TRANSPORT");
+        when(activityTypeRepository.getReferenceById("TRANSPORT")).thenReturn(transport);
         when(companyRepository.save(any())).thenReturn(company);
         when(workerRepository.save(any())).thenReturn(worker);
         when(jwtService.generateToken(any(), any(), any())).thenReturn("company-token");
@@ -224,7 +238,7 @@ class AuthServiceTest {
     void claimRegister_success_noExistingLoyalUser() {
         when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
         when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
-        when(loyalUserRepository.findByCompanyIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompaniesIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("Password1")).thenReturn("hashed");
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -244,11 +258,11 @@ class AuthServiceTest {
     void claimRegister_success_existingLoyalUserWithoutAccount() {
         LoyalUser existingLu = new LoyalUser();
         existingLu.setEmail("juan@gmail.com");
-        existingLu.setCompany(company);
+        existingLu.getCompanies().add(company);
 
         when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
         when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
-        when(loyalUserRepository.findByCompanyIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.of(existingLu));
+        when(loyalUserRepository.findByCompaniesIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.of(existingLu));
         when(passwordEncoder.encode("Password1")).thenReturn("hashed");
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(loyalUserRepository.save(existingLu)).thenReturn(existingLu);
@@ -301,7 +315,7 @@ class AuthServiceTest {
         ClaimRegisterRequest upperCase = new ClaimRegisterRequest("Juan", "García", "JUAN@GMAIL.COM", "Password1");
         when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
         when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
-        when(loyalUserRepository.findByCompanyIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompaniesIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("Password1")).thenReturn("hashed");
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));

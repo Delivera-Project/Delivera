@@ -1,7 +1,13 @@
 package com.delivera.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "worker_role_config")
 public class WorkerRoleConfig {
@@ -23,11 +29,4 @@ public class WorkerRoleConfig {
 
     @Column(name = "can_manage_settings", nullable = false)
     private boolean canManageSettings;
-
-    public String getRole() { return role; }
-    public boolean isCanCreateOrders() { return canCreateOrders; }
-    public boolean isCanUpdateOrderStatus() { return canUpdateOrderStatus; }
-    public boolean isCanManageUnits() { return canManageUnits; }
-    public boolean isCanManageLoyalUsers() { return canManageLoyalUsers; }
-    public boolean isCanManageSettings() { return canManageSettings; }
 }

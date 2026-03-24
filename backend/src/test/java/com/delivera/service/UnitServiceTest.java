@@ -1,6 +1,6 @@
 package com.delivera.service;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.unit.UnitRequest;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.UnitNameConflictException;
@@ -29,10 +29,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UnitServiceTest {
 
-    @Mock private OperationalUnitRepository unitRepository;
-    @Mock private CompanyRepository companyRepository;
-    @Mock private SecurityUtils securityUtils;
-    @InjectMocks private UnitService unitService;
+    @Mock
+    private OperationalUnitRepository unitRepository;
+    @Mock
+    private CompanyRepository companyRepository;
+    @Mock
+    private SecurityUtils securityUtils;
+    @InjectMocks
+    private UnitService unitService;
 
     private UUID companyId;
     private Company company;

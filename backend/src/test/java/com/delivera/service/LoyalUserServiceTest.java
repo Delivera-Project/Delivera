@@ -1,6 +1,6 @@
 package com.delivera.service;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.loyaluser.LoyalUserRequest;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.LoyalUserConflictException;
@@ -26,12 +26,18 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class LoyalUserServiceTest {
 
-    @Mock private LoyalUserRepository loyalUserRepository;
-    @Mock private OrderRepository orderRepository;
-    @Mock private CompanyRepository companyRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private SecurityUtils securityUtils;
-    @InjectMocks private LoyalUserService loyalUserService;
+    @Mock
+    private LoyalUserRepository loyalUserRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private CompanyRepository companyRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private SecurityUtils securityUtils;
+    @InjectMocks
+    private LoyalUserService loyalUserService;
 
     private UUID companyId;
     private Company company;
@@ -46,13 +52,13 @@ class LoyalUserServiceTest {
         loyalUser = new LoyalUser();
         loyalUser.setId(UUID.randomUUID());
         loyalUser.setEmail("loyal@test.com");
-        loyalUser.setCompany(company);
+        loyalUser.getCompanies().add(company);
     }
 
     @Test
     void getByCompany_filtersUsersWithZeroOrders() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(loyalUser));
+        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(loyalUser));
         when(orderRepository.countByLoyalUserId(loyalUser.getId())).thenReturn(0L);
 
         assertThat(loyalUserService.getByCompany()).isEmpty();
@@ -61,7 +67,7 @@ class LoyalUserServiceTest {
     @Test
     void getByCompany_returnsUsersWithOrders() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(loyalUser));
+        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(loyalUser));
         when(orderRepository.countByLoyalUserId(loyalUser.getId())).thenReturn(2L);
 
         assertThat(loyalUserService.getByCompany()).hasSize(1);
@@ -71,7 +77,7 @@ class LoyalUserServiceTest {
     void add_success_noRegisteredUser() {
         LoyalUserRequest req = new LoyalUserRequest("new@test.com");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompanyIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
         when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
         when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -85,7 +91,7 @@ class LoyalUserServiceTest {
     void add_alreadyExists_throws() {
         LoyalUserRequest req = new LoyalUserRequest("loyal@test.com");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompanyIdAndEmail(companyId, "loyal@test.com")).thenReturn(Optional.of(loyalUser));
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "loyal@test.com")).thenReturn(Optional.of(loyalUser));
 
         assertThatThrownBy(() -> loyalUserService.add(req))
                 .isInstanceOf(LoyalUserConflictException.class);
@@ -95,7 +101,7 @@ class LoyalUserServiceTest {
     void add_companyNotFound_throws() {
         LoyalUserRequest req = new LoyalUserRequest("new@test.com");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompanyIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
         when(companyRepository.findById(companyId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> loyalUserService.add(req))
@@ -106,7 +112,7 @@ class LoyalUserServiceTest {
     void getOrdersForLoyalUser_success() {
         UUID loyalUserId = loyalUser.getId();
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByIdAndCompanyId(loyalUserId, companyId)).thenReturn(Optional.of(loyalUser));
+        when(loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)).thenReturn(Optional.of(loyalUser));
         when(orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUserId)).thenReturn(List.of());
 
         assertThat(loyalUserService.getOrdersForLoyalUser(loyalUserId)).isEmpty();
@@ -116,7 +122,7 @@ class LoyalUserServiceTest {
     void getOrdersForLoyalUser_notFound_throws() {
         UUID loyalUserId = UUID.randomUUID();
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByIdAndCompanyId(loyalUserId, companyId)).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> loyalUserService.getOrdersForLoyalUser(loyalUserId))
                 .isInstanceOf(OrderNotFoundException.class);

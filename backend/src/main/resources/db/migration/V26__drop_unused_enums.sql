@@ -1,0 +1,6 @@
+ALTER TABLE orders ALTER COLUMN status SET DEFAULT 'PENDING';
+
+DROP TYPE IF EXISTS activity_type;
+DROP TYPE IF EXISTS worker_role;
+DROP TYPE IF EXISTS unit_type;
+DROP TYPE IF EXISTS order_status;

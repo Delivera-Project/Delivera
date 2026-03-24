@@ -1,13 +1,13 @@
 package com.delivera.controller;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.auth.CompanyRegisterRequest;
 import com.delivera.dto.auth.CompanyRegisterResponse;
 import com.delivera.dto.auth.LoginRequest;
 import com.delivera.dto.auth.LoginResponse;
 import com.delivera.dto.auth.RegisterRequest;
 import com.delivera.dto.auth.RegisterResponse;
-import com.delivera.dto.AvailabilityCheckResponse;
+import com.delivera.dto.common.AvailabilityCheckResponse;
 import com.delivera.dto.auth.SwitchCompanyRequest;
 import com.delivera.service.AuthService;
 
@@ -29,8 +29,10 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Autenticación", description = "Endpoints para registro e inicio de sesión")
 public class AuthController {
 
-    @Autowired private AuthService authService;
-    @Autowired private SecurityUtils securityUtils;
+    @Autowired
+    private AuthService authService;
+    @Autowired
+    private SecurityUtils securityUtils;
 
     @Operation(summary = "Iniciar sesión", description = "Autenticación de usuario con email y contraseña")
     @ApiResponses(value = {

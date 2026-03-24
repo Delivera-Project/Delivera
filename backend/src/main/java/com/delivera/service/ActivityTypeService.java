@@ -10,7 +10,8 @@ import java.util.List;
 @Service
 public class ActivityTypeService {
 
-    @Autowired private ActivityTypeRepository activityTypeRepository;
+    @Autowired
+    private ActivityTypeRepository activityTypeRepository;
 
     public List<ActivityType> getAll() {
         return activityTypeRepository.findAllByOrderBySortOrderAsc();

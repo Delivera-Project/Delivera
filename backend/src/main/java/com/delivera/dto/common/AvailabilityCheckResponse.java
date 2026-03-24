@@ -1,3 +1,3 @@
-package com.delivera.dto;
+package com.delivera.dto.common;
 
 public record AvailabilityCheckResponse(boolean available) {}

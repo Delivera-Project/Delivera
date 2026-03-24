@@ -23,7 +23,10 @@ public class SecurityConfig {
 
     private static final String ROLE_COMPANY_ADMIN = "COMPANY_ADMIN";
 
-    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    @Value("${app.api-prefix}")
+    private String apiPrefix;
+
+    @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
     @Autowired
@@ -37,21 +40,21 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**").permitAll()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers("/api/v1/organizations/**").permitAll()
-                        .requestMatchers("/api/v1/activity-types/**").permitAll()
-                        .requestMatchers("/api/v1/app-config/**").permitAll()
-                        .requestMatchers("/api/v1/orders/public/**").permitAll()
-                        .requestMatchers("/api/v1/admin/**").hasRole("GLOBAL_ADMIN")
-                        .requestMatchers("/api/v1/settings/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.GET, "/api/v1/units/external").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
-                        .requestMatchers(HttpMethod.POST, "/api/v1/units").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/units/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/units/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/*/status").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST", "OPERATOR")
-                        .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.POST, "/api/v1/loyal-users").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(apiPrefix + "/auth/**").permitAll()
+                        .requestMatchers(apiPrefix + "/organizations/**").permitAll()
+                        .requestMatchers(apiPrefix + "/activity-types/**").permitAll()
+                        .requestMatchers(apiPrefix + "/app-config/**").permitAll()
+                        .requestMatchers(apiPrefix + "/orders/public/**").permitAll()
+                        .requestMatchers(apiPrefix + "/admin/**").hasRole("GLOBAL_ADMIN")
+                        .requestMatchers(apiPrefix + "/settings/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.GET, apiPrefix + "/units/external").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
+                        .requestMatchers(HttpMethod.POST, apiPrefix + "/units").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.PUT, apiPrefix + "/units/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.DELETE, apiPrefix + "/units/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.POST, apiPrefix + "/orders").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
+                        .requestMatchers(HttpMethod.PATCH, apiPrefix + "/orders/*/status").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST", "OPERATOR")
+                        .requestMatchers(HttpMethod.DELETE, apiPrefix + "/orders/**").hasRole(ROLE_COMPANY_ADMIN)
+                        .requestMatchers(HttpMethod.POST, apiPrefix + "/loyal-users").hasRole(ROLE_COMPANY_ADMIN)
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

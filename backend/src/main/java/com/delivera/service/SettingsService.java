@@ -1,6 +1,6 @@
 package com.delivera.service;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.settings.*;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.CompanyHasActiveOrdersException;
@@ -22,14 +22,24 @@ import static com.delivera.model.OrderStatus.PENDING;
 @Service
 public class SettingsService {
 
-    @Autowired private CompanyRepository companyRepository;
-    @Autowired private OrganizationRepository organizationRepository;
-    @Autowired private WorkerRepository workerRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private LoyalUserRepository loyalUserRepository;
-    @Autowired private OperationalUnitRepository operationalUnitRepository;
-    @Autowired private SecurityUtils securityUtils;
+    @Autowired
+    private CompanyRepository companyRepository;
+    @Autowired
+    private OrganizationRepository organizationRepository;
+    @Autowired
+    private WorkerRepository workerRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private LoyalUserRepository loyalUserRepository;
+    @Autowired
+    private OperationalUnitRepository operationalUnitRepository;
+    @Autowired
+    private ActivityTypeRepository activityTypeRepository;
+    @Autowired
+    private SecurityUtils securityUtils;
 
     private Company currentCompany() {
         return companyRepository.findById(securityUtils.getCurrentCompanyId())
@@ -39,7 +49,7 @@ public class SettingsService {
     public SettingsResponse getSettings() {
         Company c = currentCompany();
         Organization o = c.getOrganization();
-        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType());
+        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType().getCode());
     }
 
     @Transactional
@@ -59,7 +69,7 @@ public class SettingsService {
     public SettingsResponse updateCompany(CompanyUpdateRequest req) {
         Company c = currentCompany();
         c.setName(req.name());
-        c.setActivityType(req.activityType());
+        c.setActivityType(activityTypeRepository.getReferenceById(req.activityType()));
         companyRepository.save(c);
         return getSettings();
     }
@@ -72,7 +82,7 @@ public class SettingsService {
         Company newCompany = new Company();
         newCompany.setOrganization(org);
         newCompany.setName(req.name());
-        newCompany.setActivityType(req.activityType());
+        newCompany.setActivityType(activityTypeRepository.getReferenceById(req.activityType()));
         companyRepository.save(newCompany);
 
         String email = securityUtils.getCurrentEmail();
@@ -83,7 +93,7 @@ public class SettingsService {
         worker.setRole(WorkerRole.COMPANY_ADMIN);
         workerRepository.save(worker);
 
-        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType());
+        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType().getCode());
     }
 
     @Transactional
@@ -102,7 +112,7 @@ public class SettingsService {
         }
 
         orderRepository.deleteAll(orderRepository.findByCompanyId(companyId));
-        loyalUserRepository.deleteAll(loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(companyId));
+        loyalUserRepository.deleteAll(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId));
         operationalUnitRepository.deleteAll(operationalUnitRepository.findAllByCompanyId(companyId));
         workerRepository.deleteAll(workerRepository.findByCompanyId(companyId));
         companyRepository.delete(target);
@@ -112,7 +122,7 @@ public class SettingsService {
         String email = securityUtils.getCurrentEmail();
         UUID orgId = currentCompany().getOrganization().getId();
         return workerRepository.findByUserEmailAndOrgId(email, orgId).stream()
-                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType()))
+                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType().getCode()))
                 .toList();
     }
 }

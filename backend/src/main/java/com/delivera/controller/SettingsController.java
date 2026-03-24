@@ -17,7 +17,8 @@ import java.util.List;
 @Tag(name = "Configuración", description = "Gestión de organización y empresa")
 public class SettingsController {
 
-    @Autowired private SettingsService settingsService;
+    @Autowired
+    private SettingsService settingsService;
 
     @Operation(summary = "Obtener configuración de organización y empresa")
     @GetMapping

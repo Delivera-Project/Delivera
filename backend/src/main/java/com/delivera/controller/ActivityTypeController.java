@@ -15,7 +15,8 @@ import java.util.List;
 @Tag(name = "Tipos de actividad", description = "Catálogo de tipos de actividad empresarial")
 public class ActivityTypeController {
 
-    @Autowired private ActivityTypeService activityTypeService;
+    @Autowired
+    private ActivityTypeService activityTypeService;
 
     @Operation(summary = "Listar tipos de actividad")
     @GetMapping

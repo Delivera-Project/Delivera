@@ -9,6 +9,7 @@ import java.util.UUID;
 public record OrderDetailResponse(
         UUID id,
         String reference,
+        String orderType,
         UUID originId,
         String originName,
         String originCompanyName,
@@ -32,6 +33,7 @@ public record OrderDetailResponse(
         return new OrderDetailResponse(
                 order.getId(),
                 order.getReference(),
+                order.getOrderType().name(),
                 order.getOrigin().getId(),
                 order.getOrigin().getName(),
                 order.getOrigin().getCompany().getName(),

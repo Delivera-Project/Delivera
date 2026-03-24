@@ -7,6 +7,7 @@ import com.delivera.service.LoyalUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,11 +20,8 @@ import java.util.UUID;
 @Tag(name = "Fidelizados", description = "Gestión de usuarios fidelizados")
 public class LoyalUserController {
 
-    private final LoyalUserService loyalUserService;
-
-    public LoyalUserController(LoyalUserService loyalUserService) {
-        this.loyalUserService = loyalUserService;
-    }
+    @Autowired
+    private LoyalUserService loyalUserService;
 
     @Operation(summary = "Listar fidelizados de la empresa")
     @GetMapping
