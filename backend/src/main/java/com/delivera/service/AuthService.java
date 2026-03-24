@@ -26,18 +26,28 @@ public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private OrganizationRepository organizationRepository;
-    @Autowired private CompanyRepository companyRepository;
-    @Autowired private WorkerRepository workerRepository;
-    @Autowired private OrderRepository orderRepository;
-    @Autowired private LoyalUserRepository loyalUserRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired private JwtService jwtService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private OrganizationRepository organizationRepository;
+    @Autowired
+    private CompanyRepository companyRepository;
+    @Autowired
+    private WorkerRepository workerRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+    @Autowired
+    private LoyalUserRepository loyalUserRepository;
+    @Autowired
+    private ActivityTypeRepository activityTypeRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtService jwtService;
 
     public LoginResponse login(String identifier, String password) {
         User user = userRepository.findByEmailOrUsername(identifier)
-                .filter(u -> passwordEncoder.matches(password, u.getPassword()))
+                .filter(u -> passwordEncoder.matches(password, u.getPasswordHash()))
                 .orElseThrow(InvalidCredentialsException::new);
 
         List<Worker> workers = workerRepository.findByUserEmailOrderByCreatedAtAsc(user.getEmail());
@@ -109,7 +119,8 @@ public class AuthService {
         Company company = new Company();
         company.setOrganization(organization);
         company.setName(request.companyName());
-        company.setActivityType(request.activityType());
+        ActivityType activityType = activityTypeRepository.getReferenceById(request.activityType());
+        company.setActivityType(activityType);
         companyRepository.save(company);
 
         Worker worker = new Worker();
@@ -145,10 +156,10 @@ public class AuthService {
         userRepository.save(user);
 
         LoyalUser loyalUser = loyalUserRepository
-                .findByCompanyIdAndEmail(order.getCompany().getId(), email)
+                .findByCompaniesIdAndEmail(order.getCompany().getId(), email)
                 .orElseGet(() -> {
                     var lu = new LoyalUser();
-                    lu.setCompany(order.getCompany());
+                    lu.getCompanies().add(order.getCompany());
                     lu.setEmail(email);
                     return lu;
                 });
@@ -159,7 +170,7 @@ public class AuthService {
         orderRepository.save(order);
 
         String jwtToken = jwtService.generateToken(user.getEmail());
-        return new LoginResponse(jwtToken, user.getEmail(), null, WorkerRole.LOYAL_USER.name(), null, null, null);
+        return new LoginResponse(jwtToken, user.getEmail(), null, "LOYAL_USER", null, null, null);
     }
 
     private User buildUser(String email, String username, String firstName, String lastName, String phone, String password) {
@@ -169,7 +180,7 @@ public class AuthService {
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setPhone(StringUtils.hasText(phone) ? phone : null);
-        user.setPassword(passwordEncoder.encode(password));
+        user.setPasswordHash(passwordEncoder.encode(password));
         return user;
     }
 }

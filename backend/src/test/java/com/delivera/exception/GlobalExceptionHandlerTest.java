@@ -1,7 +1,7 @@
 package com.delivera.exception;
 
-import com.delivera.dto.ErrorResponse;
-import com.delivera.dto.ValidationErrorResponse;
+import com.delivera.dto.common.ErrorResponse;
+import com.delivera.dto.common.ValidationErrorResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -12,8 +12,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class GlobalExceptionHandlerTest {
 
@@ -166,12 +164,11 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void handleValidation_returns400WithFieldErrors() throws Exception {
+    void handleValidation_returns400WithFieldErrors() {
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "target");
         bindingResult.addError(new FieldError("target", "email", "must not be blank"));
 
-        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
-        when(ex.getBindingResult()).thenReturn(bindingResult);
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(null, bindingResult);
 
         ResponseEntity<ValidationErrorResponse> response = handler.handleValidation(ex);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);

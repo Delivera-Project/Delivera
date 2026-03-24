@@ -1,7 +1,13 @@
 package com.delivera.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "order_priority_config")
 public class OrderPriorityConfig {
@@ -14,8 +20,4 @@ public class OrderPriorityConfig {
 
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
-
-    public String getPriority() { return priority; }
-    public String getUiSeverity() { return uiSeverity; }
-    public int getSortOrder() { return sortOrder; }
 }

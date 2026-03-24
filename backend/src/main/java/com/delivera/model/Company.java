@@ -24,11 +24,12 @@ public class Company {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(name = "activity_type", nullable = false, length = 50)
-    private String activityType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "activity_type", nullable = false)
+    private ActivityType activityType;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;

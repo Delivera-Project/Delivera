@@ -10,11 +10,11 @@ import java.util.UUID;
 
 public interface LoyalUserRepository extends JpaRepository<LoyalUser, UUID> {
 
-    List<LoyalUser> findByCompanyIdOrderByCreatedAtDesc(UUID companyId);
+    List<LoyalUser> findByCompaniesIdOrderByCreatedAtDesc(UUID companyId);
 
-    Optional<LoyalUser> findByCompanyIdAndEmail(UUID companyId, String email);
+    Optional<LoyalUser> findByCompaniesIdAndEmail(UUID companyId, String email);
 
-    Optional<LoyalUser> findByIdAndCompanyId(UUID id, UUID companyId);
+    Optional<LoyalUser> findByIdAndCompaniesId(UUID id, UUID companyId);
 
     @Query("SELECT lu FROM LoyalUser lu WHERE lu.email = :email")
     List<LoyalUser> findByEmail(String email);

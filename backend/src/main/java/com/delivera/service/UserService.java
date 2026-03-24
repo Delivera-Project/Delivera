@@ -54,15 +54,15 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException());
 
-        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
             throw new InvalidPasswordException("CURRENT_PASSWORD_INVALID");
         }
 
-        if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
+        if (passwordEncoder.matches(request.newPassword(), user.getPasswordHash())) {
             throw new InvalidPasswordException("NEW_PASSWORD_SAME_AS_CURRENT");
         }
 
-        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
     }
 

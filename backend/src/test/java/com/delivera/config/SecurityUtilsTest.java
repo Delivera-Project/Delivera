@@ -1,5 +1,7 @@
 package com.delivera.config;
 
+import com.delivera.security.SecurityUtils;
+
 import com.delivera.exception.CompanyContextException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

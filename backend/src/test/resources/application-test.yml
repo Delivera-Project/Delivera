@@ -1,6 +1,3 @@
-# Perfil de TESTING
-# Se activa con @ActiveProfiles("test")
-
 server:
   port: 8081
 
@@ -11,7 +8,6 @@ logging:
 spring:
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL
-    driver-class-name: org.h2.Driver
     username: sa
     password:
   jpa:
@@ -23,5 +19,5 @@ spring:
 
 app:
   jwt:
-    secret: delivera-jwt-secret-key-para-tests
+    secret: delivera-jwt-secret-key-para-tests # TODO: Esto se puede mejorar
     expiration: 3600

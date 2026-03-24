@@ -8,6 +8,7 @@ import com.delivera.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,13 +21,10 @@ import java.util.UUID;
 @Tag(name = "Pedidos", description = "Gestión de pedidos")
 public class OrderController {
 
-    private final OrderService orderService;
-    private final AuthService authService;
-
-    public OrderController(OrderService orderService, AuthService authService) {
-        this.orderService = orderService;
-        this.authService = authService;
-    }
+    @Autowired
+    private OrderService orderService;
+    @Autowired
+    private AuthService authService;
 
     @Operation(summary = "Listar pedidos de la empresa")
     @GetMapping

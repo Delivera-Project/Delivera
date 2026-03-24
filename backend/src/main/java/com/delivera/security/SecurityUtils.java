@@ -1,4 +1,4 @@
-package com.delivera.config;
+package com.delivera.security;
 
 import com.delivera.exception.CompanyContextException;
 import org.springframework.security.core.context.SecurityContextHolder;

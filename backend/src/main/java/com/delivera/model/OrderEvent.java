@@ -33,11 +33,6 @@ public class OrderEvent {
     @Column(name = "author_email", length = 255)
     private String authorEmail;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
-
-    @PrePersist
-    void prePersist() {
-        if (createdAt == null) createdAt = Instant.now();
-    }
 }

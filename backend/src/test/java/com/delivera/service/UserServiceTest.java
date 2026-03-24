@@ -27,9 +27,12 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @InjectMocks private UserService userService;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @InjectMocks
+    private UserService userService;
 
     private User user;
 
@@ -38,7 +41,7 @@ class UserServiceTest {
         user = new User();
         user.setEmail("user@test.com");
         user.setUsername("testuser");
-        user.setPassword("hashed");
+        user.setPasswordHash("hashed");
     }
 
     @Test

@@ -25,10 +25,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AppConfigServiceTest {
 
-    @Mock private OrderStatusConfigRepository statusConfigRepository;
-    @Mock private OrderPriorityConfigRepository priorityConfigRepository;
-    @Mock private WorkerRoleConfigRepository roleConfigRepository;
-    @InjectMocks private AppConfigService appConfigService;
+    @Mock
+    private OrderStatusConfigRepository statusConfigRepository;
+    @Mock
+    private OrderPriorityConfigRepository priorityConfigRepository;
+    @Mock
+    private WorkerRoleConfigRepository roleConfigRepository;
+    @InjectMocks
+    private AppConfigService appConfigService;
 
     private OrderStatusConfig pendingConfig;
 

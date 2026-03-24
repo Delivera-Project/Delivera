@@ -37,6 +37,10 @@ public class Order {
     private OperationalUnit destination;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "order_type", nullable = false, length = 10)
+    private OrderType orderType;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OrderStatus status;
 

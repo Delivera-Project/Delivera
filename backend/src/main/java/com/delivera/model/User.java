@@ -1,9 +1,6 @@
 package com.delivera.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,28 +19,21 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotBlank
-    @Email
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
-    @Size(max = 50)
     @Column(length = 50, unique = true)
     private String username;
 
-    @NotBlank
     @Column(name = "password_hash", nullable = false)
-    private String password;
+    private String passwordHash;
 
-    @Size(max = 100)
     @Column(name = "first_name", length = 100)
     private String firstName;
 
-    @Size(max = 100)
     @Column(name = "last_name", length = 100)
     private String lastName;
 
-    @Size(max = 20)
     @Column(length = 20)
     private String phone;
 

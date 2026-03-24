@@ -1,7 +1,7 @@
 package com.delivera.exception;
 
-import com.delivera.dto.ErrorResponse;
-import com.delivera.dto.ValidationErrorResponse;
+import com.delivera.dto.common.ErrorResponse;
+import com.delivera.dto.common.ValidationErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;

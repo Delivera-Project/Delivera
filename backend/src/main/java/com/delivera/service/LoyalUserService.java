@@ -1,6 +1,6 @@
 package com.delivera.service;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.loyaluser.LoyalUserRequest;
 import com.delivera.dto.loyaluser.LoyalUserResponse;
 import com.delivera.dto.order.OrderResponse;
@@ -41,7 +41,7 @@ public class LoyalUserService {
 
     public List<LoyalUserResponse> getByCompany() {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        return loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(companyId).stream()
+        return loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId).stream()
                 .map(lu -> LoyalUserResponse.from(lu, orderRepository.countByLoyalUserId(lu.getId())))
                 .filter(r -> r.orderCount() > 0)
                 .toList();
@@ -52,24 +52,28 @@ public class LoyalUserService {
         UUID companyId = securityUtils.getCurrentCompanyId();
         String email = request.email().toLowerCase().trim();
 
-        if (loyalUserRepository.findByCompanyIdAndEmail(companyId, email).isPresent()) {
+        if (loyalUserRepository.findByCompaniesIdAndEmail(companyId, email).isPresent()) {
             throw new LoyalUserConflictException();
         }
 
         var company = companyRepository.findById(companyId)
                 .orElseThrow(CompanyContextException::new);
 
-        var lu = new LoyalUser();
-        lu.setCompany(company);
-        lu.setEmail(email);
-        userRepository.findByEmail(email).ifPresent(lu::setUser);
+        var lu = loyalUserRepository.findByEmail(email).stream().findFirst()
+                .orElseGet(() -> {
+                    var newLu = new LoyalUser();
+                    newLu.setEmail(email);
+                    userRepository.findByEmail(email).ifPresent(newLu::setUser);
+                    return newLu;
+                });
+        lu.getCompanies().add(company);
 
         return LoyalUserResponse.from(loyalUserRepository.save(lu));
     }
 
     public List<OrderResponse> getOrdersForLoyalUser(UUID loyalUserId) {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        loyalUserRepository.findByIdAndCompanyId(loyalUserId, companyId)
+        loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)
                 .orElseThrow(OrderNotFoundException::new);
         return orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUserId)
                 .stream().map(OrderResponse::from).toList();

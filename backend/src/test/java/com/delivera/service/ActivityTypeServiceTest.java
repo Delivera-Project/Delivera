@@ -16,8 +16,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ActivityTypeServiceTest {
 
-    @Mock private ActivityTypeRepository activityTypeRepository;
-    @InjectMocks private ActivityTypeService activityTypeService;
+    @Mock
+    private ActivityTypeRepository activityTypeRepository;
+    @InjectMocks
+    private ActivityTypeService activityTypeService;
 
     @Test
     void getAll_returnsSortedList() {

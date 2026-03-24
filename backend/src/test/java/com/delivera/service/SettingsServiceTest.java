@@ -1,6 +1,6 @@
 package com.delivera.service;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.settings.CompanyCreateRequest;
 import com.delivera.dto.settings.CompanyUpdateRequest;
 import com.delivera.dto.settings.OrgUpdateRequest;
@@ -9,6 +9,7 @@ import com.delivera.exception.ForbiddenException;
 import com.delivera.exception.HandleConflictException;
 import com.delivera.model.*;
 import com.delivera.repository.*;
+import com.delivera.repository.ActivityTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,15 +29,26 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SettingsServiceTest {
 
-    @Mock private CompanyRepository companyRepository;
-    @Mock private OrganizationRepository organizationRepository;
-    @Mock private WorkerRepository workerRepository;
-    @Mock private UserRepository userRepository;
-    @Mock private OrderRepository orderRepository;
-    @Mock private LoyalUserRepository loyalUserRepository;
-    @Mock private OperationalUnitRepository operationalUnitRepository;
-    @Mock private SecurityUtils securityUtils;
-    @InjectMocks private SettingsService settingsService;
+    @Mock
+    private CompanyRepository companyRepository;
+    @Mock
+    private OrganizationRepository organizationRepository;
+    @Mock
+    private WorkerRepository workerRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private LoyalUserRepository loyalUserRepository;
+    @Mock
+    private OperationalUnitRepository operationalUnitRepository;
+    @Mock
+    private ActivityTypeRepository activityTypeRepository;
+    @Mock
+    private SecurityUtils securityUtils;
+    @InjectMocks
+    private SettingsService settingsService;
 
     private UUID companyId;
     private UUID orgId;
@@ -56,7 +68,7 @@ class SettingsServiceTest {
         company = new Company();
         company.setId(companyId);
         company.setName("TestCompany");
-        company.setActivityType("TRANSPORT");
+        ActivityType at = new ActivityType(); at.setCode("TRANSPORT"); company.setActivityType(at);
         company.setOrganization(organization);
 
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
@@ -102,6 +114,8 @@ class SettingsServiceTest {
     @Test
     void updateCompany_success() {
         CompanyUpdateRequest req = new CompanyUpdateRequest("UpdatedCompany", "RETAIL");
+        ActivityType retail = new ActivityType(); retail.setCode("RETAIL");
+        when(activityTypeRepository.getReferenceById("RETAIL")).thenReturn(retail);
         when(companyRepository.save(company)).thenReturn(company);
 
         var result = settingsService.updateCompany(req);
@@ -117,10 +131,12 @@ class SettingsServiceTest {
         Company newCompany = new Company();
         newCompany.setId(UUID.randomUUID());
         newCompany.setName("NewCompany");
-        newCompany.setActivityType("FOOD");
+        ActivityType at2 = new ActivityType(); at2.setCode("FOOD"); newCompany.setActivityType(at2);
         newCompany.setOrganization(organization);
 
         when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
+        ActivityType food = new ActivityType(); food.setCode("FOOD");
+        when(activityTypeRepository.getReferenceById("FOOD")).thenReturn(food);
         when(companyRepository.save(any())).thenReturn(newCompany);
         when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(user));
         when(workerRepository.save(any())).thenReturn(new Worker());
@@ -138,7 +154,7 @@ class SettingsServiceTest {
         when(companyRepository.findById(target.getId())).thenReturn(Optional.of(target));
         when(orderRepository.existsByCompanyIdAndStatusIn(any(), any())).thenReturn(false);
         when(orderRepository.findByCompanyId(any())).thenReturn(List.of());
-        when(loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(any())).thenReturn(List.of());
+        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(any())).thenReturn(List.of());
         when(operationalUnitRepository.findAllByCompanyId(any())).thenReturn(List.of());
         when(workerRepository.findByCompanyId(any())).thenReturn(List.of());
 
@@ -181,7 +197,7 @@ class SettingsServiceTest {
 
         when(companyRepository.findById(target.getId())).thenReturn(Optional.of(target));
         when(orderRepository.findByCompanyId(any())).thenReturn(List.of());
-        when(loyalUserRepository.findByCompanyIdOrderByCreatedAtDesc(any())).thenReturn(List.of());
+        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(any())).thenReturn(List.of());
         when(operationalUnitRepository.findAllByCompanyId(any())).thenReturn(List.of());
         when(workerRepository.findByCompanyId(any())).thenReturn(List.of());
 

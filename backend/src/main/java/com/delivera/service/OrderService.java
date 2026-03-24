@@ -1,6 +1,6 @@
 package com.delivera.service;
 
-import com.delivera.config.SecurityUtils;
+import com.delivera.security.SecurityUtils;
 import com.delivera.dto.order.*;
 import com.delivera.exception.*;
 import com.delivera.model.*;
@@ -57,24 +57,21 @@ public class OrderService {
     public OrderResponse create(OrderRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
 
-        boolean isB2B = request.orderType() == OrderType.B2B;
-        boolean isExternal = request.destinationId() == null;
+        OrderType orderType = request.orderType();
 
         var origin = unitRepository.findByIdAndCompanyId(request.originId(), companyId)
                 .orElseThrow(InvalidOrderUnitsException::new);
 
         OperationalUnit destination = null;
-        if (!isExternal) {
-            if (isB2B) {
-                destination = unitRepository.findById(request.destinationId())
-                        .orElseThrow(InvalidOrderUnitsException::new);
-            } else {
-                destination = unitRepository.findByIdAndCompanyId(request.destinationId(), companyId)
-                        .orElseThrow(InvalidOrderUnitsException::new);
-                if (origin.getId().equals(destination.getId())) {
-                    throw new InvalidOrderUnitsException();
-                }
+        if (orderType == OrderType.INTERNAL) {
+            destination = unitRepository.findByIdAndCompanyId(request.destinationId(), companyId)
+                    .orElseThrow(InvalidOrderUnitsException::new);
+            if (origin.getId().equals(destination.getId())) {
+                throw new InvalidOrderUnitsException();
             }
+        } else if (orderType == OrderType.B2B) {
+            destination = unitRepository.findById(request.destinationId())
+                    .orElseThrow(InvalidOrderUnitsException::new);
         }
 
         var company = companyRepository.findById(companyId)
@@ -82,6 +79,7 @@ public class OrderService {
 
         var order = new Order();
         order.setCompany(company);
+        order.setOrderType(orderType);
         order.setReference(generateReference());
         order.setOrigin(origin);
         order.setDestination(destination);
@@ -89,12 +87,12 @@ public class OrderService {
         order.setPriority(request.priority() != null ? request.priority() : OrderPriority.NORMAL);
         order.setNotes(request.notes() != null ? request.notes().trim() : null);
 
-        if (isExternal && request.recipientEmail() != null) {
+        if (orderType == OrderType.B2C && request.recipientEmail() != null) {
             String recipientEmail = request.recipientEmail().toLowerCase().trim();
             order.setRecipientEmail(recipientEmail);
             order.setRecipientName(request.recipientName() != null ? request.recipientName().trim() : null);
             order.setTrackingToken(UUID.randomUUID().toString().replace("-", ""));
-            loyalUserRepository.findByCompanyIdAndEmail(companyId, recipientEmail)
+            loyalUserRepository.findByCompaniesIdAndEmail(companyId, recipientEmail)
                     .ifPresent(order::setLoyalUser);
         }
 
