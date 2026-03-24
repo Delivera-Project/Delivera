@@ -16,7 +16,7 @@ const mockOrder = {
 test.beforeEach(async ({ page }) => {
   await setupAuth(page)
   await mockApiDefaults(page)
-  await page.route('**/api/v1/app-config', route =>
+  await page.route('**/api/v2/app-config', route =>
     route.fulfill({ json: mockAppConfig })
   )
 })
@@ -34,7 +34,7 @@ test('orders list shows empty state when no orders', { tag: '@orders' }, async (
 })
 
 test('orders list shows rows when data is returned', { tag: '@orders' }, async ({ page }) => {
-  await page.route('**/api/v1/orders', route =>
+  await page.route('**/api/v2/orders', route =>
     route.fulfill({ json: [mockOrder] })
   )
   await page.goto('/orders')
@@ -49,7 +49,7 @@ test('nuevo pedido button navigates to /orders/new', { tag: '@orders' }, async (
 })
 
 test('clicking an order row navigates to detail', { tag: '@orders' }, async ({ page }) => {
-  await page.route('**/api/v1/orders', route =>
+  await page.route('**/api/v2/orders', route =>
     route.fulfill({ json: [mockOrder] })
   )
   await page.goto('/orders')
@@ -60,7 +60,7 @@ test('clicking an order row navigates to detail', { tag: '@orders' }, async ({ p
 // ── Filters ───────────────────────────────────────────────────────────────────
 
 test('filter by reference hides non-matching orders', { tag: '@orders' }, async ({ page }) => {
-  await page.route('**/api/v1/orders', route =>
+  await page.route('**/api/v2/orders', route =>
     route.fulfill({ json: [
       { ...mockOrder, id: 1, reference: 'DEL-20240101-0001' },
       { ...mockOrder, id: 2, reference: 'DEL-20240102-0002', originName: 'Tienda Norte', destinationName: 'Almacén Sur' },

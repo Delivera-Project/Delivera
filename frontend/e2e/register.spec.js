@@ -39,7 +39,7 @@ test('register individual empty submit stays on form', { tag: '@register' }, asy
 })
 
 test('register individual successful redirects to /profile', { tag: '@register' }, async ({ page }) => {
-  await page.route('**/api/v1/**', async route => {
+  await page.route('**/api/v2/**', async route => {
     const url = route.request().url()
     if (url.includes('/auth/check-username')) {
       await route.fulfill({ json: { available: true } })
@@ -62,7 +62,7 @@ test('register individual successful redirects to /profile', { tag: '@register' 
 // ── Company registration ──────────────────────────────────────────────────────
 
 test('register company shows step 1 org form', { tag: '@register' }, async ({ page }) => {
-  await page.route('**/api/v1/**', route => route.fulfill({ json: [] }))
+  await page.route('**/api/v2/**', route => route.fulfill({ json: [] }))
   await page.goto('/register/company')
   await expect(page.locator('#org-name')).toBeVisible()
   await expect(page.locator('#org-handle')).toBeVisible()
@@ -70,7 +70,7 @@ test('register company shows step 1 org form', { tag: '@register' }, async ({ pa
 })
 
 test('register company step 1 empty submit stays on step 1', { tag: '@register' }, async ({ page }) => {
-  await page.route('**/api/v1/**', route => route.fulfill({ json: [] }))
+  await page.route('**/api/v2/**', route => route.fulfill({ json: [] }))
   await page.goto('/register/company')
   await page.getByRole('button', { name: 'Siguiente' }).click()
   // Validation rejects — step stays at 1
@@ -78,11 +78,11 @@ test('register company step 1 empty submit stays on step 1', { tag: '@register' 
 })
 
 test('register company step 1 advances to step 2', { tag: '@register' }, async ({ page }) => {
-  await page.route('**/api/v1/**', route => route.fulfill({ json: [] }))
-  await page.route('**/api/v1/activity-types', route =>
+  await page.route('**/api/v2/**', route => route.fulfill({ json: [] }))
+  await page.route('**/api/v2/activity-types', route =>
     route.fulfill({ json: activityTypes })
   )
-  await page.route('**/api/v1/organizations/check-handle**', route =>
+  await page.route('**/api/v2/organizations/check-handle**', route =>
     route.fulfill({ json: { available: true } })
   )
   await page.goto('/register/company')
@@ -94,11 +94,11 @@ test('register company step 1 advances to step 2', { tag: '@register' }, async (
 })
 
 test('register company step 2 advances to step 3', { tag: '@register' }, async ({ page }) => {
-  await page.route('**/api/v1/**', route => route.fulfill({ json: [] }))
-  await page.route('**/api/v1/activity-types', route =>
+  await page.route('**/api/v2/**', route => route.fulfill({ json: [] }))
+  await page.route('**/api/v2/activity-types', route =>
     route.fulfill({ json: activityTypes })
   )
-  await page.route('**/api/v1/organizations/check-handle**', route =>
+  await page.route('**/api/v2/organizations/check-handle**', route =>
     route.fulfill({ json: { available: true } })
   )
   await page.goto('/register/company')
@@ -115,17 +115,17 @@ test('register company step 2 advances to step 3', { tag: '@register' }, async (
 })
 
 test('register company full flow submits and redirects', { tag: '@register' }, async ({ page }) => {
-  await page.route('**/api/v1/**', route => route.fulfill({ json: [] }))
-  await page.route('**/api/v1/auth/register/company', route =>
+  await page.route('**/api/v2/**', route => route.fulfill({ json: [] }))
+  await page.route('**/api/v2/auth/register/company', route =>
     route.fulfill({ json: registerResponse })
   )
-  await page.route('**/api/v1/activity-types', route =>
+  await page.route('**/api/v2/activity-types', route =>
     route.fulfill({ json: activityTypes })
   )
-  await page.route('**/api/v1/auth/check-username**', route =>
+  await page.route('**/api/v2/auth/check-username**', route =>
     route.fulfill({ json: { available: true } })
   )
-  await page.route('**/api/v1/organizations/check-handle**', route =>
+  await page.route('**/api/v2/organizations/check-handle**', route =>
     route.fulfill({ json: { available: true } })
   )
   await page.goto('/register/company')

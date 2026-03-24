@@ -11,7 +11,7 @@ async function loadConfig() {
   if (loaded.value || loading.value) return
   loading.value = true
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/app-config`)
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/app-config`)
     if (res.ok) {
       const data = await res.json()
       _statuses.value = data.orderStatuses ?? []

@@ -28,7 +28,7 @@ test('units list shows empty state when no units', { tag: '@units' }, async ({ p
 })
 
 test('units list shows rows when data is returned', { tag: '@units' }, async ({ page }) => {
-  await page.route('**/api/v1/units', route =>
+  await page.route('**/api/v2/units', route =>
     route.fulfill({ json: [mockUnit] })
   )
   await page.goto('/units')
@@ -43,7 +43,7 @@ test('nueva unidad button navigates to /units/new', { tag: '@units' }, async ({ 
 })
 
 test('clicking a unit row navigates to detail', { tag: '@units' }, async ({ page }) => {
-  await page.route('**/api/v1/units', route =>
+  await page.route('**/api/v2/units', route =>
     route.fulfill({ json: [mockUnit] })
   )
   await page.goto('/units')
@@ -54,7 +54,7 @@ test('clicking a unit row navigates to detail', { tag: '@units' }, async ({ page
 // ── Filters ───────────────────────────────────────────────────────────────────
 
 test('filter by name hides non-matching units', { tag: '@units' }, async ({ page }) => {
-  await page.route('**/api/v1/units', route =>
+  await page.route('**/api/v2/units', route =>
     route.fulfill({ json: [
       { id: 1, name: 'Almacén Central', type: 'WAREHOUSE', address: 'Madrid' },
       { id: 2, name: 'Tienda Norte', type: 'STORE', address: 'Barcelona' },
