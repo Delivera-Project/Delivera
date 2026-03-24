@@ -91,7 +91,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function loadCompanies() {
     if (!isCompanyAdmin.value || !token.value) return
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/settings/companies`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/settings/companies`, {
         headers: { Authorization: `Bearer ${token.value}` },
       })
       if (res.ok) companies.value = await res.json()

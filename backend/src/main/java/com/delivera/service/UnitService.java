@@ -1,5 +1,6 @@
 package com.delivera.service;
 
+import com.delivera.dto.settings.CompanySummary;
 import com.delivera.dto.unit.B2BUnitResponse;
 import com.delivera.dto.unit.UnitRequest;
 import com.delivera.dto.unit.UnitResponse;
@@ -7,6 +8,7 @@ import com.delivera.security.SecurityUtils;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.UnitNameConflictException;
 import com.delivera.exception.UnitNotFoundException;
+import com.delivera.model.Company;
 import com.delivera.model.OperationalUnit;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.OperationalUnitRepository;
@@ -83,6 +85,17 @@ public class UnitService {
     public List<B2BUnitResponse> getExternalUnits() {
         return unitRepository.findExternalByOrganization(securityUtils.getCurrentCompanyId()).stream()
                 .map(B2BUnitResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompanySummary> getExternalCompanies() {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        Company company = companyRepository.findById(companyId).orElseThrow(CompanyContextException::new);
+        return companyRepository.findByOrganizationId(company.getOrganization().getId())
+                .stream()
+                .filter(c -> !c.getId().equals(companyId))
+                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode()))
                 .toList();
     }
 

@@ -81,9 +81,7 @@ public class LoyalUserService {
 
     public List<OrderResponse> getMyOrders() {
         String email = securityUtils.getCurrentEmail();
-        return loyalUserRepository.findByEmail(email).stream()
-                .flatMap(lu -> orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(lu.getId()).stream())
-                .map(OrderResponse::from)
-                .toList();
+        return orderRepository.findByRecipientEmailOrderByCreatedAtDesc(email)
+                .stream().map(OrderResponse::from).toList();
     }
 }

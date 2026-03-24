@@ -12,6 +12,7 @@ export function useOrderForm() {
 
   const units = ref([])
   const externalUnits = ref([])
+  const externalCompanies = ref([])
   const loyalUsers = ref([])
   const loadError = ref('')
   const orderType = ref('INTERNAL') // 'INTERNAL' | 'B2C' | 'B2B'
@@ -30,12 +31,7 @@ export function useOrderForm() {
     units.value.filter(u => u.id !== originId.value)
   )
 
-  const b2bCompanies = computed(() => {
-    const seen = new Set()
-    return externalUnits.value
-      .filter(u => { if (seen.has(u.companyId)) return false; seen.add(u.companyId); return true })
-      .map(u => ({ id: u.companyId, name: u.companyName }))
-  })
+  const b2bCompanies = computed(() => externalCompanies.value)
 
   const b2bUnitOptions = computed(() =>
     externalUnits.value.filter(u => u.companyId === b2bCompanyId.value)
@@ -55,10 +51,11 @@ export function useOrderForm() {
 
   onMounted(async () => {
     try {
-      const [unitsRes, externalRes, luRes] = await Promise.all([
+      const [unitsRes, externalRes, luRes, extCompRes] = await Promise.all([
         api.get('/units'),
         api.get('/units/external'),
         api.get('/loyal-users'),
+        api.get('/units/external-companies'),
       ])
       if (unitsRes.ok) units.value = await unitsRes.json()
       else {
@@ -69,6 +66,8 @@ export function useOrderForm() {
       else console.error('Failed to load external units:', externalRes.status)
       if (luRes.ok) loyalUsers.value = await luRes.json()
       else console.error('Failed to load loyal users:', luRes.status)
+      if (extCompRes.ok) externalCompanies.value = await extCompRes.json()
+      else console.error('Failed to load external companies:', extCompRes.status)
     } catch {
       loadError.value = t('error.connection')
     }
