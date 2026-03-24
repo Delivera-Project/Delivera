@@ -11,7 +11,7 @@ Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y ope
 | Capa | Tecnologías |
 |---|---|
 | Backend | Java 21, Spring Boot 3.2, Tomcat 10.1 (embedded), Lombok |
-| ORM / Migraciones | Hibernate/JPA, Flyway (V24) |
+| ORM / Migraciones | Hibernate/JPA, Flyway (V32) |
 | Base de datos | PostgreSQL 16 |
 | Autenticación | Argon2 (Bouncy Castle), JWT HS256 (jjwt 0.12) |
 | Frontend | Vue 3, Vite 7, Vue Router 4, Pinia, Vue i18n |
@@ -70,7 +70,7 @@ npm run dev
 | PostgreSQL (host) | 5433 |
 | Spring Boot | 8080 |
 | Vite dev server | 3000 |
-| Swagger UI | http://localhost:8080/api/v1/swagger-ui.html |
+| Swagger UI | http://localhost:8080/swagger-ui/index.html |
 
 El proxy de Vite reenvía `/api/*` al backend, por lo que no hace falta configurar CORS en desarrollo. Si cambias el puerto de Spring Boot, actualiza también el `target` del proxy en `vite.config.js`.
 
@@ -149,6 +149,13 @@ Activa el perfil `prod` con `SPRING_PROFILES_ACTIVE=prod`. Variables de entorno 
 
 ## Migraciones
 
-Flyway gestiona el esquema desde `backend/src/main/resources/db/migration/`. Versión actual: **V24**. Para añadir una nueva migración, crea un archivo `V{n}__descripcion.sql`.
+Flyway gestiona el esquema desde `backend/src/main/resources/db/migration/`. Versión actual: **V32**. Para añadir una nueva migración, crea un archivo `V{n}__descripcion.sql`.
 
-Las migraciones V1–V6 cubren la infraestructura base; V7–V18 el multi-tenant, pedidos y fidelizados; V19–V22 configuración extensible (status, prioridad, roles); V23 completa filas de `worker_role_config`; V24 renombra `slug` → `handle` en `organizations`.
+| Rango | Contenido |
+|---|---|
+| V1–V6 | Infraestructura base de usuarios |
+| V7–V18 | Multi-tenant, unidades operativas, pedidos y fidelizados |
+| V19–V23 | Configuración extensible de estados, prioridades y roles de trabajador |
+| V24–V26 | Renombrado `slug` → `handle`, relaxación de trigger de pedido, eliminación de enums |
+| V27–V29 | FK de tipo de actividad a empresas, fidelizados many-to-many con empresas |
+| V30–V32 | Tipo de pedido en órdenes, unicidad worker por empresa, limpieza `worker_role_config` |
