@@ -21,7 +21,7 @@ async function fetchOrder() {
   loading.value = true
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/v1/orders/public/search?reference=${encodeURIComponent(reference)}`
+      `${import.meta.env.VITE_API_URL}/api/v2/orders/public/search?reference=${encodeURIComponent(reference)}`
     )
     if (res.ok) order.value = await res.json()
     else error.value = t('tracking.notFound')

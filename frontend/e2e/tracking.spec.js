@@ -16,7 +16,7 @@ const mockOrder = {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.route('**/api/v1/app-config', route =>
+  await page.route('**/api/v2/app-config', route =>
     route.fulfill({ json: mockAppConfig })
   )
 })
@@ -29,7 +29,7 @@ test('shows search form', { tag: '@tracking' }, async ({ page }) => {
 })
 
 test('search by reference shows order info', { tag: '@tracking' }, async ({ page }) => {
-  await page.route('**/api/v1/orders/public/search**', route =>
+  await page.route('**/api/v2/orders/public/search**', route =>
     route.fulfill({ json: mockOrder })
   )
   // Use ?q= param so onMounted triggers fetchByReference without needing the input
@@ -40,7 +40,7 @@ test('search by reference shows order info', { tag: '@tracking' }, async ({ page
 })
 
 test('direct token URL shows order info', { tag: '@tracking' }, async ({ page }) => {
-  await page.route('**/api/v1/orders/public/track/**', route =>
+  await page.route('**/api/v2/orders/public/track/**', route =>
     route.fulfill({ json: mockOrder })
   )
   await page.goto('/track/ABC123TOKEN')
@@ -49,7 +49,7 @@ test('direct token URL shows order info', { tag: '@tracking' }, async ({ page })
 })
 
 test('not found reference shows error', { tag: '@tracking' }, async ({ page }) => {
-  await page.route('**/api/v1/orders/public/search**', route =>
+  await page.route('**/api/v2/orders/public/search**', route =>
     route.fulfill({ status: 404, json: {} })
   )
   await page.goto('/track?q=XXXX')

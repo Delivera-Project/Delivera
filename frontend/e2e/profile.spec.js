@@ -14,7 +14,7 @@ const mockProfile = {
 test.beforeEach(async ({ page }) => {
   await setupAuth(page)
   await mockApiDefaults(page)
-  await page.route('**/api/v1/user/profile', route =>
+  await page.route('**/api/v2/user/profile', route =>
     route.fulfill({ json: mockProfile })
   )
 })
@@ -55,8 +55,8 @@ test('logout redirects to /', { tag: '@profile' }, async ({ page }) => {
 })
 
 test('save profile updates display name', { tag: '@profile' }, async ({ page }) => {
-  await page.unroute('**/api/v1/user/profile')
-  await page.route('**/api/v1/user/profile', async route => {
+  await page.unroute('**/api/v2/user/profile')
+  await page.route('**/api/v2/user/profile', async route => {
     if (route.request().method() === 'PUT') {
       await route.fulfill({ json: { ...mockProfile, firstName: 'Manuel', lastName: 'Niza' } })
     } else {

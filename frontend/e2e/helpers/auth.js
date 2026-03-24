@@ -17,11 +17,11 @@ export async function setupAuth(page, overrides = {}) {
 }
 
 /**
- * Catches all /api/v1/ requests and returns [] by default.
+ * Catches all /api/v2/ requests and returns [] by default.
  * Individual tests can add more specific routes on top (LIFO — last wins).
  */
 export async function mockApiDefaults(page) {
-  await page.route('**/api/v1/**', route => route.fulfill({ json: [] }))
+  await page.route('**/api/v2/**', route => route.fulfill({ json: [] }))
 }
 
 export const mockAppConfig = { orderStatuses: [], orderPriorities: [], roleCapabilities: [] }

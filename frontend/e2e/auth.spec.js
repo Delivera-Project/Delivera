@@ -10,7 +10,7 @@ const loginResponse = {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.route('**/api/v1/**', async route => {
+  await page.route('**/api/v2/**', async route => {
     const url = route.request().url()
     if (url.includes('/auth/login')) {
       await route.fulfill({ json: loginResponse })
@@ -36,7 +36,7 @@ test('valid credentials redirect to /units', { tag: '@auth' }, async ({ page }) 
 })
 
 test('invalid credentials shows error message', { tag: '@auth' }, async ({ page }) => {
-  await page.route('**/api/v1/auth/login', route =>
+  await page.route('**/api/v2/auth/login', route =>
     route.fulfill({ status: 401, json: { code: 'INVALID_CREDENTIALS' } })
   )
   await page.goto('/')

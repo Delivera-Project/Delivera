@@ -29,7 +29,7 @@ async function submitClaim() {
   claimError.value = ''
   claimLoading.value = true
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/public/track/${route.params.token}/register`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/orders/public/track/${route.params.token}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -62,7 +62,7 @@ async function fetchByToken(token) {
   error.value = ''
   order.value = null
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/public/track/${token}`)
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/orders/public/track/${token}`)
     if (res.ok) order.value = await res.json()
     else error.value = t('tracking.notFound')
   } catch {
@@ -78,7 +78,7 @@ async function fetchByReference() {
   error.value = ''
   order.value = null
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/orders/public/search?reference=${encodeURIComponent(searchRef.value.trim())}`)
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/orders/public/search?reference=${encodeURIComponent(searchRef.value.trim())}`)
     if (res.ok) order.value = await res.json()
     else error.value = t('tracking.notFound')
   } catch {
