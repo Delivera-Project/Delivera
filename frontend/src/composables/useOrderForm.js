@@ -63,11 +63,8 @@ export function useOrderForm() {
         loadError.value = api.translateError(data, 'error.connection')
       }
       if (externalRes.ok) externalUnits.value = await externalRes.json()
-      else console.error('Failed to load external units:', externalRes.status)
       if (luRes.ok) loyalUsers.value = await luRes.json()
-      else console.error('Failed to load loyal users:', luRes.status)
       if (extCompRes.ok) externalCompanies.value = await extCompRes.json()
-      else console.error('Failed to load external companies:', extCompRes.status)
     } catch {
       loadError.value = t('error.connection')
     }

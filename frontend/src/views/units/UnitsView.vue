@@ -1,19 +1,18 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
+import { useResourceList } from '@/composables/useResourceList'
 import EmptyState from '@/components/EmptyState.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const api = useApi()
 const auth = useAuthStore()
+const { items: units, loading, error } = useResourceList('/units')
 
-const units = ref([])
-const loading = ref(false)
-const error = ref('')
 const deleteError = ref('')
 const filterText = ref('')
 const filterType = ref('ALL')
@@ -29,26 +28,10 @@ const typeOptions = computed(() => [
 const filtered = computed(() => {
   return units.value.filter(u => {
     if (filterType.value !== 'ALL' && u.type !== filterType.value) return false
-    if (filterText.value) {
-      const q = filterText.value.toLowerCase()
-      if (!u.name.toLowerCase().includes(q)) return false
-    }
+    if (filterText.value && !u.name.toLowerCase().includes(filterText.value.toLowerCase())) return false
     return true
   })
 })
-
-async function load() {
-  loading.value = true
-  try {
-    const res = await api.get('/units')
-    if (res.ok) units.value = await res.json()
-    else error.value = t('error.connection')
-  } catch {
-    error.value = t('error.connection')
-  } finally {
-    loading.value = false
-  }
-}
 
 async function deleteUnit(e, id) {
   e.stopPropagation()
@@ -63,8 +46,6 @@ async function deleteUnit(e, id) {
       : t('error.connection')
   }
 }
-
-onMounted(load)
 </script>
 
 <template>

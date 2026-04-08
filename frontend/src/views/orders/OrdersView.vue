@@ -6,6 +6,7 @@ import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useFormatDate } from '@/composables/useFormatDate'
+import { useResourceList } from '@/composables/useResourceList'
 import EmptyState from '@/components/EmptyState.vue'
 
 const { t } = useI18n()
@@ -15,10 +16,8 @@ const route = useRoute()
 const api = useApi()
 const auth = useAuthStore()
 const { load: loadConfig, statusSeverity, prioritySeverity } = useAppConfig()
+const { items: orders, loading, error } = useResourceList('/orders')
 
-const orders = ref([])
-const loading = ref(false)
-const error = ref('')
 const successMsg = ref(route.query.created ? t('orders.created', { reference: route.query.created }) : '')
 const filterStatus = ref('ALL')
 const filterPriority = ref('ALL')
@@ -56,19 +55,6 @@ const filtered = computed(() => {
   })
 })
 
-async function load() {
-  loading.value = true
-  try {
-    const res = await api.get('/orders')
-    if (res.ok) orders.value = await res.json()
-    else error.value = t('error.connection')
-  } catch {
-    error.value = t('error.connection')
-  } finally {
-    loading.value = false
-  }
-}
-
 async function deleteOrder(e, id) {
   e.stopPropagation()
   if (!confirm(t('orders.deleteConfirm'))) return
@@ -76,7 +62,7 @@ async function deleteOrder(e, id) {
   if (res.ok) orders.value = orders.value.filter(o => o.id !== id)
 }
 
-onMounted(() => { loadConfig(); load() })
+onMounted(loadConfig)
 </script>
 
 <template>

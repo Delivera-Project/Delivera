@@ -1,33 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useApi } from '@/composables/useApi'
 import { useFormatDate } from '@/composables/useFormatDate'
+import { useResourceList } from '@/composables/useResourceList'
 
 const { t } = useI18n()
 const { formatDate } = useFormatDate()
 const router = useRouter()
-const api = useApi()
-
-const loyalUsers = ref([])
-const loading = ref(false)
-const error = ref('')
-
-async function load() {
-  loading.value = true
-  try {
-    const res = await api.get('/loyal-users')
-    if (res.ok) loyalUsers.value = await res.json()
-    else error.value = t('error.connection')
-  } catch {
-    error.value = t('error.connection')
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(load)
+const { items: loyalUsers, loading, error } = useResourceList('/loyal-users')
 </script>
 
 <template>
