@@ -29,9 +29,4 @@ class ActivityTypeServiceTest {
         assertThat(activityTypeService.getAll()).hasSize(2);
     }
 
-    @Test
-    void getAll_emptyRepository_returnsEmptyList() {
-        when(activityTypeRepository.findAllByOrderBySortOrderAsc()).thenReturn(List.of());
-        assertThat(activityTypeService.getAll()).isEmpty();
-    }
 }

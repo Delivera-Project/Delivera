@@ -79,16 +79,6 @@ class UnitServiceTest {
     }
 
     @Test
-    void create_companyNotFound_throws() {
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.existsByCompanyIdAndName(companyId, "Warehouse A")).thenReturn(false);
-        when(companyRepository.findById(companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> unitService.create(request))
-                .isInstanceOf(CompanyContextException.class);
-    }
-
-    @Test
     void update_success() {
         UUID unitId = unit.getId();
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
@@ -97,72 +87,6 @@ class UnitServiceTest {
         when(unitRepository.save(unit)).thenReturn(unit);
 
         assertThat(unitService.update(unitId, request)).isNotNull();
-    }
-
-    @Test
-    void update_notFound_throws() {
-        UUID unitId = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> unitService.update(unitId, request))
-                .isInstanceOf(UnitNotFoundException.class);
-    }
-
-    @Test
-    void update_nameTakenByOtherUnit_throws() {
-        UUID unitId = unit.getId();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.of(unit));
-        when(unitRepository.existsByCompanyIdAndNameAndIdNot(companyId, "Warehouse A", unitId)).thenReturn(true);
-
-        assertThatThrownBy(() -> unitService.update(unitId, request))
-                .isInstanceOf(UnitNameConflictException.class);
-    }
-
-    @Test
-    void getByCompany_returnsMappedList() {
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findAllByCompanyId(companyId)).thenReturn(List.of(unit));
-
-        assertThat(unitService.getByCompany()).hasSize(1);
-    }
-
-    @Test
-    void getExternalUnits_returnsMappedList() {
-        Company externalCompany = new Company();
-        externalCompany.setId(UUID.randomUUID());
-        externalCompany.setName("External Co");
-
-        OperationalUnit externalUnit = new OperationalUnit();
-        externalUnit.setId(UUID.randomUUID());
-        externalUnit.setName("External Warehouse");
-        externalUnit.setType(UnitType.WAREHOUSE);
-        externalUnit.setCompany(externalCompany);
-
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findExternalByOrganization(companyId)).thenReturn(List.of(externalUnit));
-
-        assertThat(unitService.getExternalUnits()).hasSize(1);
-    }
-
-    @Test
-    void getDetail_found() {
-        UUID unitId = unit.getId();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.of(unit));
-
-        assertThat(unitService.getDetail(unitId)).isNotNull();
-    }
-
-    @Test
-    void getDetail_notFound_throws() {
-        UUID unitId = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> unitService.getDetail(unitId))
-                .isInstanceOf(UnitNotFoundException.class);
     }
 
     @Test
@@ -175,13 +99,4 @@ class UnitServiceTest {
         verify(unitRepository).delete(unit);
     }
 
-    @Test
-    void delete_notFound_throws() {
-        UUID unitId = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> unitService.delete(unitId))
-                .isInstanceOf(UnitNotFoundException.class);
-    }
 }

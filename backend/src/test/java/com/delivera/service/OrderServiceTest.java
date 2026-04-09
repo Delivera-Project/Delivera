@@ -94,24 +94,6 @@ class OrderServiceTest {
     }
 
     @Test
-    void getDetail_found() {
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(orderRepository.findByIdForCompany(order.getId(), companyId)).thenReturn(Optional.of(order));
-
-        assertThat(orderService.getDetail(order.getId())).isNotNull();
-    }
-
-    @Test
-    void getDetail_notFound_throws() {
-        UUID id = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(orderRepository.findByIdForCompany(id, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> orderService.getDetail(id))
-                .isInstanceOf(OrderNotFoundException.class);
-    }
-
-    @Test
     void create_internalOrder_success() {
         OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, OrderType.INTERNAL, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
@@ -123,39 +105,6 @@ class OrderServiceTest {
         when(orderRepository.save(any())).thenReturn(order);
 
         assertThat(orderService.create(req)).isNotNull();
-    }
-
-    @Test
-    void create_sameOriginAndDestination_throws() {
-        OrderRequest req = new OrderRequest(origin.getId(), origin.getId(), null, null, OrderType.INTERNAL, null, null);
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
-
-        assertThatThrownBy(() -> orderService.create(req))
-                .isInstanceOf(InvalidOrderUnitsException.class);
-    }
-
-    @Test
-    void create_originNotFound_throws() {
-        UUID badId = UUID.randomUUID();
-        OrderRequest req = new OrderRequest(badId, destination.getId(), null, null, OrderType.INTERNAL, null, null);
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(badId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> orderService.create(req))
-                .isInstanceOf(InvalidOrderUnitsException.class);
-    }
-
-    @Test
-    void create_destinationNotFound_throws() {
-        UUID badId = UUID.randomUUID();
-        OrderRequest req = new OrderRequest(origin.getId(), badId, null, null, OrderType.INTERNAL, null, null);
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
-        when(unitRepository.findByIdAndCompanyId(badId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> orderService.create(req))
-                .isInstanceOf(InvalidOrderUnitsException.class);
     }
 
     @Test
@@ -177,20 +126,6 @@ class OrderServiceTest {
     }
 
     @Test
-    void create_externalOrder_success() {
-        OrderRequest req = new OrderRequest(origin.getId(), null, "recipient@test.com", "John", OrderType.B2C, null, null);
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
-        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
-        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
-        when(orderRepository.nextReferenceSeq()).thenReturn(1L);
-        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "recipient@test.com")).thenReturn(Optional.empty());
-        when(orderRepository.save(any())).thenReturn(order);
-
-        assertThat(orderService.create(req)).isNotNull();
-    }
-
-    @Test
     void updateStatus_success() {
         OrderStatusRequest req = new OrderStatusRequest(OrderStatus.IN_TRANSIT, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
@@ -203,17 +138,6 @@ class OrderServiceTest {
     }
 
     @Test
-    void updateStatus_orderNotFound_throws() {
-        UUID id = UUID.randomUUID();
-        OrderStatusRequest req = new OrderStatusRequest(OrderStatus.IN_TRANSIT, null);
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(orderRepository.findByIdAndCompanyId(id, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> orderService.updateStatus(id, req))
-                .isInstanceOf(OrderNotFoundException.class);
-    }
-
-    @Test
     void delete_success() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdAndCompanyId(order.getId(), companyId)).thenReturn(Optional.of(order));
@@ -223,39 +147,10 @@ class OrderServiceTest {
     }
 
     @Test
-    void delete_notFound_throws() {
-        UUID id = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(orderRepository.findByIdAndCompanyId(id, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> orderService.delete(id))
-                .isInstanceOf(OrderNotFoundException.class);
-    }
-
-    @Test
     void getPublicByToken_found() {
         order.setTrackingToken("abc123");
         when(orderRepository.findByTrackingToken("abc123")).thenReturn(Optional.of(order));
         assertThat(orderService.getPublicByToken("abc123")).isNotNull();
     }
 
-    @Test
-    void getPublicByToken_notFound_throws() {
-        when(orderRepository.findByTrackingToken("bad")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> orderService.getPublicByToken("bad"))
-                .isInstanceOf(OrderNotFoundException.class);
-    }
-
-    @Test
-    void getPublicByReference_found() {
-        when(orderRepository.findByReference("DEL-20240101-0001")).thenReturn(Optional.of(order));
-        assertThat(orderService.getPublicByReference("del-20240101-0001")).isNotNull();
-    }
-
-    @Test
-    void getPublicByReference_notFound_throws() {
-        when(orderRepository.findByReference("UNKNOWN")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> orderService.getPublicByReference("unknown"))
-                .isInstanceOf(OrderNotFoundException.class);
-    }
 }

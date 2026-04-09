@@ -44,6 +44,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleKnown(RuntimeException ex) {
         Mapping m = ERRORS.get(ex.getClass());
         if (m == null) {
+            m = ERRORS.entrySet().stream()
+                    .filter(e -> e.getKey().isAssignableFrom(ex.getClass()))
+                    .map(Map.Entry::getValue)
+                    .findFirst()
+                    .orElse(null);
+        }
+        if (m == null) {
             log.error("Unhandled runtime exception: {}", ex.getMessage(), ex);
             return ResponseEntity.status(INTERNAL_SERVER_ERROR).body(new ErrorResponse("INTERNAL_ERROR"));
         }

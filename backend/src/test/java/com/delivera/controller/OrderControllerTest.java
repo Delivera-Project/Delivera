@@ -11,6 +11,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -34,5 +37,25 @@ class OrderControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody()).isEqualTo(loginResponse);
+    }
+
+    @Test
+    void list_returns200WithOrderList() {
+        when(orderService.getByCompany()).thenReturn(List.of());
+
+        var response = orderController.list();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEmpty();
+    }
+
+    @Test
+    void detail_returns200() {
+        UUID id = UUID.randomUUID();
+        when(orderService.getDetail(id)).thenReturn(null);
+
+        var response = orderController.detail(id);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 }

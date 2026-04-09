@@ -12,7 +12,6 @@ export function useOrderForm() {
 
   const units = ref([])
   const externalUnits = ref([])
-  const externalCompanies = ref([])
   const loyalUsers = ref([])
   const loadError = ref('')
   const orderType = ref('INTERNAL') // 'INTERNAL' | 'B2C' | 'B2B'
@@ -31,7 +30,12 @@ export function useOrderForm() {
     units.value.filter(u => u.id !== originId.value)
   )
 
-  const b2bCompanies = computed(() => externalCompanies.value)
+  const b2bCompanies = computed(() => {
+    const seen = new Set()
+    return externalUnits.value
+      .filter(u => !seen.has(u.companyId) && seen.add(u.companyId))
+      .map(u => ({ id: u.companyId, name: u.companyName }))
+  })
 
   const b2bUnitOptions = computed(() =>
     externalUnits.value.filter(u => u.companyId === b2bCompanyId.value)
@@ -51,11 +55,10 @@ export function useOrderForm() {
 
   onMounted(async () => {
     try {
-      const [unitsRes, externalRes, luRes, extCompRes] = await Promise.all([
+      const [unitsRes, externalRes, luRes] = await Promise.all([
         api.get('/units'),
         api.get('/units/external'),
         api.get('/loyal-users'),
-        api.get('/units/external-companies'),
       ])
       if (unitsRes.ok) units.value = await unitsRes.json()
       else {
@@ -64,7 +67,6 @@ export function useOrderForm() {
       }
       if (externalRes.ok) externalUnits.value = await externalRes.json()
       if (luRes.ok) loyalUsers.value = await luRes.json()
-      if (extCompRes.ok) externalCompanies.value = await extCompRes.json()
     } catch {
       loadError.value = t('error.connection')
     }
@@ -123,7 +125,7 @@ export function useOrderForm() {
   }
 
   return {
-    units, externalUnits, loyalUsers, loyalUserMatch, loadError,
+    units, loyalUsers, loyalUserMatch, loadError,
     orderType, originId, destinationId, b2bCompanyId, b2bDestinationId,
     recipientEmail, recipientName,
     priority, notes, loading, error, errors, invalids,

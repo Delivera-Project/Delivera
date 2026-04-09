@@ -50,9 +50,9 @@ public class SecurityConfig {
                 // Documentación y acceso público
                 auth.requestMatchers(SWAGGER_PATHS).permitAll();
                 auth.requestMatchers(api + "/auth/**").permitAll();
-                auth.requestMatchers(api + "/organizations/**").permitAll();
-                auth.requestMatchers(api + "/activity-types/**").permitAll();
-                auth.requestMatchers(api + "/app-config/**").permitAll();
+                auth.requestMatchers(HttpMethod.GET, api + "/organizations/**").permitAll();
+                auth.requestMatchers(HttpMethod.GET, api + "/activity-types/**").permitAll();
+                auth.requestMatchers(HttpMethod.GET, api + "/app-config/**").permitAll();
                 auth.requestMatchers(api + "/orders/public/**").permitAll();
 
                 // Administración global
@@ -76,7 +76,13 @@ public class SecurityConfig {
                 // Usuarios fidelizados
                 auth.requestMatchers(HttpMethod.POST, api + "/loyal-users").hasRole(ADMIN);
 
-                auth.anyRequest().authenticated();
+                // Endpoints autenticados: cualquier trabajador activo
+                auth.requestMatchers(api + "/units/**").authenticated();
+                auth.requestMatchers(api + "/orders/**").authenticated();
+                auth.requestMatchers(api + "/loyal-users/**").authenticated();
+                auth.requestMatchers(api + "/user/**").authenticated();
+
+                auth.anyRequest().denyAll();
             })
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

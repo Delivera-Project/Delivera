@@ -1,6 +1,6 @@
 package com.delivera.controller;
 
-import com.delivera.model.ActivityType;
+import com.delivera.dto.config.ActivityTypeResponse;
 import com.delivera.service.ActivityTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +21,7 @@ public class ActivityTypeController {
 
     @Operation(summary = "Listar tipos de actividad")
     @GetMapping
-    public List<ActivityType> getAll() {
-        return activityTypeService.getAll();
+    public List<ActivityTypeResponse> getAll() {
+        return activityTypeService.getAll().stream().map(ActivityTypeResponse::from).toList();
     }
 }

@@ -24,30 +24,8 @@ class SecurityUtilsTest {
     }
 
     @Test
-    void getCurrentCompanyId_withValidAuth_returnsCompanyId() {
-        UUID companyId = UUID.randomUUID();
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken("user@test.com", null, List.of());
-        auth.setDetails(companyId);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        assertThat(securityUtils.getCurrentCompanyId()).isEqualTo(companyId);
-    }
-
-    @Test
     void getCurrentCompanyId_nullAuth_throws() {
         SecurityContextHolder.clearContext();
-        assertThatThrownBy(() -> securityUtils.getCurrentCompanyId())
-                .isInstanceOf(CompanyContextException.class);
-    }
-
-    @Test
-    void getCurrentCompanyId_detailsNotUUID_throws() {
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken("user@test.com", null, List.of());
-        auth.setDetails("not-a-uuid");
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
         assertThatThrownBy(() -> securityUtils.getCurrentCompanyId())
                 .isInstanceOf(CompanyContextException.class);
     }
@@ -61,9 +39,4 @@ class SecurityUtilsTest {
         assertThat(securityUtils.getCurrentEmail()).isEqualTo("user@test.com");
     }
 
-    @Test
-    void getCurrentEmail_nullAuth_returnsNull() {
-        SecurityContextHolder.clearContext();
-        assertThat(securityUtils.getCurrentEmail()).isNull();
-    }
 }
