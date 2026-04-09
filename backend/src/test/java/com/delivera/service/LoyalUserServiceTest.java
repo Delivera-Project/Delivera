@@ -129,13 +129,9 @@ class LoyalUserServiceTest {
     }
 
     @Test
-    void getMyOrders_returnsAllOrdersFromAllCompanies() {
-        LoyalUser lu2 = new LoyalUser();
-        lu2.setId(UUID.randomUUID());
+    void getMyOrders_returnsOrdersByRecipientEmail() {
         when(securityUtils.getCurrentEmail()).thenReturn("loyal@test.com");
-        when(loyalUserRepository.findByEmail("loyal@test.com")).thenReturn(List.of(loyalUser, lu2));
-        when(orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUser.getId())).thenReturn(List.of());
-        when(orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(lu2.getId())).thenReturn(List.of());
+        when(orderRepository.findByRecipientEmailOrderByCreatedAtDesc("loyal@test.com")).thenReturn(List.of());
 
         assertThat(loyalUserService.getMyOrders()).isEmpty();
     }
