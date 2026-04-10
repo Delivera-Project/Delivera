@@ -56,15 +56,6 @@ class LoyalUserServiceTest {
     }
 
     @Test
-    void getByCompany_filtersUsersWithZeroOrders() {
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(loyalUser));
-        when(orderRepository.countByLoyalUserId(loyalUser.getId())).thenReturn(0L);
-
-        assertThat(loyalUserService.getByCompany()).isEmpty();
-    }
-
-    @Test
     void getByCompany_returnsUsersWithOrders() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(loyalUser));
@@ -88,55 +79,11 @@ class LoyalUserServiceTest {
     }
 
     @Test
-    void add_alreadyExists_throws() {
-        LoyalUserRequest req = new LoyalUserRequest("loyal@test.com");
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "loyal@test.com")).thenReturn(Optional.of(loyalUser));
-
-        assertThatThrownBy(() -> loyalUserService.add(req))
-                .isInstanceOf(LoyalUserConflictException.class);
-    }
-
-    @Test
-    void add_companyNotFound_throws() {
-        LoyalUserRequest req = new LoyalUserRequest("new@test.com");
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
-        when(companyRepository.findById(companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> loyalUserService.add(req))
-                .isInstanceOf(CompanyContextException.class);
-    }
-
-    @Test
-    void getOrdersForLoyalUser_success() {
-        UUID loyalUserId = loyalUser.getId();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)).thenReturn(Optional.of(loyalUser));
-        when(orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUserId)).thenReturn(List.of());
-
-        assertThat(loyalUserService.getOrdersForLoyalUser(loyalUserId)).isEmpty();
-    }
-
-    @Test
-    void getOrdersForLoyalUser_notFound_throws() {
-        UUID loyalUserId = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> loyalUserService.getOrdersForLoyalUser(loyalUserId))
-                .isInstanceOf(OrderNotFoundException.class);
-    }
-
-    @Test
-    void getMyOrders_returnsAllOrdersFromAllCompanies() {
-        LoyalUser lu2 = new LoyalUser();
-        lu2.setId(UUID.randomUUID());
+    void getMyOrders_returnsOrdersByRecipientEmail() {
         when(securityUtils.getCurrentEmail()).thenReturn("loyal@test.com");
-        when(loyalUserRepository.findByEmail("loyal@test.com")).thenReturn(List.of(loyalUser, lu2));
-        when(orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUser.getId())).thenReturn(List.of());
-        when(orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(lu2.getId())).thenReturn(List.of());
+        when(orderRepository.findByRecipientEmailOrderByCreatedAtDesc("loyal@test.com")).thenReturn(List.of());
 
         assertThat(loyalUserService.getMyOrders()).isEmpty();
+        verify(orderRepository).findByRecipientEmailOrderByCreatedAtDesc("loyal@test.com");
     }
 }

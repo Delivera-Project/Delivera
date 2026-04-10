@@ -1,6 +1,8 @@
 package com.delivera.controller;
 
 import com.delivera.dto.unit.B2BUnitResponse;
+import com.delivera.dto.unit.UnitRequest;
+import com.delivera.model.UnitType;
 import com.delivera.service.UnitService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,5 +35,25 @@ class UnitControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
         assertThat(response.getBody().get(0).name()).isEqualTo("Ext Warehouse");
+    }
+
+    @Test
+    void list_returns200WithUnitList() {
+        when(unitService.getByCompany()).thenReturn(List.of());
+
+        var response = unitController.list();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isEmpty();
+    }
+
+    @Test
+    void create_returns201() {
+        UnitRequest req = new UnitRequest("Warehouse A", UnitType.WAREHOUSE, "1 Main St", null, null);
+        when(unitService.create(req)).thenReturn(null);
+
+        var response = unitController.create(req);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     }
 }

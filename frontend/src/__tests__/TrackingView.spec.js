@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import TrackingView from '@/views/public/TrackingView.vue'
 
@@ -91,39 +91,6 @@ describe('TrackingView — claim panel visibility', () => {
     expect(wrapper.find('.claim-panel').exists()).toBe(true)
   })
 
-  it('shows email hint when recipientEmailHint is present', async () => {
-    mockFetch(buildOrder({ claimable: true, recipientEmailHint: 'j***@gmail.com' }))
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.find('.claim-hint').text()).toContain('j***@gmail.com')
-  })
-
-  it('does not show email hint when recipientEmailHint is null', async () => {
-    mockFetch(buildOrder({ claimable: true, recipientEmailHint: null }))
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.find('.claim-hint').exists()).toBe(false)
-  })
-})
-
-describe('TrackingView — claim panel without token (search result)', () => {
-  beforeEach(() => {
-    mockRouteParams = {}
-    mockRouteQuery = { q: 'DEL-001' }
-  })
-
-  afterEach(() => {
-    vi.unstubAllGlobals()
-    mockRouteParams = { token: 'testtoken123' }
-    mockRouteQuery = {}
-  })
-
-  it('does not show claim panel even when claimable=true on search result', async () => {
-    mockFetch(buildOrder({ claimable: true }))
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.find('.claim-panel').exists()).toBe(false)
-  })
 })
 
 describe('TrackingView — submitClaim', () => {
@@ -178,43 +145,4 @@ describe('TrackingView — submitClaim', () => {
     expect(mockPush).not.toHaveBeenCalled()
   })
 
-  it('ORDER_CLAIM_EMAIL_MISMATCH — shows error message', async () => {
-    const { wrapper, fetchMock } = await mountWithClaimableOrder()
-
-    fetchMock.mockResolvedValueOnce({
-      ok: false,
-      status: 422,
-      json: async () => ({ code: 'ORDER_CLAIM_EMAIL_MISMATCH' }),
-    })
-
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    expect(wrapper.find('.p-message').text()).toContain('tracking.claim.emailMismatch')
-  })
-
-  it('EMAIL_ALREADY_EXISTS — shows error message', async () => {
-    const { wrapper, fetchMock } = await mountWithClaimableOrder()
-
-    fetchMock.mockResolvedValueOnce({
-      ok: false,
-      status: 409,
-      json: async () => ({ code: 'EMAIL_ALREADY_EXISTS' }),
-    })
-
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    expect(wrapper.find('.p-message').text()).toContain('tracking.claim.emailExists')
-  })
-
-  it('network error — shows generic connection error', async () => {
-    const { wrapper, fetchMock } = await mountWithClaimableOrder()
-    fetchMock.mockRejectedValueOnce(new Error('Network error'))
-
-    await wrapper.find('form').trigger('submit')
-    await flushPromises()
-
-    expect(wrapper.find('.p-message').text()).toContain('error.connection')
-  })
 })

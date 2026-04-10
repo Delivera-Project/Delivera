@@ -32,7 +32,6 @@ jobs:
   frontend:
     name: Frontend — Lint, Test & Build
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -63,11 +62,31 @@ jobs:
         working-directory: frontend
         continue-on-error: true
 
+      - name: Subir reporte lcov
+        uses: actions/upload-artifact@v4
+        with:
+          name: lcov-report
+          path: frontend/coverage/lcov.info
+
+  security:
+    name: Security — IaC Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy IaC scan
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: '0'
+          format: table
+
   sonar:
     name: SonarCloud
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,28 +98,36 @@ jobs:
           distribution: temurin
           cache: maven
 
-      - uses: actions/setup-node@v4
+      - name: Descargar reporte JaCoCo
+        uses: actions/download-artifact@v4
         with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          name: jacoco-report
+          path: backend/target/site/jacoco
 
-      - name: Instalar dependencias frontend
-        run: npm ci
-        working-directory: frontend
-
-      - name: Generar cobertura frontend
-        run: npm run test:coverage
-        working-directory: frontend
+      - name: Descargar reporte lcov
+        uses: actions/download-artifact@v4
+        with:
+          name: lcov-report
+          path: frontend/coverage
 
       - name: Ajustar rutas lcov para SonarCloud
         run: sed -i 's|^SF:src/|SF:frontend/src/|g' frontend/coverage/lcov.info
 
-      - name: Compilar backend (con JaCoCo)
-        run: mvn -B verify
+      - name: Compilar backend y resolver dependencias (para Sonar)
+        run: mvn -B compile dependency:copy-dependencies -DincludeScope=compile -DoutputDirectory=target/dependency -DskipTests
         working-directory: backend
 
       - name: Análisis SonarCloud
-        run: npx --yes sonar-scanner -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@v1.2.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          scanMetadataReportFile: .scannerwork/report-task.txt
