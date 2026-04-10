@@ -1,6 +1,5 @@
 package com.delivera.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,9 +21,10 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private static final String ADMIN   = "COMPANY_ADMIN";
-    private static final String ANALYST = "ANALYST";
+    private static final String ADMIN    = "COMPANY_ADMIN";
+    private static final String ANALYST  = "ANALYST";
     private static final String OPERATOR = "OPERATOR";
+    private static final String UNITS_ALL = "/units/**";
 
     // Paths de documentación y endpoints públicos sin prefijo de API
     private static final String[] SWAGGER_PATHS = {
@@ -37,11 +37,8 @@ public class SecurityConfig {
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
@@ -65,8 +62,8 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.GET, api + "/units/external").hasAnyRole(ADMIN, ANALYST);
                 auth.requestMatchers(HttpMethod.GET, api + "/units/external-companies").hasAnyRole(ADMIN, ANALYST);
                 auth.requestMatchers(HttpMethod.POST, api + "/units").hasRole(ADMIN);
-                auth.requestMatchers(HttpMethod.PUT, api + "/units/**").hasRole(ADMIN);
-                auth.requestMatchers(HttpMethod.DELETE, api + "/units/**").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.PUT, api + UNITS_ALL).hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.DELETE, api + UNITS_ALL).hasRole(ADMIN);
 
                 // Pedidos
                 auth.requestMatchers(HttpMethod.POST, api + "/orders").hasAnyRole(ADMIN, ANALYST);
@@ -77,7 +74,7 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.POST, api + "/loyal-users").hasRole(ADMIN);
 
                 // Endpoints autenticados: cualquier trabajador activo
-                auth.requestMatchers(api + "/units/**").authenticated();
+                auth.requestMatchers(api + UNITS_ALL).authenticated();
                 auth.requestMatchers(api + "/orders/**").authenticated();
                 auth.requestMatchers(api + "/loyal-users/**").authenticated();
                 auth.requestMatchers(api + "/user/**").authenticated();
