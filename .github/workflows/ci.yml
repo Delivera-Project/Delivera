@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Trivy IaC scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: config
           scan-ref: .
@@ -113,8 +113,8 @@ jobs:
       - name: Ajustar rutas lcov para SonarCloud
         run: sed -i 's|^SF:src/|SF:frontend/src/|g' frontend/coverage/lcov.info
 
-      - name: Compilar backend (bytecode para Sonar)
-        run: mvn -B compile -DskipTests
+      - name: Compilar backend y resolver dependencias (para Sonar)
+        run: mvn -B compile dependency:copy-dependencies -DincludeScope=compile -DoutputDirectory=target/dependency -DskipTests
         working-directory: backend
 
       - name: Análisis SonarCloud
