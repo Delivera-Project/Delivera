@@ -86,6 +86,12 @@ function usageSeverity(pct) {
   return 'success'
 }
 
+const PLANS = [
+  { code: 'FREE',  name: 'Free',  units: 3,  workers: 5,  ordersThisMonth: 50,  loyalUsers: 20,  companies: 1 },
+  { code: 'BASIC', name: 'Basic', units: 10, workers: 15, ordersThisMonth: 200, loyalUsers: 100, companies: 5 },
+  { code: 'PRO',   name: 'Pro',   units: -1, workers: -1, ordersThisMonth: -1,  loyalUsers: -1,  companies: -1 },
+]
+
 const showUpgradeBanner = computed(() =>
   subscription.value && ['units','workers','ordersThisMonth','loyalUsers','companies'].some(k => {
     const r = subscription.value[k]
@@ -418,6 +424,23 @@ async function copyHandle() {
                 />
               </div>
             </div>
+            <div class="plans-comparison">
+              <p class="info-label" style="margin-bottom:12px">{{ t('settings.availablePlans') }}</p>
+              <div class="plans-grid">
+                <div v-for="plan in PLANS" :key="plan.code"
+                  :class="['plan-card', { 'plan-card--current': subscription?.planCode === plan.code }]">
+                  <div class="plan-card-name">{{ plan.name }}
+                    <span v-if="subscription?.planCode === plan.code" class="sub-plan-badge">{{ t('settings.currentPlan') }}</span>
+                  </div>
+                  <ul class="plan-features">
+                    <li v-for="key in ['units','workers','ordersThisMonth','loyalUsers','companies']" :key="key">
+                      <span class="plan-feature-label">{{ t('settings.resource.' + key) }}</span>
+                      <span class="plan-feature-val">{{ plan[key] === -1 ? '∞' : plan[key] }}</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </PTabPanel>
       </PTabPanels>
@@ -647,4 +670,22 @@ async function copyHandle() {
 :deep(.sub-bar-success) { background: #22c55e; }
 :deep(.sub-bar-warn)    { background: #f59e0b; }
 :deep(.sub-bar-danger)  { background: #ef4444; }
+
+.plans-comparison { margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0; }
+.plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.plan-card {
+  border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px;
+}
+.plan-card--current {
+  border-color: var(--p-primary-color, #7c3aed);
+  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 4%, white);
+}
+.plan-card-name {
+  font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.plan-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.plan-features li { display: flex; justify-content: space-between; font-size: 13px; }
+.plan-feature-label { color: #64748b; }
+.plan-feature-val { font-weight: 600; color: #1e293b; }
 </style>
