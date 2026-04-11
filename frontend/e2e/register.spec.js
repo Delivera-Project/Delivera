@@ -144,5 +144,5 @@ test('register company full flow submits and redirects', { tag: '@register' }, a
   await page.locator('#company-fullname').fill('Admin User')
   await page.locator('#company-password input').fill('Password1')
   await page.getByRole('button', { name: 'Crear empresa' }).click()
-  await expect(page).toHaveURL('/units')
+  await expect(page).toHaveURL('/onboarding')
 })

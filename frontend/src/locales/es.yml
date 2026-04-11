@@ -82,6 +82,14 @@ notFound:
   message: La página que buscas no existe
   goHome: Volver al inicio
 
+onboarding:
+  createUnit: Crea tu primera unidad
+  createUnitHint: Las unidades son los nodos operativos de tu empresa (almacenes, tiendas, fábricas...)
+  inviteWorker: Invita a tu primer trabajador
+  inviteWorkerHint: Los trabajadores podrán gestionar envíos desde tu empresa
+  skip: Omitir
+  finish: Finalizar configuración
+
 register:
   orgTitle: Crear organización
   companyTitle: Registrar empresa

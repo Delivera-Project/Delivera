@@ -156,7 +156,7 @@ export function useCompanyRegistration() {
       const data = isJson ? await res.json().catch(() => null) : null
       if (res.ok && data?.token) {
         auth.applyLoginData(data)
-        router.push('/units')
+        router.push('/onboarding')
       } else {
         error.value = data ? api.translateError(data, 'error.registerFailed') : t('error.registerFailed')
       }

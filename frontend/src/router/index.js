@@ -21,6 +21,7 @@ import ActivityView from '@/views/ActivityView.vue'
 import WorkersView from '@/views/workers/WorkersView.vue'
 import HomeView from '@/views/home/HomeView.vue'
 import UnitAssignWorkersView from '@/views/units/UnitAssignWorkersView.vue'
+import OnboardingView from '@/views/auth/OnboardingView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -31,6 +32,7 @@ const router = createRouter({
     { path: '/login/org-select', component: OrgSelectView, meta: { guest: true } },
     { path: '/register', component: RegisterView, meta: { guest: true } },
     { path: '/register/company', component: CompanyRegisterView, meta: { guest: true } },
+    { path: '/onboarding', component: OnboardingView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
     { path: '/track', component: TrackingView },
     { path: '/track/:token', component: TrackingView },
     {

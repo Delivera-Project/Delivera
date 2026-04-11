@@ -20,3 +20,6 @@ app:
     expiration: 86400
   cors:
     allowed-origins: http://localhost:3000
+  mail:
+    enabled: false
+    from: noreply@delivera.app
