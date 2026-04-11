@@ -23,6 +23,7 @@ public class OrderService {
     private final SecurityUtils securityUtils;
     private final AppConfigService appConfigService;
     private final SubscriptionService subscriptionService;
+    private final EmailService emailService;
 
     public OrderService(OrderRepository orderRepository,
                         OperationalUnitRepository unitRepository,
@@ -30,7 +31,8 @@ public class OrderService {
                         LoyalUserRepository loyalUserRepository,
                         SecurityUtils securityUtils,
                         AppConfigService appConfigService,
-                        SubscriptionService subscriptionService) {
+                        SubscriptionService subscriptionService,
+                        EmailService emailService) {
         this.orderRepository = orderRepository;
         this.unitRepository = unitRepository;
         this.companyRepository = companyRepository;
@@ -38,6 +40,7 @@ public class OrderService {
         this.securityUtils = securityUtils;
         this.appConfigService = appConfigService;
         this.subscriptionService = subscriptionService;
+        this.emailService = emailService;
     }
 
     public List<OrderResponse> getByCompany() {
@@ -93,11 +96,25 @@ public class OrderService {
 
         if (orderType == OrderType.B2C && request.recipientEmail() != null) {
             String recipientEmail = request.recipientEmail().toLowerCase().trim();
+            String recipientName = request.recipientName() != null ? request.recipientName().trim() : null;
+            String token = UUID.randomUUID().toString().replace("-", "");
             order.setRecipientEmail(recipientEmail);
-            order.setRecipientName(request.recipientName() != null ? request.recipientName().trim() : null);
-            order.setTrackingToken(UUID.randomUUID().toString().replace("-", ""));
+            order.setRecipientName(recipientName);
+            order.setTrackingToken(token);
             loyalUserRepository.findByCompaniesIdAndEmail(companyId, recipientEmail)
                     .ifPresent(order::setLoyalUser);
+            // DSI-09.5: send tracking link after save (inline lambda to avoid eager flush)
+            final String savedToken = token;
+            final String savedRecipient = recipientEmail;
+            final String savedName = recipientName;
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        String url = "https://delivera.app/track/" + savedToken;
+                        emailService.sendTrackingLink(savedRecipient, savedName, order.getReference(), url);
+                    }
+                });
         }
 
         var initialEvent = new OrderEvent();

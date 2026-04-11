@@ -82,6 +82,14 @@ notFound:
   message: The page you are looking for does not exist
   goHome: Go to home
 
+onboarding:
+  createUnit: Create your first unit
+  createUnitHint: Units are the operational nodes of your company (warehouses, stores, factories...)
+  inviteWorker: Invite your first worker
+  inviteWorkerHint: Workers will be able to manage shipments from your company
+  skip: Skip
+  finish: Finish setup
+
 register:
   orgTitle: Create organization
   companyTitle: Register company
