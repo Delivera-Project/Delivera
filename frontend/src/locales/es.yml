@@ -217,6 +217,20 @@ nav:
   loyalUsers: Fidelizados
   myOrders: Mis pedidos
   settings: Configuración
+  activity: Actividad
+
+activity:
+  title: Panel de actividad
+  period:
+    MONTH: Este mes
+    WEEK: Esta semana
+    TODAY: Hoy
+  metric:
+    totalOrders: Pedidos creados
+    completedOrders: Completados
+    cancelledOrders: Cancelados
+    activeOrders: En curso
+    newLoyalUsers: Nuevos fidelizados
 
 common:
   back: Volver

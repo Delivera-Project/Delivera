@@ -217,6 +217,20 @@ nav:
   loyalUsers: Loyal users
   myOrders: My orders
   settings: Settings
+  activity: Activity
+
+activity:
+  title: Activity panel
+  period:
+    MONTH: This month
+    WEEK: This week
+    TODAY: Today
+  metric:
+    totalOrders: Orders created
+    completedOrders: Completed
+    cancelledOrders: Cancelled
+    activeOrders: In progress
+    newLoyalUsers: New loyal users
 
 common:
   back: Back
