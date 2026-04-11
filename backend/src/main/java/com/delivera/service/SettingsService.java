@@ -40,6 +40,8 @@ public class SettingsService {
     private ActivityTypeRepository activityTypeRepository;
     @Autowired
     private SecurityUtils securityUtils;
+    @Autowired
+    private SubscriptionService subscriptionService;
 
     private Company currentCompany() {
         return companyRepository.findById(securityUtils.getCurrentCompanyId())
@@ -77,6 +79,7 @@ public class SettingsService {
     @Transactional
     public CompanySummary createCompany(CompanyCreateRequest req) {
         Company current = currentCompany();
+        subscriptionService.checkCompanyLimit(current.getId());
         Organization org = current.getOrganization();
 
         Company newCompany = new Company();

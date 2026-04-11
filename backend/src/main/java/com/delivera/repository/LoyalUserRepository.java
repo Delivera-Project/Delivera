@@ -18,4 +18,6 @@ public interface LoyalUserRepository extends JpaRepository<LoyalUser, UUID> {
 
     @Query("SELECT lu FROM LoyalUser lu WHERE lu.email = :email")
     List<LoyalUser> findByEmail(String email);
+
+    long countByCompaniesId(UUID companyId);
 }

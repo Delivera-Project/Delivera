@@ -23,4 +23,6 @@ public interface OperationalUnitRepository extends JpaRepository<OperationalUnit
            "(SELECT c.organization.id FROM Company c WHERE c.id = :companyId) " +
            "AND u.company.id <> :companyId")
     List<OperationalUnit> findExternalByOrganization(@Param("companyId") UUID companyId);
+
+    long countByCompanyId(UUID companyId);
 }

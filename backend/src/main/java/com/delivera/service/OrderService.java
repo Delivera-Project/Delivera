@@ -22,19 +22,22 @@ public class OrderService {
     private final LoyalUserRepository loyalUserRepository;
     private final SecurityUtils securityUtils;
     private final AppConfigService appConfigService;
+    private final SubscriptionService subscriptionService;
 
     public OrderService(OrderRepository orderRepository,
                         OperationalUnitRepository unitRepository,
                         CompanyRepository companyRepository,
                         LoyalUserRepository loyalUserRepository,
                         SecurityUtils securityUtils,
-                        AppConfigService appConfigService) {
+                        AppConfigService appConfigService,
+                        SubscriptionService subscriptionService) {
         this.orderRepository = orderRepository;
         this.unitRepository = unitRepository;
         this.companyRepository = companyRepository;
         this.loyalUserRepository = loyalUserRepository;
         this.securityUtils = securityUtils;
         this.appConfigService = appConfigService;
+        this.subscriptionService = subscriptionService;
     }
 
     public List<OrderResponse> getByCompany() {
@@ -56,6 +59,7 @@ public class OrderService {
     @Transactional
     public OrderResponse create(OrderRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
+        subscriptionService.checkOrderLimit(companyId);
 
         OrderType orderType = request.orderType();
 

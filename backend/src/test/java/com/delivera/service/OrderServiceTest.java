@@ -39,6 +39,8 @@ class OrderServiceTest {
     private SecurityUtils securityUtils;
     @Mock
     private AppConfigService appConfigService;
+    @Mock
+    private SubscriptionService subscriptionService;
     @InjectMocks
     private OrderService orderService;
 

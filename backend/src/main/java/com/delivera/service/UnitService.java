@@ -25,18 +25,22 @@ public class UnitService {
     private final OperationalUnitRepository unitRepository;
     private final CompanyRepository companyRepository;
     private final SecurityUtils securityUtils;
+    private final SubscriptionService subscriptionService;
 
     public UnitService(OperationalUnitRepository unitRepository,
                        CompanyRepository companyRepository,
-                       SecurityUtils securityUtils) {
+                       SecurityUtils securityUtils,
+                       SubscriptionService subscriptionService) {
         this.unitRepository = unitRepository;
         this.companyRepository = companyRepository;
         this.securityUtils = securityUtils;
+        this.subscriptionService = subscriptionService;
     }
 
     @Transactional
     public UnitResponse create(UnitRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
+        subscriptionService.checkUnitLimit(companyId);
         if (unitRepository.existsByCompanyIdAndName(companyId, request.name())) {
             throw new UnitNameConflictException();
         }

@@ -36,6 +36,8 @@ class LoyalUserServiceTest {
     private UserRepository userRepository;
     @Mock
     private SecurityUtils securityUtils;
+    @Mock
+    private SubscriptionService subscriptionService;
     @InjectMocks
     private LoyalUserService loyalUserService;
 
