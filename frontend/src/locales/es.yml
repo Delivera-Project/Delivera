@@ -1,6 +1,17 @@
 app:
   name: Delivera
 
+home:
+  welcome: "Bienvenido, {name}"
+  setupBanner: Completa la configuración para empezar a gestionar envíos
+  createFirstUnit: Crea tu primera unidad
+  inviteFirstWorker: Invita a tu primer trabajador
+  quickActions: Accesos rápidos
+  stats:
+    units: Unidades
+    workers: Trabajadores
+    orders: Pedidos activos
+
 auth:
   login: Iniciar sesión
   register: Registrarse
@@ -248,6 +259,7 @@ nav:
   units: Unidades
   orders: Pedidos
   loyalUsers: Fidelizados
+  home: Inicio
   myOrders: Mis pedidos
   settings: Configuración
   activity: Actividad

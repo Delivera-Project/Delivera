@@ -19,6 +19,7 @@ import TrackingView from '@/views/public/TrackingView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
 import ActivityView from '@/views/ActivityView.vue'
 import WorkersView from '@/views/workers/WorkersView.vue'
+import HomeView from '@/views/home/HomeView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -35,6 +36,7 @@ const router = createRouter({
       path: '/',
       component: AppLayout,
       children: [
+        { path: 'home', component: HomeView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'profile', component: ProfileView, meta: { requiresAuth: true } },
         { path: 'my-orders', component: MyOrdersView, meta: { requiresAuth: true } },
         { path: 'my-orders/detail', component: MyOrderDetailView, meta: { requiresAuth: true } },
@@ -65,7 +67,7 @@ router.beforeEach((to) => {
 
   if (to.meta.guest && auth.isAuthenticated && to.path !== '/login/org-select') {
     const companyRoles = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
-    return companyRoles.includes(auth.role) ? '/units' : '/my-orders'
+    return companyRoles.includes(auth.role) ? '/home' : '/my-orders'
   }
 
   if (to.meta.roles) {

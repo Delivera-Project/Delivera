@@ -25,6 +25,7 @@ const themeClass = computed(() =>
 )
 
 const navItems = [
+  { path: '/home', icon: 'pi-home', labelKey: 'nav.home', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
   { path: '/activity', icon: 'pi-chart-bar', labelKey: 'nav.activity', roles: ['COMPANY_ADMIN', 'ANALYST'] },
   { path: '/units', icon: 'pi-building', labelKey: 'nav.units', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
   { path: '/orders', icon: 'pi-send', labelKey: 'nav.orders', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
