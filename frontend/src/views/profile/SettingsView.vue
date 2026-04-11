@@ -86,6 +86,13 @@ function usageSeverity(pct) {
   return 'success'
 }
 
+const showUpgradeBanner = computed(() =>
+  subscription.value && ['units','workers','ordersThisMonth','loyalUsers','companies'].some(k => {
+    const r = subscription.value[k]
+    return !r.unlimited && usagePercent(r) > 85
+  })
+)
+
 onMounted(() => { load(); loadActivityTypes() })
 
 function startEditOrg() {
@@ -255,6 +262,7 @@ async function copyHandle() {
     <h1>{{ t('settings.title') }}</h1>
 
     <PMessage v-if="loadError" severity="error" :closable="false" class="form-message">{{ loadError }}</PMessage>
+    <PMessage v-if="showUpgradeBanner" severity="warn" :closable="true" class="form-message">{{ t('settings.upgradeBanner') }}</PMessage>
 
     <PTabs v-if="settings" v-model:value="activeTab">
       <PTabList>
