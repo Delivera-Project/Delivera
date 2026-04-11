@@ -92,6 +92,34 @@ class SubscriptionServiceTest {
     }
 
     @Test
+    void checkWorkerLimit_belowLimit_passes() {
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(4L);
+        assertThatCode(() -> subscriptionService.checkWorkerLimit(companyId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void checkWorkerLimit_atLimit_throws() {
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(5L);
+        assertThatThrownBy(() -> subscriptionService.checkWorkerLimit(companyId))
+                .isInstanceOf(SubscriptionLimitException.class)
+                .hasMessageContaining("workers");
+    }
+
+    @Test
+    void checkCompanyLimit_belowLimit_passes() {
+        when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(0L);
+        assertThatCode(() -> subscriptionService.checkCompanyLimit(companyId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void checkCompanyLimit_atLimit_throws() {
+        when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(1L);
+        assertThatThrownBy(() -> subscriptionService.checkCompanyLimit(companyId))
+                .isInstanceOf(SubscriptionLimitException.class)
+                .hasMessageContaining("companies");
+    }
+
+    @Test
     void unlimited_plan_never_blocks() {
         SubscriptionPlan pro = buildPlan("PRO", -1, -1, -1, -1, -1);
         company.setPlan(pro);
