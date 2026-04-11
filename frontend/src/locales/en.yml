@@ -280,6 +280,7 @@ settings:
   companySection: Company
   subscriptionSection: Plan
   currentPlan: Current plan
+  availablePlans: Available plans
   upgradeBanner: You are close to your plan limit. Consider upgrading to avoid interruptions.
   resource:
     units: Operational units
