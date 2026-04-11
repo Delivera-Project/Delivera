@@ -46,13 +46,13 @@ onMounted(load)
 <template>
   <div class="card card-wide">
     <div class="activity-header">
-      <h1>{{ t('activity.title') }}</h1>
+      <h1>{{ t('activity.panel.title') }}</h1>
       <div class="period-tabs">
         <button
           v-for="p in PERIODS" :key="p"
           :class="['period-btn', { 'period-btn--active': period === p }]"
           @click="selectPeriod(p)"
-        >{{ t('activity.period.' + p) }}</button>
+        >{{ t('activity.panel.period.' + p) }}</button>
       </div>
     </div>
 
@@ -62,7 +62,7 @@ onMounted(load)
       <div v-for="key in METRIC_KEYS" :key="key" class="metric-card">
         <i :class="['pi', METRIC_ICONS[key], 'metric-icon']" />
         <span class="metric-value">{{ metrics[key] }}</span>
-        <span class="metric-label">{{ t('activity.metric.' + key) }}</span>
+        <span class="metric-label">{{ t('activity.panel.metric.' + key) }}</span>
       </div>
     </div>
 

@@ -90,6 +90,18 @@ activity:
   retail: Retail
   transport: Transporte
   other: Otro
+  panel:
+    title: Panel de actividad
+    period:
+      MONTH: Este mes
+      WEEK: Esta semana
+      TODAY: Hoy
+    metric:
+      totalOrders: Pedidos creados
+      completedOrders: Completados
+      cancelledOrders: Cancelados
+      activeOrders: En curso
+      newLoyalUsers: Nuevos fidelizados
 
 units:
   title: Unidades operativas
@@ -218,19 +230,6 @@ nav:
   myOrders: Mis pedidos
   settings: Configuración
   activity: Actividad
-
-activity:
-  title: Panel de actividad
-  period:
-    MONTH: Este mes
-    WEEK: Esta semana
-    TODAY: Hoy
-  metric:
-    totalOrders: Pedidos creados
-    completedOrders: Completados
-    cancelledOrders: Cancelados
-    activeOrders: En curso
-    newLoyalUsers: Nuevos fidelizados
 
 common:
   back: Volver
