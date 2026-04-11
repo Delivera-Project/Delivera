@@ -166,11 +166,65 @@ class SubscriptionServiceTest {
     void changePlan_downgrade_blockedByUnits_throws() {
         SubscriptionPlan free = buildPlan("FREE", 1, 3, 5, 50, 20);
         when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
-        when(unitRepository.countByCompanyId(companyId)).thenReturn(5L); // over FREE limit of 3
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(5L);
 
         assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
                 .isInstanceOf(SubscriptionLimitException.class)
                 .hasMessageContaining("units");
+    }
+
+    @Test
+    void changePlan_downgrade_blockedByWorkers_throws() {
+        SubscriptionPlan free = buildPlan("FREE", 1, 3, 5, 50, 20);
+        when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(2L);
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(6L);
+
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+                .isInstanceOf(SubscriptionLimitException.class)
+                .hasMessageContaining("workers");
+    }
+
+    @Test
+    void changePlan_downgrade_blockedByOrders_throws() {
+        SubscriptionPlan free = buildPlan("FREE", 1, 3, 5, 50, 20);
+        when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(2L);
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(3L);
+        when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(51L);
+
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+                .isInstanceOf(SubscriptionLimitException.class)
+                .hasMessageContaining("orders");
+    }
+
+    @Test
+    void changePlan_downgrade_blockedByLoyalUsers_throws() {
+        SubscriptionPlan free = buildPlan("FREE", 1, 3, 5, 50, 20);
+        when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(2L);
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(3L);
+        when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(10L);
+        when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(21L);
+
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+                .isInstanceOf(SubscriptionLimitException.class)
+                .hasMessageContaining("loyal_users");
+    }
+
+    @Test
+    void changePlan_downgrade_blockedByCompanies_throws() {
+        SubscriptionPlan free = buildPlan("FREE", 1, 3, 5, 50, 20);
+        when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(2L);
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(3L);
+        when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(10L);
+        when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(5L);
+        when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(2L);
+
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+                .isInstanceOf(SubscriptionLimitException.class)
+                .hasMessageContaining("companies");
     }
 
     // --- helpers ---
