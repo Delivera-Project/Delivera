@@ -17,6 +17,7 @@ import MyOrdersView from '@/views/orders/MyOrdersView.vue'
 import MyOrderDetailView from '@/views/orders/MyOrderDetailView.vue'
 import TrackingView from '@/views/public/TrackingView.vue'
 import NotFoundView from '@/views/NotFoundView.vue'
+import ActivityView from '@/views/ActivityView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -45,6 +46,7 @@ const router = createRouter({
         { path: 'orders/:id', component: OrderDetailView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'loyal-users', component: LoyalUsersView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
         { path: 'loyal-users/:id', component: LoyalUserDetailView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
+        { path: 'activity', component: ActivityView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
         { path: 'settings', component: SettingsView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
       ],
     },

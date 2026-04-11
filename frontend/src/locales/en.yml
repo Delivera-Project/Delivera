@@ -90,6 +90,18 @@ activity:
   retail: Retail
   transport: Transport
   other: Other
+  panel:
+    title: Activity panel
+    period:
+      MONTH: This month
+      WEEK: This week
+      TODAY: Today
+    metric:
+      totalOrders: Orders created
+      completedOrders: Completed
+      cancelledOrders: Cancelled
+      activeOrders: In progress
+      newLoyalUsers: New loyal users
 
 units:
   title: Operational units
@@ -217,6 +229,7 @@ nav:
   loyalUsers: Loyal users
   myOrders: My orders
   settings: Settings
+  activity: Activity
 
 common:
   back: Back

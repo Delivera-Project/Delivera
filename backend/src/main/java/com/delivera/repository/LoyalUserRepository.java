@@ -4,6 +4,7 @@ import com.delivera.model.LoyalUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -20,4 +21,6 @@ public interface LoyalUserRepository extends JpaRepository<LoyalUser, UUID> {
     List<LoyalUser> findByEmail(String email);
 
     long countByCompaniesId(UUID companyId);
+
+    long countByCompaniesIdAndCreatedAtAfter(UUID companyId, Instant createdAtAfter);
 }

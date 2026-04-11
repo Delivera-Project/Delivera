@@ -45,4 +45,8 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     List<Order> findByCompanyId(UUID companyId);
 
     long countByCompanyIdAndCreatedAtAfter(UUID companyId, Instant after);
+
+    long countByCompanyIdAndStatusAndCreatedAtAfter(UUID companyId, OrderStatus status, Instant after);
+
+    long countByCompanyIdAndStatusNotIn(UUID companyId, java.util.Collection<OrderStatus> statuses);
 }
