@@ -1,5 +1,7 @@
 package com.delivera.service;
 
+import com.delivera.dto.settings.SubscriptionUsageResponse;
+import com.delivera.dto.settings.SubscriptionUsageResponse.ResourceUsage;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.SubscriptionLimitException;
 import com.delivera.model.Company;
@@ -67,6 +69,21 @@ public class SubscriptionService {
         if (!plan.allows(companyRepository.countByOrganizationId(company.getOrganization().getId()), plan.getMaxCompanies())) {
             throw new SubscriptionLimitException("companies");
         }
+    }
+
+    public SubscriptionUsageResponse getUsage(UUID companyId) {
+        Company company = getCompany(companyId);
+        SubscriptionPlan plan = company.getPlan();
+        Instant som = startOfMonth();
+        return new SubscriptionUsageResponse(
+                plan.getCode(),
+                plan.getName(),
+                new ResourceUsage(unitRepository.countByCompanyId(companyId), plan.getMaxUnits()),
+                new ResourceUsage(workerRepository.countByCompanyId(companyId), plan.getMaxWorkers()),
+                new ResourceUsage(orderRepository.countByCompanyIdAndCreatedAtAfter(companyId, som), plan.getMaxOrdersPerMonth()),
+                new ResourceUsage(loyalUserRepository.countByCompaniesId(companyId), plan.getMaxLoyalUsers()),
+                new ResourceUsage(companyRepository.countByOrganizationId(company.getOrganization().getId()), plan.getMaxCompanies())
+        );
     }
 
     private SubscriptionPlan getPlan(UUID companyId) {

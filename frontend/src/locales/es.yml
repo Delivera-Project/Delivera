@@ -278,6 +278,14 @@ settings:
   title: Configuración
   orgSection: Organización
   companySection: Empresa
+  subscriptionSection: Plan
+  currentPlan: Plan actual
+  resource:
+    units: Unidades operativas
+    workers: Trabajadores
+    ordersThisMonth: Pedidos este mes
+    loyalUsers: Usuarios fidelizados
+    companies: Empresas
   orgCode: Código de organización
   orgCodeHint: "Los trabajadores usan este código para identificar la organización al iniciar sesión"
   orgCodeCopied: Código copiado al portapapeles

@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
@@ -117,6 +118,25 @@ class SubscriptionServiceTest {
         assertThatThrownBy(() -> subscriptionService.checkCompanyLimit(companyId))
                 .isInstanceOf(SubscriptionLimitException.class)
                 .hasMessageContaining("companies");
+    }
+
+    @Test
+    void getUsage_returnsCurrentCounts() {
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(2L);
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(3L);
+        when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(10L);
+        when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(5L);
+        when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(1L);
+
+        var usage = subscriptionService.getUsage(companyId);
+
+        assertThat(usage.planCode()).isEqualTo("FREE");
+        assertThat(usage.units().current()).isEqualTo(2);
+        assertThat(usage.units().max()).isEqualTo(3);
+        assertThat(usage.workers().current()).isEqualTo(3);
+        assertThat(usage.ordersThisMonth().current()).isEqualTo(10);
+        assertThat(usage.loyalUsers().current()).isEqualTo(5);
+        assertThat(usage.companies().current()).isEqualTo(1);
     }
 
     @Test
