@@ -26,17 +26,20 @@ public class LoyalUserService {
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final SecurityUtils securityUtils;
+    private final SubscriptionService subscriptionService;
 
     public LoyalUserService(LoyalUserRepository loyalUserRepository,
                             OrderRepository orderRepository,
                             CompanyRepository companyRepository,
                             UserRepository userRepository,
-                            SecurityUtils securityUtils) {
+                            SecurityUtils securityUtils,
+                            SubscriptionService subscriptionService) {
         this.loyalUserRepository = loyalUserRepository;
         this.orderRepository = orderRepository;
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
         this.securityUtils = securityUtils;
+        this.subscriptionService = subscriptionService;
     }
 
     public List<LoyalUserResponse> getByCompany() {
@@ -50,6 +53,7 @@ public class LoyalUserService {
     @Transactional
     public LoyalUserResponse add(LoyalUserRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
+        subscriptionService.checkLoyalUserLimit(companyId);
         String email = request.email().toLowerCase().trim();
 
         if (loyalUserRepository.findByCompaniesIdAndEmail(companyId, email).isPresent()) {

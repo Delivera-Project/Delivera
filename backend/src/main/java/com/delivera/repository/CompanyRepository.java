@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface CompanyRepository extends JpaRepository<Company, UUID> {
     List<Company> findByOrganizationId(UUID organizationId);
+
+    long countByOrganizationId(UUID organizationId);
 }

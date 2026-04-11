@@ -65,6 +65,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse(ex.getCode()));
     }
 
+    @ExceptionHandler(SubscriptionLimitException.class)
+    public ResponseEntity<ErrorResponse> handleSubscriptionLimit(SubscriptionLimitException ex) {
+        log.warn("Subscription limit reached: {}", ex.getMessage());
+        return ResponseEntity.status(FORBIDDEN).body(new ErrorResponse(ex.getCode()));
+    }
+
     // DataIntegrityViolationException requiere inspección del cause para distinguir casos
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {

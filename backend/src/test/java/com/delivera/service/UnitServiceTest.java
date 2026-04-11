@@ -35,6 +35,8 @@ class UnitServiceTest {
     private CompanyRepository companyRepository;
     @Mock
     private SecurityUtils securityUtils;
+    @Mock
+    private SubscriptionService subscriptionService;
     @InjectMocks
     private UnitService unitService;
 
