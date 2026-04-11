@@ -278,6 +278,14 @@ settings:
   title: Settings
   orgSection: Organization
   companySection: Company
+  subscriptionSection: Plan
+  currentPlan: Current plan
+  resource:
+    units: Operational units
+    workers: Workers
+    ordersThisMonth: Orders this month
+    loyalUsers: Loyal users
+    companies: Companies
   orgCode: Organization code
   orgCodeHint: "Workers use this code to identify the organization when signing in"
   orgCodeCopied: Code copied to clipboard

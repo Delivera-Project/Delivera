@@ -17,6 +17,7 @@ const { activityTypes, load: loadActivityTypes } = useActivityTypes()
 
 const settings = ref(null)
 const allCompanies = ref([])
+const subscription = ref(null)
 const loadError = ref('')
 const activeTab = ref(0)
 
@@ -60,16 +61,29 @@ function activityLabel(code) {
 async function load() {
   loadError.value = ''
   try {
-    const [settRes, compRes] = await Promise.all([
+    const [settRes, compRes, subRes] = await Promise.all([
       api.get('/settings'),
       api.get('/settings/companies'),
+      api.get('/settings/subscription'),
     ])
     if (settRes.ok) settings.value = await settRes.json()
     else loadError.value = t('error.connection')
     if (compRes.ok) allCompanies.value = await compRes.json()
+    if (subRes.ok) subscription.value = await subRes.json()
   } catch {
     loadError.value = t('error.connection')
   }
+}
+
+function usagePercent(usage) {
+  if (!usage || usage.unlimited) return 0
+  return Math.round((usage.current / usage.max) * 100)
+}
+
+function usageSeverity(pct) {
+  if (pct > 85) return 'danger'
+  if (pct > 60) return 'warn'
+  return 'success'
 }
 
 onMounted(() => { load(); loadActivityTypes() })
@@ -246,6 +260,7 @@ async function copyHandle() {
       <PTabList>
         <PTab :value="0">{{ t('settings.orgSection') }}</PTab>
         <PTab :value="1">{{ t('settings.companySection') }}</PTab>
+        <PTab :value="2">{{ t('settings.subscriptionSection') }}</PTab>
       </PTabList>
 
       <PTabPanels>
@@ -366,6 +381,33 @@ async function copyHandle() {
               <div class="form-actions">
                 <PButton :label="t('common.cancel')" severity="secondary" text @click="addingCompany = false; addError = ''" />
                 <PButton :label="addSaving ? t('common.loading') : t('settings.addCompany')" :loading="addSaving" @click="addCompany" />
+              </div>
+            </div>
+          </div>
+        </PTabPanel>
+        <!-- Suscripción -->
+        <PTabPanel :value="2">
+          <div class="settings-section" v-if="subscription">
+            <div class="sub-plan-header">
+              <span class="info-label">{{ t('settings.currentPlan') }}</span>
+              <span class="sub-plan-badge">{{ subscription.planName }}</span>
+            </div>
+            <div class="sub-resources">
+              <div v-for="key in ['units','workers','ordersThisMonth','loyalUsers','companies']" :key="key" class="sub-resource">
+                <div class="sub-resource-header">
+                  <span class="sub-resource-label">{{ t('settings.resource.' + key) }}</span>
+                  <span class="sub-resource-count">
+                    {{ subscription[key].current }}
+                    <template v-if="!subscription[key].unlimited"> / {{ subscription[key].max }}</template>
+                    <template v-else> / ∞</template>
+                  </span>
+                </div>
+                <PProgressBar
+                  v-if="!subscription[key].unlimited"
+                  :value="usagePercent(subscription[key])"
+                  :pt="{ value: { class: 'sub-bar-' + usageSeverity(usagePercent(subscription[key])) } }"
+                  class="sub-progress"
+                />
               </div>
             </div>
           </div>
@@ -555,4 +597,46 @@ async function copyHandle() {
   opacity: 0;
   transform: translateY(-4px);
 }
+
+.sub-plan-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.sub-plan-badge {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 12%, white);
+  color: var(--p-primary-color, #7c3aed);
+  border: 1px solid color-mix(in srgb, var(--p-primary-color, #7c3aed) 25%, white);
+}
+.sub-resources {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.sub-resource-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sub-resource-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+.sub-resource-count {
+  font-size: 13px;
+  color: #64748b;
+}
+.sub-progress {
+  height: 8px;
+  border-radius: 4px;
+}
+:deep(.sub-bar-success) { background: #22c55e; }
+:deep(.sub-bar-warn)    { background: #f59e0b; }
+:deep(.sub-bar-danger)  { background: #ef4444; }
 </style>
