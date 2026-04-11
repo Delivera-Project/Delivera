@@ -218,6 +218,27 @@ loyalUsers:
   since: Customer since
   ordersEmpty: This loyal user has no orders yet.
 
+workers:
+  title: Team
+  invite: Invite worker
+  inviteTitle: Invite a worker
+  inviteSubtitle: They will receive access to this company
+  email: Email
+  role: Role
+  name: Name
+  since: Since
+  empty: No workers yet. Invite the first one.
+  invited: Worker invited successfully
+  roleChanged: Role updated
+  removed: Worker removed
+  tempPasswordHint: "Temporary password (share with the worker):"
+  filterAll: All
+  roles:
+    COMPANY_ADMIN: Admin
+    ANALYST: Analyst
+    OPERATOR: Operator
+  confirmRemove: Remove this worker?
+
 myOrders:
   title: My orders
   empty: You have no received orders yet.
@@ -230,6 +251,7 @@ nav:
   myOrders: My orders
   settings: Settings
   activity: Activity
+  workers: Team
 
 common:
   back: Back
