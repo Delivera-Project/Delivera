@@ -31,6 +31,10 @@ public class Company {
     @JoinColumn(name = "activity_type", nullable = false)
     private ActivityType activityType;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "plan_code", nullable = false)
+    private SubscriptionPlan plan;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 }
