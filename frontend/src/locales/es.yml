@@ -218,6 +218,27 @@ loyalUsers:
   since: Cliente desde
   ordersEmpty: Este fidelizado no tiene pedidos todavía.
 
+workers:
+  title: Equipo
+  invite: Invitar trabajador
+  inviteTitle: Invitar a un trabajador
+  inviteSubtitle: Tendrá acceso a esta empresa
+  email: Email
+  role: Rol
+  name: Nombre
+  since: Desde
+  empty: No hay trabajadores aún. Invita al primero.
+  invited: Trabajador invitado correctamente
+  roleChanged: Rol actualizado
+  removed: Trabajador eliminado
+  tempPasswordHint: "Contraseña temporal (compártela con el trabajador):"
+  filterAll: Todos
+  roles:
+    COMPANY_ADMIN: Administrador
+    ANALYST: Analista
+    OPERATOR: Operador
+  confirmRemove: "¿Eliminar este trabajador?"
+
 myOrders:
   title: Mis pedidos
   empty: No tienes pedidos recibidos todavía.
@@ -230,6 +251,7 @@ nav:
   myOrders: Mis pedidos
   settings: Configuración
   activity: Actividad
+  workers: Equipo
 
 common:
   back: Volver

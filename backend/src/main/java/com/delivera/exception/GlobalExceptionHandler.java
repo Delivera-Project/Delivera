@@ -37,7 +37,10 @@ public class GlobalExceptionHandler {
         Map.entry(HandleConflictException.class,          new Mapping(CONFLICT,             "HANDLE_CONFLICT")),
         Map.entry(OrderAlreadyClaimedException.class,     new Mapping(CONFLICT,             "ORDER_ALREADY_CLAIMED")),
         Map.entry(OrderClaimEmailMismatchException.class, new Mapping(UNPROCESSABLE_ENTITY, "ORDER_CLAIM_EMAIL_MISMATCH")),
-        Map.entry(ForbiddenException.class,               new Mapping(FORBIDDEN,            "FORBIDDEN"))
+        Map.entry(ForbiddenException.class,               new Mapping(FORBIDDEN,            "FORBIDDEN")),
+        Map.entry(WorkerAlreadyExistsException.class,     new Mapping(CONFLICT,             "WORKER_ALREADY_EXISTS")),
+        Map.entry(WorkerNotFoundException.class,          new Mapping(NOT_FOUND,            "WORKER_NOT_FOUND")),
+        Map.entry(LastAdminException.class,               new Mapping(CONFLICT,             "LAST_ADMIN"))
     );
 
     @ExceptionHandler(RuntimeException.class)

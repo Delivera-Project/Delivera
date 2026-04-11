@@ -73,7 +73,13 @@ public class SecurityConfig {
                 // Usuarios fidelizados
                 auth.requestMatchers(HttpMethod.POST, api + "/loyal-users").hasRole(ADMIN);
 
+                // Trabajadores
+                auth.requestMatchers(HttpMethod.POST, api + "/workers/invite").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.PATCH, api + "/workers/*/role").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.DELETE, api + "/workers/**").hasRole(ADMIN);
+
                 // Endpoints autenticados: cualquier trabajador activo
+                auth.requestMatchers(api + "/workers/**").authenticated();
                 auth.requestMatchers(api + UNITS_ALL).authenticated();
                 auth.requestMatchers(api + "/orders/**").authenticated();
                 auth.requestMatchers(api + "/loyal-users/**").authenticated();

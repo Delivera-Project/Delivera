@@ -1,6 +1,7 @@
 package com.delivera.repository;
 
 import com.delivera.model.Worker;
+import com.delivera.model.WorkerRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +24,12 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
     List<Worker> findByUserEmailAndOrgId(@Param("email") String email, @Param("orgId") UUID orgId);
 
     List<Worker> findByCompanyId(UUID companyId);
+
+    List<Worker> findByCompanyIdOrderByCreatedAtAsc(UUID companyId);
+
+    Optional<Worker> findByIdAndCompanyId(UUID id, UUID companyId);
+
+    long countByCompanyIdAndRole(UUID companyId, WorkerRole role);
 
     @Query("SELECT w FROM Worker w JOIN FETCH w.company c JOIN c.organization o JOIN w.user u WHERE u.email = :email ORDER BY w.createdAt ASC")
     List<Worker> findByUserEmailOrderByCreatedAtAsc(@Param("email") String email);

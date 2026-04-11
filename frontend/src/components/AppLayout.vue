@@ -29,6 +29,7 @@ const navItems = [
   { path: '/units', icon: 'pi-building', labelKey: 'nav.units', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
   { path: '/orders', icon: 'pi-send', labelKey: 'nav.orders', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
   { path: '/loyal-users', icon: 'pi-users', labelKey: 'nav.loyalUsers', roles: ['COMPANY_ADMIN', 'ANALYST'] },
+  { path: '/workers', icon: 'pi-id-card', labelKey: 'nav.workers', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
   { path: '/my-orders', icon: 'pi-inbox', labelKey: 'nav.myOrders', noRole: true },
   { path: '/settings', icon: 'pi-cog', labelKey: 'nav.settings', roles: ['COMPANY_ADMIN'] },
 ]
