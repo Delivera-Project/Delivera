@@ -20,6 +20,7 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import ActivityView from '@/views/ActivityView.vue'
 import WorkersView from '@/views/workers/WorkersView.vue'
 import HomeView from '@/views/home/HomeView.vue'
+import UnitAssignWorkersView from '@/views/units/UnitAssignWorkersView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 
@@ -44,6 +45,7 @@ const router = createRouter({
         { path: 'units/new', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
         { path: 'units/:id', component: UnitDetailView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'units/:id/edit', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
+        { path: 'units/:id/assign-workers', component: UnitAssignWorkersView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
         { path: 'orders', component: OrdersView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'orders/new', component: OrderFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
         { path: 'orders/:id', component: OrderDetailView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },

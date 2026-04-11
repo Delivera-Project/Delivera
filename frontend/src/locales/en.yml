@@ -126,6 +126,10 @@ units:
   deleteActiveOrders: Cannot delete unit because it has associated orders.
   filterAll: All
   noCoords: No coordinates
+  workers: Assigned workers
+  noWorkers: No workers assigned to this unit.
+  assignWorkers: Assign workers
+  noAssignableWorkers: No workers available to assign.
   WAREHOUSE: Warehouse
   STORE: Store
   FACTORY: Factory

@@ -31,6 +31,7 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
 
     long countByCompanyIdAndRole(UUID companyId, WorkerRole role);
 
+
     @Query("SELECT w FROM Worker w JOIN FETCH w.company c JOIN c.organization o JOIN w.user u WHERE u.email = :email ORDER BY w.createdAt ASC")
     List<Worker> findByUserEmailOrderByCreatedAtAsc(@Param("email") String email);
 
