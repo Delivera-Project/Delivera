@@ -281,6 +281,7 @@ settings:
   subscriptionSection: Plan
   currentPlan: Plan actual
   availablePlans: Planes disponibles
+  selectPlan: Cambiar a este plan
   upgradeBanner: Estás cerca del límite de tu plan. Considera actualizar para evitar interrupciones.
   resource:
     units: Unidades operativas

@@ -92,6 +92,26 @@ const PLANS = [
   { code: 'PRO',   name: 'Pro',   units: -1, workers: -1, ordersThisMonth: -1,  loyalUsers: -1,  companies: -1 },
 ]
 
+const planChanging = ref(false)
+const planChangeError = ref('')
+
+async function selectPlan(planCode) {
+  planChangeError.value = ''
+  planChanging.value = true
+  try {
+    const res = await api.patch('/settings/subscription/plan', { planCode })
+    if (res.ok) subscription.value = await res.json()
+    else {
+      const data = await res.json()
+      planChangeError.value = api.translateError(data, 'error.saveFailed')
+    }
+  } catch {
+    planChangeError.value = t('error.connection')
+  } finally {
+    planChanging.value = false
+  }
+}
+
 const showUpgradeBanner = computed(() =>
   subscription.value && ['units','workers','ordersThisMonth','loyalUsers','companies'].some(k => {
     const r = subscription.value[k]
@@ -426,6 +446,7 @@ async function copyHandle() {
             </div>
             <div class="plans-comparison">
               <p class="info-label" style="margin-bottom:12px">{{ t('settings.availablePlans') }}</p>
+              <PMessage v-if="planChangeError" severity="error" :closable="false" class="form-message">{{ planChangeError }}</PMessage>
               <div class="plans-grid">
                 <div v-for="plan in PLANS" :key="plan.code"
                   :class="['plan-card', { 'plan-card--current': subscription?.planCode === plan.code }]">
@@ -438,6 +459,9 @@ async function copyHandle() {
                       <span class="plan-feature-val">{{ plan[key] === -1 ? '∞' : plan[key] }}</span>
                     </li>
                   </ul>
+                  <PButton v-if="subscription?.planCode !== plan.code"
+                    :label="t('settings.selectPlan')" size="small" class="plan-select-btn"
+                    :loading="planChanging" @click="selectPlan(plan.code)" />
                 </div>
               </div>
             </div>
@@ -680,6 +704,7 @@ async function copyHandle() {
   border-color: var(--p-primary-color, #7c3aed);
   background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 4%, white);
 }
+.plan-select-btn { margin-top: 12px; width: 100%; }
 .plan-card-name {
   font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 12px;
   display: flex; align-items: center; gap: 8px;

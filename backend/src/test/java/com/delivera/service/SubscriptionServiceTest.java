@@ -31,6 +31,7 @@ class SubscriptionServiceTest {
     @Mock private WorkerRepository workerRepository;
     @Mock private OrderRepository orderRepository;
     @Mock private LoyalUserRepository loyalUserRepository;
+    @Mock private SubscriptionPlanRepository subscriptionPlanRepository;
     @InjectMocks private SubscriptionService subscriptionService;
 
     private UUID companyId;
@@ -145,6 +146,31 @@ class SubscriptionServiceTest {
         company.setPlan(pro);
         when(unitRepository.countByCompanyId(companyId)).thenReturn(9999L);
         assertThatCode(() -> subscriptionService.checkUnitLimit(companyId)).doesNotThrowAnyException();
+    }
+
+    @Test
+    void changePlan_upgrade_succeeds() {
+        SubscriptionPlan basic = buildPlan("BASIC", 5, 10, 15, 200, 100);
+        when(subscriptionPlanRepository.findById("BASIC")).thenReturn(Optional.of(basic));
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(2L);
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(3L);
+        when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(10L);
+        when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(5L);
+        when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(1L);
+
+        var usage = subscriptionService.changePlan(companyId, "BASIC");
+        assertThat(usage.planCode()).isEqualTo("BASIC");
+    }
+
+    @Test
+    void changePlan_downgrade_blockedByUnits_throws() {
+        SubscriptionPlan free = buildPlan("FREE", 1, 3, 5, 50, 20);
+        when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(5L); // over FREE limit of 3
+
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+                .isInstanceOf(SubscriptionLimitException.class)
+                .hasMessageContaining("units");
     }
 
     // --- helpers ---

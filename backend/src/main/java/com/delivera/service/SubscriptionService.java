@@ -8,6 +8,7 @@ import com.delivera.model.Company;
 import com.delivera.model.SubscriptionPlan;
 import com.delivera.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -22,17 +23,20 @@ public class SubscriptionService {
     private final WorkerRepository workerRepository;
     private final OrderRepository orderRepository;
     private final LoyalUserRepository loyalUserRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
 
     public SubscriptionService(CompanyRepository companyRepository,
                                OperationalUnitRepository unitRepository,
                                WorkerRepository workerRepository,
                                OrderRepository orderRepository,
-                               LoyalUserRepository loyalUserRepository) {
+                               LoyalUserRepository loyalUserRepository,
+                               SubscriptionPlanRepository subscriptionPlanRepository) {
         this.companyRepository = companyRepository;
         this.unitRepository = unitRepository;
         this.workerRepository = workerRepository;
         this.orderRepository = orderRepository;
         this.loyalUserRepository = loyalUserRepository;
+        this.subscriptionPlanRepository = subscriptionPlanRepository;
     }
 
     public void checkUnitLimit(UUID companyId) {
@@ -84,6 +88,27 @@ public class SubscriptionService {
                 new ResourceUsage(loyalUserRepository.countByCompaniesId(companyId), plan.getMaxLoyalUsers()),
                 new ResourceUsage(companyRepository.countByOrganizationId(company.getOrganization().getId()), plan.getMaxCompanies())
         );
+    }
+
+    @Transactional
+    public SubscriptionUsageResponse changePlan(UUID companyId, String planCode) {
+        SubscriptionPlan newPlan = subscriptionPlanRepository.findById(planCode)
+                .orElseThrow(CompanyContextException::new);
+        Company company = getCompany(companyId);
+        Instant som = startOfMonth();
+        if (newPlan.getMaxUnits() != -1 && unitRepository.countByCompanyId(companyId) > newPlan.getMaxUnits())
+            throw new SubscriptionLimitException("units");
+        if (newPlan.getMaxWorkers() != -1 && workerRepository.countByCompanyId(companyId) > newPlan.getMaxWorkers())
+            throw new SubscriptionLimitException("workers");
+        if (newPlan.getMaxOrdersPerMonth() != -1 && orderRepository.countByCompanyIdAndCreatedAtAfter(companyId, som) > newPlan.getMaxOrdersPerMonth())
+            throw new SubscriptionLimitException("orders");
+        if (newPlan.getMaxLoyalUsers() != -1 && loyalUserRepository.countByCompaniesId(companyId) > newPlan.getMaxLoyalUsers())
+            throw new SubscriptionLimitException("loyal_users");
+        if (newPlan.getMaxCompanies() != -1 && companyRepository.countByOrganizationId(company.getOrganization().getId()) > newPlan.getMaxCompanies())
+            throw new SubscriptionLimitException("companies");
+        company.setPlan(newPlan);
+        companyRepository.save(company);
+        return getUsage(companyId);
     }
 
     private SubscriptionPlan getPlan(UUID companyId) {
