@@ -62,7 +62,9 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.GET, api + "/units/external").hasAnyRole(ADMIN, ANALYST);
                 auth.requestMatchers(HttpMethod.GET, api + "/units/external-companies").hasAnyRole(ADMIN, ANALYST);
                 auth.requestMatchers(HttpMethod.POST, api + "/units").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.POST, api + "/units/*/workers/*").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.PUT, api + UNITS_ALL).hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.DELETE, api + "/units/*/workers/*").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.DELETE, api + UNITS_ALL).hasRole(ADMIN);
 
                 // Pedidos

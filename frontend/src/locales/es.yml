@@ -126,6 +126,10 @@ units:
   deleteActiveOrders: No se puede eliminar la unidad porque tiene pedidos asociados.
   filterAll: Todos
   noCoords: Sin coordenadas
+  workers: Trabajadores asignados
+  noWorkers: No hay trabajadores asignados a esta unidad.
+  assignWorkers: Asignar trabajadores
+  noAssignableWorkers: No hay trabajadores disponibles para asignar.
   WAREHOUSE: Almacén
   STORE: Tienda
   FACTORY: Fábrica

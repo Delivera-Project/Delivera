@@ -21,4 +21,12 @@ public class SecurityUtils {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         return auth != null ? (String) auth.getPrincipal() : null;
     }
+
+    public String getCurrentRole() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return null;
+        return auth.getAuthorities().stream()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .findFirst().orElse(null);
+    }
 }
