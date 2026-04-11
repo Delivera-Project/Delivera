@@ -62,6 +62,12 @@ public class SettingsController {
         return ResponseEntity.ok(subscriptionService.getUsage(securityUtils.getCurrentCompanyId()));
     }
 
+    @Operation(summary = "Cambiar plan de suscripción")
+    @PatchMapping("/subscription/plan")
+    public ResponseEntity<SubscriptionUsageResponse> changePlan(@Valid @RequestBody ChangePlanRequest req) {
+        return ResponseEntity.ok(subscriptionService.changePlan(securityUtils.getCurrentCompanyId(), req.planCode()));
+    }
+
     @Operation(summary = "Eliminar empresa de la organización")
     @DeleteMapping("/companies/{id}")
     public ResponseEntity<Void> deleteCompany(
