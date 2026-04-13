@@ -16,6 +16,17 @@ vi.mock('@/composables/useAppConfig', () => ({
   useAppConfig: () => ({ load: vi.fn(), statusSeverity: {} }),
 }))
 
+vi.mock('@/composables/useApi', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    useApi: () => ({
+      get: vi.fn().mockResolvedValue({ ok: true, json: async () => [] }),
+      post: vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }),
+    }),
+  }
+})
+
 const mockPush = vi.fn()
 let mockRouteQuery = { q: 'DEL-20240101-0001' }
 vi.mock('vue-router', () => ({
@@ -29,6 +40,8 @@ const STUBS = {
   PButton: { template: '<button />' },
   PMessage: { template: '<div class="p-message"><slot /></div>' },
   PTag: { template: '<span />' },
+  PTextarea: { template: '<textarea />' },
+  TimelineList: { template: '<div />' },
 }
 
 function buildOrder(overrides = {}) {
