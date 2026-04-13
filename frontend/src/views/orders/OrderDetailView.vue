@@ -26,6 +26,36 @@ const newStatus = ref('')
 const statusNote = ref('')
 const activeTab = ref(0)
 
+const messages = ref([])
+const chatLoading = ref(false)
+const newMessage = ref('')
+const sendingMessage = ref(false)
+
+async function loadMessages(orderId) {
+  chatLoading.value = true
+  try {
+    const res = await api.get(`/orders/${orderId}/messages`)
+    if (res.ok) messages.value = await res.json()
+  } catch { /* silent */ } finally {
+    chatLoading.value = false
+  }
+}
+
+async function sendMessage() {
+  const text = newMessage.value.trim()
+  if (!text) return
+  sendingMessage.value = true
+  try {
+    const res = await api.post(`/orders/${order.value.id}/messages`, { content: text })
+    if (res.ok) {
+      messages.value.push(await res.json())
+      newMessage.value = ''
+    }
+  } catch { /* silent */ } finally {
+    sendingMessage.value = false
+  }
+}
+
 const viteEnvBase = `${import.meta.env.VITE_APP_URL || globalThis.location?.origin || ''}`
 
 async function copyTrackingUrl(token) {
@@ -44,8 +74,10 @@ onMounted(async () => {
   loading.value = true
   try {
     const res = await api.get(`/orders/${route.params.id}`)
-    if (res.ok) order.value = await res.json()
-    else error.value = t('error.ORDER_NOT_FOUND')
+    if (res.ok) {
+      order.value = await res.json()
+      loadMessages(order.value.id)
+    } else error.value = t('error.ORDER_NOT_FOUND')
   } catch {
     error.value = t('error.connection')
   } finally {
@@ -115,6 +147,7 @@ async function submitStatusUpdate() {
         <PTabList>
           <PTab :value="0">{{ t('orders.details') }}</PTab>
           <PTab :value="1">{{ t('orders.timeline') }}</PTab>
+          <PTab :value="2">{{ t('orders.chat') }}</PTab>
         </PTabList>
 
         <PTabPanels>
@@ -209,6 +242,44 @@ async function submitStatusUpdate() {
               <PMessage v-if="updateSuccess" severity="success" :closable="false" class="status-msg">{{ updateSuccess }}</PMessage>
             </div>
           </PTabPanel>
+          <PTabPanel :value="2">
+            <div class="chat-panel" data-testid="chat-panel">
+              <div class="chat-messages" data-testid="chat-messages">
+                <div v-if="chatLoading" class="chat-empty">
+                  <i class="pi pi-spin pi-spinner" />
+                </div>
+                <div v-else-if="messages.length === 0" class="chat-empty">{{ t('orders.chatEmpty') }}</div>
+                <div
+                  v-for="msg in messages"
+                  :key="msg.id"
+                  class="chat-message"
+                  :data-testid="`chat-message-${msg.id}`"
+                >
+                  <div class="chat-message-header">
+                    <span class="chat-sender">{{ msg.senderName }}</span>
+                    <span class="chat-time">{{ formatDateTime(msg.createdAt) }}</span>
+                  </div>
+                  <p class="chat-content">{{ msg.content }}</p>
+                </div>
+              </div>
+              <div class="chat-input-row">
+                <PTextarea
+                  v-model="newMessage"
+                  :placeholder="t('orders.chatPlaceholder')"
+                  rows="2"
+                  class="chat-textarea"
+                  @keydown.enter.exact.prevent="sendMessage"
+                />
+                <PButton
+                  icon="pi pi-send"
+                  :loading="sendingMessage"
+                  :disabled="!newMessage.trim()"
+                  data-testid="chat-send"
+                  @click="sendMessage"
+                />
+              </div>
+            </div>
+          </PTabPanel>
         </PTabPanels>
       </PTabs>
     </template>
@@ -253,4 +324,15 @@ async function submitStatusUpdate() {
 .claimed-section .pi { color: #16a34a; font-size: 16px; margin-top: 2px; }
 .claimed-label { font-weight: 600; font-size: 13px; color: #15803d; }
 .claimed-hint { font-size: 12px; color: #166534; margin-top: 2px; }
+
+.chat-panel { display: flex; flex-direction: column; gap: 12px; }
+.chat-messages { display: flex; flex-direction: column; gap: 10px; min-height: 120px; max-height: 360px; overflow-y: auto; padding: 4px 0; }
+.chat-empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 24px 0; }
+.chat-message { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
+.chat-message-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+.chat-sender { font-size: 13px; font-weight: 600; color: #334155; }
+.chat-time { font-size: 11px; color: #94a3b8; }
+.chat-content { font-size: 14px; color: #1e293b; margin: 0; white-space: pre-wrap; }
+.chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+.chat-textarea { flex: 1; }
 </style>
