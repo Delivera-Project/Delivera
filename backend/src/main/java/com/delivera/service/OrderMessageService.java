@@ -4,6 +4,7 @@ import com.delivera.dto.chat.OrderMessageRequest;
 import com.delivera.dto.chat.OrderMessageResponse;
 import com.delivera.exception.ForbiddenException;
 import com.delivera.exception.OrderNotFoundException;
+import com.delivera.model.Order;
 import com.delivera.model.OrderMessage;
 import com.delivera.repository.OrderMessageRepository;
 import com.delivera.repository.OrderRepository;
@@ -34,9 +35,7 @@ public class OrderMessageService {
     }
 
     public List<OrderMessageResponse> getMessages(UUID orderId) {
-        UUID companyId = securityUtils.getCurrentCompanyId();
-        orderRepository.findByIdForCompany(orderId, companyId)
-                .orElseThrow(OrderNotFoundException::new);
+        resolveOrder(orderId);
         return messageRepository.findByOrderIdOrderByCreatedAtAsc(orderId)
                 .stream()
                 .map(OrderMessageResponse::from)
@@ -45,18 +44,29 @@ public class OrderMessageService {
 
     @Transactional
     public OrderMessageResponse sendMessage(UUID orderId, OrderMessageRequest request) {
-        UUID companyId = securityUtils.getCurrentCompanyId();
-        var order = orderRepository.findByIdForCompany(orderId, companyId)
-                .orElseThrow(OrderNotFoundException::new);
+        var order = resolveOrder(orderId);
 
         String email = securityUtils.getCurrentEmail();
         var sender = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ForbiddenException("Sender not found"));
 
         var message = new OrderMessage();
+
         message.setOrder(order);
         message.setSender(sender);
         message.setContent(request.content());
         return OrderMessageResponse.from(messageRepository.save(message));
+    }
+
+    private Order resolveOrder(UUID orderId) {
+        String role = securityUtils.getCurrentRole();
+        String email = securityUtils.getCurrentEmail();
+        if ("LOYAL_USER".equals(role)) {
+            return orderRepository.findByIdForLoyalUser(orderId, email)
+                    .orElseThrow(OrderNotFoundException::new);
+        }
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        return orderRepository.findByIdForCompany(orderId, companyId)
+                .orElseThrow(OrderNotFoundException::new);
     }
 }

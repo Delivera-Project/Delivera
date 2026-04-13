@@ -66,4 +66,7 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     long countByOrganizationId(@Param("orgId") UUID orgId);
 
     long countByCreatedAtAfter(Instant after);
+
+    @Query("SELECT o FROM Order o WHERE o.id = :id AND o.loyalUser.user.email = :email")
+    Optional<Order> findByIdForLoyalUser(@Param("id") UUID id, @Param("email") String email);
 }

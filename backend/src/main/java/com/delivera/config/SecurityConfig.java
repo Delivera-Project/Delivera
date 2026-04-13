@@ -80,6 +80,10 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.PATCH, api + "/workers/*/role").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.DELETE, api + "/workers/**").hasRole(ADMIN);
 
+                // Chat de pedido: trabajadores de empresa y usuarios fidelizados
+                auth.requestMatchers(api + "/orders/*/messages/**").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
+                auth.requestMatchers(HttpMethod.POST, api + "/orders/*/messages").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
+
                 // Endpoints autenticados: cualquier trabajador activo
                 auth.requestMatchers(api + "/workers/**").authenticated();
                 auth.requestMatchers(api + UNITS_ALL).authenticated();

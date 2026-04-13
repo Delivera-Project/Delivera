@@ -61,6 +61,7 @@ class OrderMessageServiceTest {
 
     @Test
     void getMessages_returnsListForValidCompany() {
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdForCompany(orderId, companyId)).thenReturn(Optional.of(order));
 
@@ -81,6 +82,7 @@ class OrderMessageServiceTest {
 
     @Test
     void getMessages_throwsOrderNotFound_whenOrderDoesNotBelongToCompany() {
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdForCompany(orderId, companyId)).thenReturn(Optional.empty());
 
@@ -90,6 +92,7 @@ class OrderMessageServiceTest {
 
     @Test
     void getMessages_returnsEmptyList_whenNoMessages() {
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdForCompany(orderId, companyId)).thenReturn(Optional.of(order));
         when(messageRepository.findByOrderIdOrderByCreatedAtAsc(orderId)).thenReturn(List.of());
@@ -99,6 +102,7 @@ class OrderMessageServiceTest {
 
     @Test
     void sendMessage_persistsAndReturnsMessage() {
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdForCompany(orderId, companyId)).thenReturn(Optional.of(order));
         when(securityUtils.getCurrentEmail()).thenReturn("worker@test.com");
@@ -121,6 +125,7 @@ class OrderMessageServiceTest {
 
     @Test
     void sendMessage_throwsOrderNotFound_whenOrderDoesNotBelongToCompany() {
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdForCompany(orderId, companyId)).thenReturn(Optional.empty());
 
@@ -129,7 +134,30 @@ class OrderMessageServiceTest {
     }
 
     @Test
+    void getMessages_loyalUser_canAccessOwnOrder() {
+        String email = "loyal@test.com";
+        when(securityUtils.getCurrentRole()).thenReturn("LOYAL_USER");
+        when(securityUtils.getCurrentEmail()).thenReturn(email);
+        when(orderRepository.findByIdForLoyalUser(orderId, email)).thenReturn(Optional.of(order));
+        when(messageRepository.findByOrderIdOrderByCreatedAtAsc(orderId)).thenReturn(List.of());
+
+        assertThat(service.getMessages(orderId)).isEmpty();
+    }
+
+    @Test
+    void getMessages_loyalUser_throwsOrderNotFound_whenOrderNotLinked() {
+        String email = "other@test.com";
+        when(securityUtils.getCurrentRole()).thenReturn("LOYAL_USER");
+        when(securityUtils.getCurrentEmail()).thenReturn(email);
+        when(orderRepository.findByIdForLoyalUser(orderId, email)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getMessages(orderId))
+                .isInstanceOf(OrderNotFoundException.class);
+    }
+
+    @Test
     void sendMessage_throwsForbidden_whenSenderUserNotFound() {
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdForCompany(orderId, companyId)).thenReturn(Optional.of(order));
         when(securityUtils.getCurrentEmail()).thenReturn("unknown@test.com");
@@ -143,6 +171,7 @@ class OrderMessageServiceTest {
     void sendMessage_usesSenderEmailFallback_whenNameIsNull() {
         sender.setFirstName(null);
         sender.setLastName(null);
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findByIdForCompany(orderId, companyId)).thenReturn(Optional.of(order));
         when(securityUtils.getCurrentEmail()).thenReturn("worker@test.com");
