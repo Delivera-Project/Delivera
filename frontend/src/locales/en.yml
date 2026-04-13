@@ -125,6 +125,12 @@ activity:
       title: Orders by day
       orders: Orders
       empty: No orders in this period
+    ranking:
+      title: Unit ranking
+      unit: Unit
+      type: Type
+      orders: Orders
+      empty: No unit data in this period
 
 units:
   title: Operational units

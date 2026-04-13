@@ -10,6 +10,7 @@ const api = useApi()
 const period = ref('MONTH')
 const metrics = ref(null)
 const chartData = ref(null)
+const unitRanking = ref([])
 const loading = ref(false)
 const error = ref('')
 
@@ -42,10 +43,12 @@ async function load() {
   loading.value = true
   error.value = ''
   chartData.value = null
+  unitRanking.value = []
   try {
-    const [metricsRes, chartRes] = await Promise.all([
+    const [metricsRes, chartRes, rankingRes] = await Promise.all([
       api.get(`/activity/metrics?period=${period.value}`),
       api.get(`/activity/orders-by-day?period=${period.value}`),
+      api.get(`/activity/unit-ranking?period=${period.value}`),
     ])
     if (metricsRes.ok) metrics.value = await metricsRes.json()
     else error.value = t('error.connection')
@@ -62,6 +65,8 @@ async function load() {
         }],
       }
     }
+
+    if (rankingRes.ok) unitRanking.value = await rankingRes.json()
   } catch {
     error.value = t('error.connection')
   } finally {
@@ -110,6 +115,29 @@ onMounted(load)
         <Chart type="bar" :data="chartData" :options="chartOptions" />
       </div>
       <p v-if="chartData.labels.length === 0" class="chart-empty">{{ t('activity.panel.chart.empty') }}</p>
+    </div>
+
+    <div v-if="!loading" class="ranking-section">
+      <h2>{{ t('activity.panel.ranking.title') }}</h2>
+      <table v-if="unitRanking.length" class="ranking-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ t('activity.panel.ranking.unit') }}</th>
+            <th>{{ t('activity.panel.ranking.type') }}</th>
+            <th>{{ t('activity.panel.ranking.orders') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(entry, idx) in unitRanking" :key="entry.unitId">
+            <td class="ranking-pos">{{ idx + 1 }}</td>
+            <td>{{ entry.unitName }}</td>
+            <td>{{ t('units.' + entry.unitType) }}</td>
+            <td class="ranking-count">{{ entry.orderCount }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p v-else class="ranking-empty">{{ t('activity.panel.ranking.empty') }}</p>
     </div>
   </div>
 </template>
@@ -169,4 +197,13 @@ onMounted(load)
 .chart-section h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1e293b; }
 .chart-wrapper { position: relative; height: 300px; }
 .chart-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 24px; }
+
+.ranking-section { margin-top: 32px; }
+.ranking-section h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1e293b; }
+.ranking-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.ranking-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+.ranking-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+.ranking-pos { font-weight: 700; color: var(--p-primary-color, #7c3aed); width: 40px; }
+.ranking-count { font-weight: 600; text-align: right; }
+.ranking-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 12px; }
 </style>

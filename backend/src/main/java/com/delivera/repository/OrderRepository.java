@@ -54,4 +54,11 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
            "FROM Order o WHERE o.company.id = :companyId AND o.createdAt > :after " +
            "GROUP BY CAST(o.createdAt AS LocalDate) ORDER BY day")
     List<Object[]> countByDayForCompany(@Param("companyId") UUID companyId, @Param("after") Instant after);
+
+    @Query("SELECT u.id, u.name, u.type, COUNT(o) " +
+           "FROM Order o JOIN o.origin u " +
+           "WHERE o.company.id = :companyId AND o.createdAt > :after " +
+           "GROUP BY u.id, u.name, u.type " +
+           "ORDER BY COUNT(o) DESC")
+    List<Object[]> countByOriginUnitForCompany(@Param("companyId") UUID companyId, @Param("after") Instant after);
 }
