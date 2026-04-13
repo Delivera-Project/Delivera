@@ -20,6 +20,7 @@ import NotFoundView from '@/views/NotFoundView.vue'
 import ActivityView from '@/views/ActivityView.vue'
 import WorkersView from '@/views/workers/WorkersView.vue'
 import HomeView from '@/views/home/HomeView.vue'
+import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
 import UnitAssignWorkersView from '@/views/units/UnitAssignWorkersView.vue'
 import OnboardingView from '@/views/auth/OnboardingView.vue'
 import AppLayout from '@/components/AppLayout.vue'
@@ -56,6 +57,7 @@ const router = createRouter({
         { path: 'activity', component: ActivityView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST'] } },
         { path: 'workers', component: WorkersView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'settings', component: SettingsView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
+        { path: 'admin', component: AdminDashboardView, meta: { requiresAuth: true, roles: ['GLOBAL_ADMIN'] } },
       ],
     },
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFoundView },
@@ -70,6 +72,7 @@ router.beforeEach((to) => {
   }
 
   if (to.meta.guest && auth.isAuthenticated && to.path !== '/login/org-select') {
+    if (auth.role === 'GLOBAL_ADMIN') return '/admin'
     const companyRoles = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
     return companyRoles.includes(auth.role) ? '/home' : '/my-orders'
   }

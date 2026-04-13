@@ -33,6 +33,7 @@ const navItems = [
   { path: '/workers', icon: 'pi-id-card', labelKey: 'nav.workers', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
   { path: '/my-orders', icon: 'pi-inbox', labelKey: 'nav.myOrders', noRole: true },
   { path: '/settings', icon: 'pi-cog', labelKey: 'nav.settings', roles: ['COMPANY_ADMIN'] },
+  { path: '/admin', icon: 'pi-shield', labelKey: 'nav.admin', roles: ['GLOBAL_ADMIN'] },
 ]
 
 const visibleItems = computed(() =>

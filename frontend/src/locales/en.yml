@@ -286,6 +286,23 @@ nav:
   settings: Settings
   activity: Activity
   workers: Team
+  admin: Administration
+
+admin:
+  title: Administration panel
+  organizations: Organizations
+  orgName: Name
+  orgHandle: Code
+  companies: Companies
+  workers: Workers
+  orders: Orders
+  createdAt: Created
+  empty: No organizations registered.
+  metric:
+    totalOrganizations: Organizations
+    totalCompanies: Companies
+    totalOrdersThisMonth: Orders this month
+    totalActiveUsers: Active users
 
 common:
   back: Back
