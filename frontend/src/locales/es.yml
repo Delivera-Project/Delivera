@@ -204,6 +204,9 @@ orders:
   statusUpdated: Estado actualizado correctamente
   filterAll: Todos
   deleteConfirm: "¿Eliminar este pedido?"
+  chat: Chat
+  chatEmpty: No hay mensajes todavía.
+  chatPlaceholder: Escribe un mensaje...
   details: Detalles
   priority:
     label: Prioridad

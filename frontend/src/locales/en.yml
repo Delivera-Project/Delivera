@@ -204,6 +204,9 @@ orders:
   statusUpdated: Status updated successfully
   filterAll: All
   deleteConfirm: Delete this order?
+  chat: Chat
+  chatEmpty: No messages yet.
+  chatPlaceholder: Type a message...
   details: Details
   priority:
     label: Priority
