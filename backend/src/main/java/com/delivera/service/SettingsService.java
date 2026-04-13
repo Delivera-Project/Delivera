@@ -39,6 +39,8 @@ public class SettingsService {
     @Autowired
     private ActivityTypeRepository activityTypeRepository;
     @Autowired
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Autowired
     private SecurityUtils securityUtils;
     @Autowired
     private SubscriptionService subscriptionService;
@@ -86,6 +88,7 @@ public class SettingsService {
         newCompany.setOrganization(org);
         newCompany.setName(req.name());
         newCompany.setActivityType(activityTypeRepository.getReferenceById(req.activityType()));
+        newCompany.setPlan(subscriptionPlanRepository.getReferenceById("FREE"));
         companyRepository.save(newCompany);
 
         String email = securityUtils.getCurrentEmail();

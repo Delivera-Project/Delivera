@@ -121,6 +121,10 @@ activity:
       cancelledOrders: Cancelados
       activeOrders: En curso
       newLoyalUsers: Nuevos fidelizados
+    chart:
+      title: Pedidos por día
+      orders: Pedidos
+      empty: No hay pedidos en este período
 
 units:
   title: Unidades operativas

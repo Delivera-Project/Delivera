@@ -41,6 +41,8 @@ public class AuthService {
     @Autowired
     private ActivityTypeRepository activityTypeRepository;
     @Autowired
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private JwtService jwtService;
@@ -121,6 +123,7 @@ public class AuthService {
         company.setName(request.companyName());
         ActivityType activityType = activityTypeRepository.getReferenceById(request.activityType());
         company.setActivityType(activityType);
+        company.setPlan(subscriptionPlanRepository.getReferenceById("FREE"));
         companyRepository.save(company);
 
         Worker worker = new Worker();

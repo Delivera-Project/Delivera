@@ -121,6 +121,10 @@ activity:
       cancelledOrders: Cancelled
       activeOrders: In progress
       newLoyalUsers: New loyal users
+    chart:
+      title: Orders by day
+      orders: Orders
+      empty: No orders in this period
 
 units:
   title: Operational units

@@ -2,12 +2,14 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
+import Chart from 'primevue/chart'
 
 const { t } = useI18n()
 const api = useApi()
 
 const period = ref('MONTH')
 const metrics = ref(null)
+const chartData = ref(null)
 const loading = ref(false)
 const error = ref('')
 
@@ -21,13 +23,44 @@ const METRIC_ICONS = {
   newLoyalUsers: 'pi-user-plus',
 }
 
+const chartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
+    x: { grid: { display: false } },
+  },
+}
+
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' })
+}
+
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    const res = await api.get(`/activity/metrics?period=${period.value}`)
-    if (res.ok) metrics.value = await res.json()
+    const [metricsRes, chartRes] = await Promise.all([
+      api.get(`/activity/metrics?period=${period.value}`),
+      api.get(`/activity/orders-by-day?period=${period.value}`),
+    ])
+    if (metricsRes.ok) metrics.value = await metricsRes.json()
     else error.value = t('error.connection')
+
+    if (chartRes.ok) {
+      const entries = await chartRes.json()
+      chartData.value = {
+        labels: entries.map(e => formatDateLabel(e.date)),
+        datasets: [{
+          label: t('activity.panel.chart.orders'),
+          data: entries.map(e => e.count),
+          backgroundColor: 'rgba(124, 58, 237, 0.7)',
+          borderRadius: 4,
+        }],
+      }
+    }
   } catch {
     error.value = t('error.connection')
   } finally {
@@ -68,6 +101,14 @@ onMounted(load)
 
     <div v-else-if="loading" class="metrics-grid">
       <div v-for="i in 5" :key="i" class="metric-card metric-card--skeleton" />
+    </div>
+
+    <div v-if="chartData && !loading" class="chart-section">
+      <h2>{{ t('activity.panel.chart.title') }}</h2>
+      <div class="chart-wrapper">
+        <Chart type="bar" :data="chartData" :options="chartOptions" />
+      </div>
+      <p v-if="chartData.labels.length === 0" class="chart-empty">{{ t('activity.panel.chart.empty') }}</p>
     </div>
   </div>
 </template>
@@ -122,4 +163,9 @@ onMounted(load)
 .metric-label { font-size: 12px; color: #64748b; font-weight: 500; }
 .metric-card--skeleton { background: #f1f5f9; min-height: 120px; animation: pulse 1.2s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+.chart-section { margin-top: 32px; }
+.chart-section h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1e293b; }
+.chart-wrapper { position: relative; height: 300px; }
+.chart-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 24px; }
 </style>
