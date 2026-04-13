@@ -45,12 +45,22 @@ onMounted(async () => {
         const lat = parseFloat(u.latitude)
         const lng = parseFloat(u.longitude)
         const marker = L.marker([lat, lng]).addTo(map)
-        marker.bindPopup(`
-          <strong>${u.name}</strong><br>
-          <span>${t('units.' + u.type)}</span><br>
-          ${u.address ? `<small>${u.address}</small><br>` : ''}
-          <a href="/units/${u.id}" class="map-popup-link">${t('units.detail')}</a>
-        `)
+        const popup = document.createElement('div')
+        const title = document.createElement('strong')
+        title.textContent = u.name
+        const type = document.createElement('span')
+        type.textContent = t('units.' + u.type)
+        const link = document.createElement('a')
+        link.href = `/units/${u.id}`
+        link.textContent = t('units.detail')
+        popup.append(title, document.createElement('br'), type, document.createElement('br'))
+        if (u.address) {
+          const addr = document.createElement('small')
+          addr.textContent = u.address
+          popup.append(addr, document.createElement('br'))
+        }
+        popup.appendChild(link)
+        marker.bindPopup(popup)
         bounds.push([lat, lng])
       })
       map.fitBounds(bounds, { padding: [40, 40] })
