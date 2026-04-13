@@ -4,8 +4,10 @@ import com.delivera.model.Order;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public record PublicOrderResponse(
+        UUID id,
         String reference,
         String companyName,
         String originName,
@@ -24,6 +26,7 @@ public record PublicOrderResponse(
         String hint = claimable && order.getRecipientEmail() != null
                 ? maskEmail(order.getRecipientEmail()) : null;
         return new PublicOrderResponse(
+                order.getId(),
                 order.getReference(),
                 order.getCompany().getName(),
                 order.getOrigin().getName(),
