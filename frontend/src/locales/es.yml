@@ -286,6 +286,23 @@ nav:
   settings: Configuración
   activity: Actividad
   workers: Equipo
+  admin: Administración
+
+admin:
+  title: Panel de administración
+  organizations: Organizaciones
+  orgName: Nombre
+  orgHandle: Código
+  companies: Empresas
+  workers: Trabajadores
+  orders: Pedidos
+  createdAt: Creada
+  empty: No hay organizaciones registradas.
+  metric:
+    totalOrganizations: Organizaciones
+    totalCompanies: Empresas
+    totalOrdersThisMonth: Pedidos este mes
+    totalActiveUsers: Usuarios activos
 
 common:
   back: Volver

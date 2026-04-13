@@ -61,4 +61,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
            "GROUP BY u.id, u.name, u.type " +
            "ORDER BY COUNT(o) DESC")
     List<Object[]> countByOriginUnitForCompany(@Param("companyId") UUID companyId, @Param("after") Instant after);
+
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.company.organization.id = :orgId")
+    long countByOrganizationId(@Param("orgId") UUID orgId);
+
+    long countByCreatedAtAfter(Instant after);
 }

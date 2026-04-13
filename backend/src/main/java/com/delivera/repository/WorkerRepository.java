@@ -36,4 +36,7 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
     List<Worker> findByUserEmailOrderByCreatedAtAsc(@Param("email") String email);
 
     long countByCompanyId(UUID companyId);
+
+    @Query("SELECT COUNT(w) FROM Worker w WHERE w.company.organization.id = :orgId")
+    long countByOrganizationId(@Param("orgId") UUID orgId);
 }
