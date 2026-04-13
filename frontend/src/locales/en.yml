@@ -152,6 +152,9 @@ units:
   STORE: Store
   FACTORY: Factory
   LOGISTICS_CENTER: Logistics center
+  mapTitle: Units map
+  mapView: Map view
+  listView: List view
 
 orders:
   listTitle: Orders
