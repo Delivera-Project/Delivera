@@ -43,7 +43,11 @@ public class ActivityService {
     public List<OrdersByDayEntry> getOrdersByDay(UUID companyId, String period) {
         Instant from = periodStart(period);
         return orderRepository.countByDayForCompany(companyId, from).stream()
-                .map(row -> new OrdersByDayEntry((LocalDate) row[0], (long) row[1]))
+                .map(row -> {
+                    LocalDate date = row[0] instanceof LocalDate d ? d : ((java.sql.Date) row[0]).toLocalDate();
+                    long count = ((Number) row[1]).longValue();
+                    return new OrdersByDayEntry(date, count);
+                })
                 .toList();
     }
 

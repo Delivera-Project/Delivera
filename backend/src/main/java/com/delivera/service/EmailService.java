@@ -27,6 +27,10 @@ public class EmailService {
             log.info("Mail disabled — would send tracking link to {} for order {}", recipientEmail, reference);
             return;
         }
+        if (mailSender == null) {
+            log.warn("Mail enabled but JavaMailSender not configured — skipping email to {} for order {}", recipientEmail, reference);
+            return;
+        }
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(from);

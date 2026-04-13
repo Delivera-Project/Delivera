@@ -41,6 +41,7 @@ function formatDateLabel(dateStr) {
 async function load() {
   loading.value = true
   error.value = ''
+  chartData.value = null
   try {
     const [metricsRes, chartRes] = await Promise.all([
       api.get(`/activity/metrics?period=${period.value}`),
