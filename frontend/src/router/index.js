@@ -22,6 +22,7 @@ import WorkersView from '@/views/workers/WorkersView.vue'
 import HomeView from '@/views/home/HomeView.vue'
 import AdminDashboardView from '@/views/admin/AdminDashboardView.vue'
 import UnitAssignWorkersView from '@/views/units/UnitAssignWorkersView.vue'
+import UnitsMapView from '@/views/units/UnitsMapView.vue'
 import OnboardingView from '@/views/auth/OnboardingView.vue'
 import AppLayout from '@/components/AppLayout.vue'
 import { useAuthStore } from '@/stores/auth'
@@ -45,6 +46,7 @@ const router = createRouter({
         { path: 'my-orders', component: MyOrdersView, meta: { requiresAuth: true } },
         { path: 'my-orders/detail', component: MyOrderDetailView, meta: { requiresAuth: true } },
         { path: 'units', component: UnitsView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
+        { path: 'units/map', component: UnitsMapView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'units/new', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },
         { path: 'units/:id', component: UnitDetailView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] } },
         { path: 'units/:id/edit', component: UnitFormView, meta: { requiresAuth: true, roles: ['COMPANY_ADMIN'] } },

@@ -52,12 +52,20 @@ async function deleteUnit(e, id) {
   <div class="card card-wide">
     <div class="list-header">
       <h1>{{ t('units.title') }}</h1>
-      <PButton
-        v-if="auth.isCompanyAdmin"
-        :label="t('units.new')"
-        icon="pi pi-plus"
-        @click="router.push('/units/new')"
-      />
+      <div class="header-actions">
+        <PButton
+          :label="t('units.mapView')"
+          icon="pi pi-map"
+          severity="secondary"
+          @click="router.push('/units/map')"
+        />
+        <PButton
+          v-if="auth.isCompanyAdmin"
+          :label="t('units.new')"
+          icon="pi pi-plus"
+          @click="router.push('/units/new')"
+        />
+      </div>
     </div>
 
     <div class="filters-wrapper">
@@ -128,4 +136,5 @@ async function deleteUnit(e, id) {
 <style scoped>
 .filter-select { width: 200px; }
 :deep(tr:hover) .delete-btn { opacity: 1; }
+.header-actions { display: flex; gap: 8px; }
 </style>
