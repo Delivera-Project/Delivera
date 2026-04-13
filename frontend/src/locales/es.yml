@@ -125,6 +125,12 @@ activity:
       title: Pedidos por día
       orders: Pedidos
       empty: No hay pedidos en este período
+    ranking:
+      title: Ranking de unidades
+      unit: Unidad
+      type: Tipo
+      orders: Pedidos
+      empty: No hay datos de unidades en este período
 
 units:
   title: Unidades operativas

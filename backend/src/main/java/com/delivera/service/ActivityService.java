@@ -2,6 +2,8 @@ package com.delivera.service;
 
 import com.delivera.dto.activity.ActivityMetricsResponse;
 import com.delivera.dto.activity.OrdersByDayEntry;
+import com.delivera.dto.activity.UnitRankingEntry;
+import com.delivera.model.UnitType;
 import com.delivera.model.OrderStatus;
 import com.delivera.repository.LoyalUserRepository;
 import com.delivera.repository.OrderRepository;
@@ -48,6 +50,17 @@ public class ActivityService {
                     long count = ((Number) row[1]).longValue();
                     return new OrdersByDayEntry(date, count);
                 })
+                .toList();
+    }
+
+    public List<UnitRankingEntry> getUnitRanking(UUID companyId, String period) {
+        Instant from = periodStart(period);
+        return orderRepository.countByOriginUnitForCompany(companyId, from).stream()
+                .map(row -> new UnitRankingEntry(
+                        (UUID) row[0],
+                        (String) row[1],
+                        ((UnitType) row[2]).name(),
+                        ((Number) row[3]).longValue()))
                 .toList();
     }
 
