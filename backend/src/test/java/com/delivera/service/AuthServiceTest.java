@@ -40,6 +40,8 @@ class AuthServiceTest {
     @Mock
     private ActivityTypeRepository activityTypeRepository;
     @Mock
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
     private JwtService jwtService;

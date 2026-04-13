@@ -86,6 +86,7 @@ public class SecurityConfig {
                 auth.requestMatchers(api + "/orders/**").authenticated();
                 auth.requestMatchers(api + "/loyal-users/**").authenticated();
                 auth.requestMatchers(api + "/user/**").authenticated();
+                auth.requestMatchers(api + "/activity/**").hasAnyRole(ADMIN, ANALYST);
 
                 auth.anyRequest().denyAll();
             })

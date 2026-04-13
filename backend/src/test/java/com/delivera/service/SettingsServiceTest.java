@@ -46,6 +46,8 @@ class SettingsServiceTest {
     @Mock
     private ActivityTypeRepository activityTypeRepository;
     @Mock
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Mock
     private SecurityUtils securityUtils;
     @Mock
     private SubscriptionService subscriptionService;

@@ -1,6 +1,7 @@
 package com.delivera.service;
 
 import com.delivera.dto.activity.ActivityMetricsResponse;
+import com.delivera.dto.activity.OrdersByDayEntry;
 import com.delivera.model.OrderStatus;
 import com.delivera.repository.LoyalUserRepository;
 import com.delivera.repository.OrderRepository;
@@ -39,7 +40,18 @@ public class ActivityService {
         );
     }
 
-    private Instant periodStart(String period) {
+    public List<OrdersByDayEntry> getOrdersByDay(UUID companyId, String period) {
+        Instant from = periodStart(period);
+        return orderRepository.countByDayForCompany(companyId, from).stream()
+                .map(row -> {
+                    LocalDate date = row[0] instanceof LocalDate d ? d : ((java.sql.Date) row[0]).toLocalDate();
+                    long count = ((Number) row[1]).longValue();
+                    return new OrdersByDayEntry(date, count);
+                })
+                .toList();
+    }
+
+    Instant periodStart(String period) {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         return switch (period) {
             case "TODAY" -> today.atStartOfDay().toInstant(ZoneOffset.UTC);

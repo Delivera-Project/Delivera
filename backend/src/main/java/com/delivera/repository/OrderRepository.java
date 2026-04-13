@@ -49,4 +49,9 @@ public interface OrderRepository extends JpaRepository<Order, UUID> {
     long countByCompanyIdAndStatusAndCreatedAtAfter(UUID companyId, OrderStatus status, Instant after);
 
     long countByCompanyIdAndStatusNotIn(UUID companyId, java.util.Collection<OrderStatus> statuses);
+
+    @Query("SELECT CAST(o.createdAt AS LocalDate) AS day, COUNT(o) " +
+           "FROM Order o WHERE o.company.id = :companyId AND o.createdAt > :after " +
+           "GROUP BY CAST(o.createdAt AS LocalDate) ORDER BY day")
+    List<Object[]> countByDayForCompany(@Param("companyId") UUID companyId, @Param("after") Instant after);
 }

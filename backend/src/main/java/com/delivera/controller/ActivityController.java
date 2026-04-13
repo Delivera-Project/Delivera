@@ -1,6 +1,7 @@
 package com.delivera.controller;
 
 import com.delivera.dto.activity.ActivityMetricsResponse;
+import com.delivera.dto.activity.OrdersByDayEntry;
 import com.delivera.security.SecurityUtils;
 import com.delivera.service.ActivityService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +9,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/activity")
@@ -22,5 +25,12 @@ public class ActivityController {
     public ResponseEntity<ActivityMetricsResponse> getMetrics(
             @RequestParam(defaultValue = "MONTH") String period) {
         return ResponseEntity.ok(activityService.getMetrics(securityUtils.getCurrentCompanyId(), period));
+    }
+
+    @Operation(summary = "Pedidos por día en el período")
+    @GetMapping("/orders-by-day")
+    public ResponseEntity<List<OrdersByDayEntry>> getOrdersByDay(
+            @RequestParam(defaultValue = "MONTH") String period) {
+        return ResponseEntity.ok(activityService.getOrdersByDay(securityUtils.getCurrentCompanyId(), period));
     }
 }
