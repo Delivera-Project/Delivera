@@ -10,6 +10,8 @@ RUN mvn -DskipTests package -q
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/target/delivera-backend-0.0.1-SNAPSHOT.jar app.jar
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring:spring
 ENV SPRING_PROFILES_ACTIVE=prod
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
