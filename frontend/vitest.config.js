@@ -13,7 +13,7 @@ export default mergeConfig(
         provider: 'v8',
         reporter: ['lcov', 'text'],
         reportsDirectory: 'coverage',
-        exclude: ['**/node_modules/**', '**/dist/**', '**/*.spec.js', 'src/main.js'],
+        exclude: ['**/node_modules/**', '**/dist/**', '**/*.spec.js', 'src/main.js', '*.config.*'],
       },
     },
   }),
