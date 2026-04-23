@@ -21,6 +21,7 @@
     "@primevue/themes": "^4.5.4",
     "chart.js": "^4.5.1",
     "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
     "primevue": "^4.5.4",

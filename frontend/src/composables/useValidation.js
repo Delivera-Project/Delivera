@@ -54,6 +54,24 @@ export function useValidation() {
     }
   }
 
+  function maxLength(value, max, fieldKey) {
+    return () => {
+      if (value && value.length > max) {
+        return { message: t('validation.maxLength', { field: t(`fields.${fieldKey}`), max }), type: 'format' }
+      }
+      return null
+    }
+  }
+
+  function pattern(value, regex, messageKey) {
+    return () => {
+      if (value && !regex.test(value)) {
+        return { message: t(messageKey), type: 'format' }
+      }
+      return null
+    }
+  }
+
   function match(value1, value2) {
     return () => {
       if (value1 !== value2) {
@@ -86,5 +104,5 @@ export function useValidation() {
     return keys.length > 0 ? errors.value[keys[0]] : ''
   }
 
-  return { errors, invalids, validate, required, email, minLength, match, passwordStrength, usernameFormat, firstError }
+  return { errors, invalids, validate, required, email, minLength, maxLength, pattern, match, passwordStrength, usernameFormat, firstError }
 }

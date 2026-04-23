@@ -63,4 +63,11 @@ frontend/blob-report/
 # =====================
 .env.local
 .env.*.local
-scripts/
+
+# =====================
+# SCRIPTS
+# =====================
+# Solo el script de bootstrap entra en el repo.
+# Los de demo (seed-demo.sh, reset-demo.sh, seed.py) son locales.
+scripts/*
+!scripts/seed-init.sh

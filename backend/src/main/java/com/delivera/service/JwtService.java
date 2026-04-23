@@ -26,12 +26,16 @@ public class JwtService {
     }
 
     public String generateToken(String email) {
-        return Jwts.builder()
+        return generateToken(email, null);
+    }
+
+    public String generateToken(String email, String role) {
+        var builder = Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
-                .expiration(Date.from(Instant.now().plusSeconds(expirationSeconds)))
-                .signWith(key)
-                .compact();
+                .expiration(Date.from(Instant.now().plusSeconds(expirationSeconds)));
+        if (role != null) builder.claim("role", role);
+        return builder.signWith(key).compact();
     }
 
     public String generateToken(String email, UUID companyId, WorkerRole role) {

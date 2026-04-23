@@ -35,6 +35,13 @@ public class LoyalUserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(loyalUserService.add(request));
     }
 
+    @Operation(summary = "Actualizar dirección del fidelizado")
+    @PutMapping("/{id}/address")
+    public ResponseEntity<LoyalUserResponse> updateAddress(@PathVariable UUID id,
+                                                           @Valid @RequestBody LoyalUserRequest request) {
+        return ResponseEntity.ok(loyalUserService.updateAddress(id, request));
+    }
+
     @Operation(summary = "Pedidos de un fidelizado")
     @GetMapping("/{id}/orders")
     public ResponseEntity<List<OrderResponse>> orders(@PathVariable UUID id) {

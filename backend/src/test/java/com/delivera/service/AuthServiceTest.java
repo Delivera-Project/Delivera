@@ -105,7 +105,7 @@ class AuthServiceTest {
         when(userRepository.findByEmailOrUsername("personal@test.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("pass", "hashed")).thenReturn(true);
         when(workerRepository.findByUserEmailOrderByCreatedAtAsc("admin@test.com")).thenReturn(List.of());
-        when(jwtService.generateToken("admin@test.com")).thenReturn("individual-token");
+        when(jwtService.generateToken("admin@test.com", (String) null)).thenReturn("individual-token");
 
         LoginResponse result = authService.login("personal@test.com", "pass");
 
@@ -181,4 +181,71 @@ class AuthServiceTest {
                 .isInstanceOf(OrderNotFoundException.class);
     }
 
+    @Test
+    void login_invalidCredentials_throws() {
+        when(userRepository.findByEmailOrUsername("x@t.com")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authService.login("x@t.com", "pass"))
+                .isInstanceOf(InvalidCredentialsException.class);
+    }
+
+    @Test
+    void switchCompany_success_andNotFound() {
+        when(workerRepository.findByUserEmailAndCompanyId("admin@test.com", company.getId())).thenReturn(Optional.of(worker));
+        when(jwtService.generateToken(any(), any(), any())).thenReturn("switch-token");
+        assertThat(authService.switchCompany("admin@test.com", company.getId()).token()).isEqualTo("switch-token");
+
+        UUID other = UUID.randomUUID();
+        when(workerRepository.findByUserEmailAndCompanyId("admin@test.com", other)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authService.switchCompany("admin@test.com", other))
+                .isInstanceOf(InvalidCredentialsException.class);
+    }
+
+    @Test
+    void isHandleAvailable_and_isUsernameAvailable() {
+        when(organizationRepository.existsByHandle("free")).thenReturn(false);
+        when(userRepository.existsByUsername("free")).thenReturn(false);
+        assertThat(authService.isHandleAvailable("free")).isTrue();
+        assertThat(authService.isUsernameAvailable("free")).isTrue();
+    }
+
+    @Test
+    void register_emailExists_throws() {
+        RegisterRequest req = new RegisterRequest("dup@test.com", "u", "A", null, null, "Password1");
+        when(userRepository.findByEmail("dup@test.com")).thenReturn(Optional.of(user));
+        assertThatThrownBy(() -> authService.register(req)).isInstanceOf(EmailAlreadyExistsException.class);
+    }
+
+    @Test
+    void register_usernameExists_throws() {
+        RegisterRequest req = new RegisterRequest("new@test.com", "taken", "A", null, null, "Password1");
+        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
+        when(userRepository.existsByUsername("taken")).thenReturn(true);
+        assertThatThrownBy(() -> authService.register(req)).isInstanceOf(UsernameAlreadyExistsException.class);
+    }
+
+    @Test
+    void registerCompany_handleConflict_throws() {
+        CompanyRegisterRequest req = new CompanyRegisterRequest("c@t.com", "Password1", "Org", "taken", "C", "TR", null, "A", null, null);
+        when(userRepository.findByEmail("c@t.com")).thenReturn(Optional.empty());
+        when(organizationRepository.existsByHandle("taken")).thenReturn(true);
+        assertThatThrownBy(() -> authService.registerCompany(req)).isInstanceOf(HandleConflictException.class);
+    }
+
+    @Test
+    void claimRegister_alreadyClaimed_throws() {
+        LoyalUser lu = new LoyalUser();
+        lu.setUser(user);
+        claimOrder.setLoyalUser(lu);
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        assertThatThrownBy(() -> authService.claimRegister("testtoken", claimRequest))
+                .isInstanceOf(OrderAlreadyClaimedException.class);
+    }
+
+    @Test
+    void claimRegister_emailMismatch_throws() {
+        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
+        ClaimRegisterRequest req = new ClaimRegisterRequest("A", "B", "other@gmail.com", "Password1");
+        assertThatThrownBy(() -> authService.claimRegister("testtoken", req))
+                .isInstanceOf(OrderClaimEmailMismatchException.class);
+    }
 }

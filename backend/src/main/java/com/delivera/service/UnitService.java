@@ -13,6 +13,7 @@ import com.delivera.exception.WorkerNotFoundException;
 import com.delivera.model.Company;
 import com.delivera.model.OperationalUnit;
 import com.delivera.model.Worker;
+import com.delivera.model.WorkerRole;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.OperationalUnitRepository;
 import com.delivera.repository.WorkerRepository;
@@ -87,10 +88,11 @@ public class UnitService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<UnitResponse> getByCompany() {
         UUID companyId = securityUtils.getCurrentCompanyId();
         String role = securityUtils.getCurrentRole();
-        if ("OPERATOR".equals(role)) {
+        if (WorkerRole.OPERATOR.name().equals(role)) {
             String email = securityUtils.getCurrentEmail();
             Worker worker = workerRepository.findByUserEmailAndCompanyId(email, companyId).orElse(null);
             if (worker == null) return List.of();
@@ -101,6 +103,7 @@ public class UnitService {
                 .map(UnitResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<B2BUnitResponse> getExternalUnits() {
         return unitRepository.findExternalByOrganization(securityUtils.getCurrentCompanyId()).stream()
                 .map(B2BUnitResponse::from)
@@ -114,7 +117,7 @@ public class UnitService {
         return companyRepository.findByOrganizationId(company.getOrganization().getId())
                 .stream()
                 .filter(c -> !c.getId().equals(companyId))
-                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode()))
+                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData()))
                 .toList();
     }
 
