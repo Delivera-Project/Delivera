@@ -3,7 +3,9 @@ package com.delivera.service;
 import com.delivera.dto.worker.ChangeRoleRequest;
 import com.delivera.dto.worker.WorkerInviteRequest;
 import com.delivera.dto.worker.WorkerResponse;
+import com.delivera.exception.ForbiddenException;
 import com.delivera.exception.LastAdminException;
+import com.delivera.exception.LoyalUserCannotBeWorkerException;
 import com.delivera.exception.WorkerAlreadyExistsException;
 import com.delivera.exception.WorkerNotFoundException;
 import com.delivera.model.*;
@@ -32,6 +34,7 @@ class WorkerServiceTest {
     @Mock private WorkerRepository workerRepository;
     @Mock private UserRepository userRepository;
     @Mock private CompanyRepository companyRepository;
+    @Mock private LoyalUserRepository loyalUserRepository;
     @Mock private PasswordEncoder passwordEncoder;
     @Mock private SecurityUtils securityUtils;
     @Mock private SubscriptionService subscriptionService;
@@ -64,6 +67,7 @@ class WorkerServiceTest {
     void invite_existingUser_createsWorkerWithoutTempPassword() {
         when(userRepository.findByEmail("worker@test.com")).thenReturn(Optional.of(user));
         when(workerRepository.findByUserEmailAndCompanyId("worker@test.com", companyId)).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByEmail("worker@test.com")).thenReturn(List.of());
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
         when(workerRepository.save(any())).thenReturn(worker);
 
@@ -78,6 +82,7 @@ class WorkerServiceTest {
     void invite_newUser_createsUserAndReturnsTempPassword() {
         when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
         when(workerRepository.findByUserEmailAndCompanyId("new@test.com", companyId)).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByEmail("new@test.com")).thenReturn(List.of());
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
         when(passwordEncoder.encode(any())).thenReturn("hashed");
 
@@ -158,5 +163,39 @@ class WorkerServiceTest {
 
         assertThatThrownBy(() -> workerService.remove(workerId))
                 .isInstanceOf(WorkerNotFoundException.class);
+    }
+
+    @Test
+    void invite_existingLoyalUser_throws() {
+        when(workerRepository.findByUserEmailAndCompanyId("worker@test.com", companyId)).thenReturn(Optional.empty());
+        when(loyalUserRepository.findByEmail("worker@test.com")).thenReturn(List.of(new LoyalUser()));
+        assertThatThrownBy(() -> workerService.invite(new WorkerInviteRequest("worker@test.com", "OPERATOR")))
+                .isInstanceOf(LoyalUserCannotBeWorkerException.class);
+    }
+
+    @Test
+    void getByCompany_returnsMappedList() {
+        when(workerRepository.findByCompanyIdOrderByCreatedAtAsc(companyId)).thenReturn(List.of(worker));
+        assertThat(workerService.getByCompany()).hasSize(1);
+    }
+
+    @Test
+    void remove_self_throws() {
+        UUID workerId = UUID.randomUUID();
+        when(workerRepository.findByIdAndCompanyId(workerId, companyId)).thenReturn(Optional.of(worker));
+        when(securityUtils.getCurrentEmail()).thenReturn("worker@test.com");
+        assertThatThrownBy(() -> workerService.remove(workerId))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void remove_invitedUserWithNoOtherWorkers_deletesUser() {
+        UUID workerId = UUID.randomUUID();
+        user.setId(UUID.randomUUID());
+        user.setInvited(true);
+        when(workerRepository.findByIdAndCompanyId(workerId, companyId)).thenReturn(Optional.of(worker));
+        when(workerRepository.countByUser_Id(user.getId())).thenReturn(0L);
+        workerService.remove(workerId);
+        verify(userRepository).delete(user);
     }
 }

@@ -20,6 +20,7 @@ public class WorkerService {
     private final WorkerRepository workerRepository;
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
+    private final LoyalUserRepository loyalUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtils securityUtils;
     private final SubscriptionService subscriptionService;
@@ -27,17 +28,20 @@ public class WorkerService {
     public WorkerService(WorkerRepository workerRepository,
                          UserRepository userRepository,
                          CompanyRepository companyRepository,
+                         LoyalUserRepository loyalUserRepository,
                          PasswordEncoder passwordEncoder,
                          SecurityUtils securityUtils,
                          SubscriptionService subscriptionService) {
         this.workerRepository = workerRepository;
         this.userRepository = userRepository;
         this.companyRepository = companyRepository;
+        this.loyalUserRepository = loyalUserRepository;
         this.passwordEncoder = passwordEncoder;
         this.securityUtils = securityUtils;
         this.subscriptionService = subscriptionService;
     }
 
+    @Transactional(readOnly = true)
     public List<WorkerResponse> getByCompany() {
         UUID companyId = securityUtils.getCurrentCompanyId();
         return workerRepository.findByCompanyIdOrderByCreatedAtAsc(companyId).stream()
@@ -57,6 +61,10 @@ public class WorkerService {
             throw new WorkerAlreadyExistsException();
         }
 
+        if (!loyalUserRepository.findByEmail(email).isEmpty()) {
+            throw new LoyalUserCannotBeWorkerException();
+        }
+
         Company company = companyRepository.findById(companyId).orElseThrow(CompanyContextException::new);
 
         String tempPassword = null;
@@ -68,6 +76,7 @@ public class WorkerService {
             user.setFirstName(email.split("@")[0]);
             user.setLastName("");
             user.setPasswordHash(passwordEncoder.encode(tempPassword));
+            user.setInvited(true);
             userRepository.save(user);
         }
 
@@ -104,11 +113,19 @@ public class WorkerService {
         Worker worker = workerRepository.findByIdAndCompanyId(workerId, companyId)
                 .orElseThrow(WorkerNotFoundException::new);
 
+        if (worker.getUser().getEmail().equalsIgnoreCase(securityUtils.getCurrentEmail())) {
+            throw new ForbiddenException("CANNOT_REMOVE_SELF");
+        }
+
         if (worker.getRole() == WorkerRole.COMPANY_ADMIN
                 && workerRepository.countByCompanyIdAndRole(companyId, WorkerRole.COMPANY_ADMIN) <= 1) {
             throw new LastAdminException();
         }
 
+        User user = worker.getUser();
         workerRepository.delete(worker);
+        if (user.isInvited() && workerRepository.countByUser_Id(user.getId()) == 0) {
+            userRepository.delete(user);
+        }
     }
 }

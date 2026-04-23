@@ -1,30 +1,27 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useFormatDate } from '@/composables/useFormatDate'
+import { useAuthStore } from '@/stores/auth'
+import { WORKER_ROLES } from '@/constants/roles'
 
 const { t } = useI18n()
+const router = useRouter()
+const route = useRoute()
 const api = useApi()
+const auth = useAuthStore()
 const { formatDate } = useFormatDate()
 
 const workers = ref([])
 const loading = ref(false)
 const error = ref('')
 const filterRole = ref(null)
-
-// Invite form
-const showInvite = ref(false)
-const inviteEmail = ref('')
-const inviteRole = ref('OPERATOR')
-const inviting = ref(false)
-const inviteError = ref('')
-const inviteSuccess = ref(null)
-
-// Confirm remove
-const removingId = ref(null)
-const removeLoading = ref(false)
-const removeError = ref('')
+const filterText = ref('')
+const currentPage = ref(1)
+const PAGE_SIZE = 5
+const inviteSuccess = ref(route.query.invited ? route.query.invited : null)
 
 // Change role
 const changingRoleId = ref(null)
@@ -32,15 +29,37 @@ const newRole = ref('')
 const roleLoading = ref(false)
 const roleError = ref('')
 
-const ROLES = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
+// Delete confirm
+const removingId = ref(null)
+const removeLoading = ref(false)
+const removeError = ref('')
+
+const ROLES = WORKER_ROLES
 
 const roleOptions = computed(() =>
   ROLES.map(r => ({ label: t('workers.roles.' + r), value: r }))
 )
 
-const filtered = computed(() =>
-  filterRole.value ? workers.value.filter(w => w.role === filterRole.value) : workers.value
-)
+const filtered = computed(() => {
+  const q = filterText.value.toLowerCase()
+  return workers.value.filter(w => {
+    if (filterRole.value && w.role !== filterRole.value) return false
+    if (q) {
+      const name = `${w.firstName ?? ''} ${w.lastName ?? ''}`.toLowerCase()
+      if (!name.includes(q) && !(w.email ?? '').toLowerCase().includes(q)) return false
+    }
+    return true
+  })
+})
+
+const paginatedWorkers = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE
+  return filtered.value.slice(start, start + PAGE_SIZE)
+})
+
+const totalPages = computed(() => Math.ceil(filtered.value.length / PAGE_SIZE))
+
+watch(filtered, () => { currentPage.value = 1 })
 
 async function load() {
   loading.value = true
@@ -56,32 +75,8 @@ async function load() {
   }
 }
 
-async function invite() {
-  if (!inviteEmail.value.trim()) return
-  inviting.value = true
-  inviteError.value = ''
-  inviteSuccess.value = null
-  try {
-    const res = await api.post('/workers/invite', { email: inviteEmail.value.trim(), role: inviteRole.value })
-    if (res.ok) {
-      const created = await res.json()
-      workers.value.push(created)
-      inviteSuccess.value = created
-      inviteEmail.value = ''
-      inviteRole.value = 'OPERATOR'
-      showInvite.value = false
-    } else {
-      const data = await res.json()
-      inviteError.value = api.translateError(data, 'error.saveFailed')
-    }
-  } catch {
-    inviteError.value = t('error.connection')
-  } finally {
-    inviting.value = false
-  }
-}
-
 function startChangeRole(worker) {
+  removingId.value = null
   changingRoleId.value = worker.id
   newRole.value = worker.role
   roleError.value = ''
@@ -131,157 +126,118 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="card card-wide">
-    <div class="list-header">
-      <h1>{{ t('workers.title') }}</h1>
-      <PButton :label="t('workers.invite')" icon="pi pi-plus" @click="showInvite = !showInvite; inviteError = ''; inviteSuccess = null" />
-    </div>
-
-    <!-- Resultado de invitación -->
-    <PMessage v-if="inviteSuccess" severity="success" :closable="true" @close="inviteSuccess = null" class="form-message">
-      {{ t('workers.invited') }}
-      <template v-if="inviteSuccess.tempPassword">
-        <br />
-        <strong>{{ t('workers.tempPasswordHint') }}</strong>
-        <code class="temp-pass">{{ inviteSuccess.tempPassword }}</code>
-      </template>
-    </PMessage>
-
-    <!-- Formulario invitación -->
-    <div v-if="showInvite" class="invite-form">
-      <h3>{{ t('workers.inviteTitle') }}</h3>
-      <div class="form-row">
-        <div class="form-field">
-          <label>{{ t('workers.email') }}</label>
-          <InputText v-model="inviteEmail" type="email" :placeholder="t('fields.emailPlaceholder')" fluid />
+  <div class="workers-page">
+    <div class="workers-card">
+      <div class="workers-header">
+        <div>
+          <h1 class="workers-title">{{ t('workers.title') }}</h1>
+          <p class="workers-subtitle">{{ t('workers.subtitle') }}</p>
         </div>
-        <div class="form-field">
-          <label>{{ t('workers.role') }}</label>
-          <PSelect v-model="inviteRole" :options="roleOptions" option-label="label" option-value="value" fluid />
-        </div>
+        <PButton
+          :label="t('workers.invite')"
+          icon="pi pi-plus"
+          @click="router.push('/workers/invite')"
+        />
       </div>
-      <PMessage v-if="inviteError" severity="error" :closable="false" class="form-message">{{ inviteError }}</PMessage>
-      <div class="form-actions">
-        <PButton :label="t('common.cancel')" severity="secondary" text @click="showInvite = false" />
-        <PButton :label="inviting ? t('common.loading') : t('workers.invite')" :loading="inviting" @click="invite" />
+
+      <PMessage v-if="inviteSuccess" severity="success" :closable="true" @close="inviteSuccess = null" class="form-message">
+        {{ t('workers.invited') }}
+      </PMessage>
+
+      <div class="search-bar">
+        <span class="search-icon pi pi-search" />
+        <input v-model="filterText" class="search-input" :placeholder="t('workers.searchPlaceholder')" type="text" />
       </div>
-    </div>
 
-    <!-- Filtro por rol -->
-    <div class="filter-bar">
-      <PButton
-        :label="t('workers.filterAll')"
-        :severity="filterRole === null ? 'primary' : 'secondary'"
-        text
-        @click="filterRole = null"
-      />
-      <PButton
-        v-for="r in ROLES" :key="r"
-        :label="t('workers.roles.' + r)"
-        :severity="filterRole === r ? 'primary' : 'secondary'"
-        text
-        @click="filterRole = filterRole === r ? null : r"
-      />
-    </div>
+      <div class="filter-bar">
+        <button :class="['role-filter-btn', { active: filterRole === null }]" @click="filterRole = null">
+          {{ t('workers.filterAll') }}
+        </button>
+        <button
+          v-for="r in ROLES" :key="r"
+          :class="['role-filter-btn', { active: filterRole === r }]"
+          @click="filterRole = filterRole === r ? null : r"
+        >{{ t('workers.roles.' + r) }}</button>
+      </div>
 
-    <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
+      <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
-    <DataTable :value="filtered" :loading="loading" striped-rows>
-      <template #empty>
-        <EmptyState icon="pi-users" :message="t('workers.empty')" />
-      </template>
+      <div v-if="loading" class="workers-list">
+        <div v-for="i in 3" :key="i" class="worker-card worker-card--skeleton" />
+      </div>
 
-      <Column :header="t('workers.name')">
-        <template #body="{ data }">
-          <span class="worker-name">{{ data.firstName }} {{ data.lastName }}</span>
-          <small class="worker-email">{{ data.email }}</small>
-        </template>
-      </Column>
-
-      <Column :header="t('workers.role')" style="width:200px">
-        <template #body="{ data }">
-          <template v-if="changingRoleId === data.id">
-            <div class="role-edit">
-              <PSelect v-model="newRole" :options="roleOptions" option-label="label" option-value="value" size="small" />
-              <PButton icon="pi pi-check" size="small" :loading="roleLoading" @click="saveRole(data.id)" />
-              <PButton icon="pi pi-times" size="small" severity="secondary" text @click="changingRoleId = null" />
-            </div>
-            <small v-if="roleError" class="field-error">{{ roleError }}</small>
-          </template>
-          <template v-else>
-            <PTag :value="t('workers.roles.' + data.role)" :severity="data.role === 'COMPANY_ADMIN' ? 'warn' : 'info'" />
-          </template>
-        </template>
-      </Column>
-
-      <Column :header="t('workers.since')" style="width:130px">
-        <template #body="{ data }">{{ formatDate(data.createdAt) }}</template>
-      </Column>
-
-      <Column style="width:100px">
-        <template #body="{ data }">
-          <div class="row-actions">
-            <PButton icon="pi pi-pencil" text severity="secondary" size="small" @click="startChangeRole(data)" />
-            <PButton icon="pi pi-trash" text severity="danger" size="small" @click="removingId = data.id; removeError = ''" />
+      <div v-else-if="filtered.length" class="workers-list">
+        <div
+          v-for="data in paginatedWorkers" :key="data.id"
+          :class="['worker-card', { 'worker-card--removing': removingId === data.id && data.email !== auth.user?.email }]"
+        >
+          <div class="worker-avatar">
+            {{ (data.firstName?.[0] || data.email?.[0] || '?').toUpperCase() }}
           </div>
-        </template>
-      </Column>
-    </DataTable>
+          <div class="worker-info">
+            <span class="worker-name">{{ data.firstName }} {{ data.lastName }}</span>
+            <small class="worker-email">{{ data.email }}</small>
+            <small v-if="removingId !== data.id" class="worker-since">{{ t('workers.since') }}: {{ formatDate(data.createdAt) }}</small>
+          </div>
 
-    <!-- Confirm remove -->
-    <PDialog :visible="removingId !== null" @update:visible="val => { if (!val) removingId = null }" modal :header="t('workers.confirmRemove')" style="width:360px">
-      <PMessage v-if="removeError" severity="error" :closable="false" class="form-message">{{ removeError }}</PMessage>
-      <div class="dialog-actions">
-        <PButton :label="t('common.cancel')" severity="secondary" text @click="removingId = null" />
-        <PButton :label="removeLoading ? t('common.loading') : t('common.delete')" severity="danger" :loading="removeLoading" @click="remove(removingId)" />
+          <!-- Estado: confirmar eliminación -->
+          <template v-if="removingId === data.id && data.email !== auth.user?.email">
+            <PTag :value="t('workers.roles.' + data.role)" :severity="data.role === 'COMPANY_ADMIN' ? 'warn' : 'info'" style="flex-shrink:0" />
+            <div class="remove-question">
+              <span>{{ t('workers.confirmRemove') }}</span>
+              <small>{{ t('workers.confirmRemoveDesc') }}</small>
+            </div>
+            <div class="role-edit">
+              <PButton :label="t('common.cancel')" icon="pi pi-times" size="small" severity="secondary" outlined @click="removingId = null" />
+              <PButton :label="t('workers.removeWorker')" icon="pi pi-user-minus" size="small" severity="danger" :loading="removeLoading" @click="remove(data.id)" />
+            </div>
+          </template>
+
+          <!-- Estado: normal -->
+          <template v-else>
+            <div class="worker-role">
+              <template v-if="changingRoleId === data.id">
+                <div class="role-edit">
+                  <PSelect v-model="newRole" :options="roleOptions" option-label="label" option-value="value" size="small" />
+                  <PButton :label="t('common.cancel')" icon="pi pi-times" size="small" severity="secondary" outlined @click="changingRoleId = null" />
+                  <PButton :label="t('common.save')" icon="pi pi-check" size="small" :loading="roleLoading" @click="saveRole(data.id)" />
+                </div>
+                <small v-if="roleError" class="field-error">{{ roleError }}</small>
+              </template>
+              <template v-else>
+                <PTag :value="t('workers.roles.' + data.role)" :severity="data.role === 'COMPANY_ADMIN' ? 'warn' : 'info'" />
+              </template>
+            </div>
+            <div v-if="changingRoleId !== data.id" class="worker-actions">
+              <button class="worker-action-btn" @click.stop="startChangeRole(data)" :title="t('workers.changeRole')">
+                <i class="pi pi-pencil" />
+              </button>
+              <button v-if="data.email !== auth.user?.email" class="worker-action-btn worker-action-btn--danger" @click.stop="changingRoleId = null; removingId = data.id; removeError = ''" :title="t('workers.confirmRemove')">
+                <i class="pi pi-times" />
+              </button>
+            </div>
+          </template>
+        </div>
       </div>
-    </PDialog>
+
+      <div v-if="totalPages > 1" class="pagination">
+        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
+          <i class="pi pi-chevron-left" />
+        </button>
+        <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
+        <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">
+          <i class="pi pi-chevron-right" />
+        </button>
+      </div>
+
+      <div v-else-if="!loading && !filtered.length" class="workers-empty">
+        <i class="pi pi-users" style="font-size:32px;color:#cbd5e1" />
+        <p>{{ t('workers.empty') }}</p>
+      </div>
+
+      <PMessage v-if="removeError" severity="error" :closable="true" @close="removeError = ''" class="form-message">{{ removeError }}</PMessage>
+    </div>
   </div>
 </template>
 
-<style scoped>
-.list-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.list-header h1 { margin: 0; }
-
-.invite-form {
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.invite-form h3 { margin: 0; font-size: 14px; font-weight: 600; color: #374151; }
-.form-row { display: flex; gap: 16px; }
-.form-row .form-field { flex: 1; }
-.form-field { display: flex; flex-direction: column; gap: 6px; }
-.form-field label { font-size: 13px; font-weight: 500; color: #374151; }
-.form-actions { display: flex; gap: 10px; justify-content: flex-end; }
-
-.filter-bar { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
-
-.worker-name { display: block; font-size: 14px; font-weight: 500; color: #1e293b; }
-.worker-email { display: block; font-size: 12px; color: #94a3b8; }
-
-.role-edit { display: flex; align-items: center; gap: 6px; }
-
-.row-actions { display: flex; gap: 4px; justify-content: flex-end; }
-
-.temp-pass {
-  display: inline-block;
-  background: #f1f5f9;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 13px;
-  margin-left: 8px;
-}
-
-.dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
-.field-error { color: #ef4444; font-size: 11px; }
-</style>
+<style scoped src="./WorkersView.css"></style>
