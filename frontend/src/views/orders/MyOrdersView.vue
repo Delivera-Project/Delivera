@@ -64,6 +64,4 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
-h1 { margin: 0 0 20px; }
-</style>
+<style scoped src="./MyOrdersView.css"></style>

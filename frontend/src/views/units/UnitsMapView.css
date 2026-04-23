@@ -1,0 +1,4 @@
+.map-container { position: relative; }
+.map-el { height: 520px; border-radius: 10px; border: 1px solid #e2e8f0; }
+.map-loading { display: flex; justify-content: center; align-items: center; height: 200px; color: #94a3b8; }
+.map-no-coords { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.1); color: #64748b; font-size: 14px; pointer-events: none; }
