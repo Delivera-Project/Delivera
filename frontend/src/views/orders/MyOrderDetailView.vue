@@ -1,11 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { fetchPublicOrder, useApi } from '@/composables/useApi'
 import { useFormatDate } from '@/composables/useFormatDate'
 import TimelineList from '@/components/TimelineList.vue'
+import { createMap, addMarker, addRoute, fitBounds } from '@/composables/useDeliveraMap'
 
 const { t } = useI18n()
 const { formatDateTime } = useFormatDate()
@@ -17,10 +18,62 @@ const { load: loadConfig, statusSeverity } = useAppConfig()
 const order = ref(null)
 const loading = ref(false)
 const error = ref('')
+const activeTab = ref(0)
 
 const messages = ref([])
 const newMessage = ref('')
 const sendingMessage = ref(false)
+
+const mapEl = ref(null)
+let map = null
+let mapInvalidateTimer = null
+
+const hasMap = computed(() =>
+  order.value?.originLat != null && order.value?.originLon != null
+    && order.value?.destinationLat != null && order.value?.destinationLon != null
+)
+
+async function initMap() {
+  await nextTick()
+  if (!mapEl.value || !hasMap.value) return
+  if (map) { map.remove(); map = null }
+
+  const o = order.value
+  const originLat = parseFloat(o.originLat)
+  const originLon = parseFloat(o.originLon)
+  const destLat = parseFloat(o.destinationLat)
+  const destLon = parseFloat(o.destinationLon)
+
+  map = createMap(mapEl.value)
+  fitBounds(map, [[originLat, originLon], [destLat, destLon]])
+
+  addMarker(map, {
+    id: 'origin', lat: originLat, lon: originLon, kind: 'OTHER_UNIT',
+    title: o.originName, subtitle: o.companyName || '',
+    actionLabel: null, navigateTo: null, router,
+  }).addTo(map)
+
+  addMarker(map, {
+    id: 'dest', lat: destLat, lon: destLon, kind: 'CUSTOMER',
+    title: o.destinationName || o.recipientName || t('tracking.destination'),
+    subtitle: o.recipientAddress || '',
+    actionLabel: null, navigateTo: null, router,
+  }).addTo(map)
+
+  const entry = await addRoute(map, {
+    orderId: o.id,
+    origin: { lat: originLat, lon: originLon },
+    dest:   { lat: destLat, lon: destLon },
+    popupTitle: o.reference,
+    popupSubtitle: `${o.originName} → ${o.destinationName || o.recipientName || ''}`,
+    actionLabel: null,
+    router,
+  })
+  entry?.layer?.bringToFront?.()
+
+  clearTimeout(mapInvalidateTimer)
+  mapInvalidateTimer = setTimeout(() => { if (map) map.invalidateSize() }, 100)
+}
 
 async function fetchOrder() {
   const reference = route.query.q
@@ -34,7 +87,13 @@ async function fetchOrder() {
   } finally {
     loading.value = false
   }
+  if (order.value) initMap()
 }
+
+onUnmounted(() => {
+  clearTimeout(mapInvalidateTimer)
+  if (map) { map.remove(); map = null }
+})
 
 async function loadMessages() {
   if (!order.value?.id) return
@@ -63,115 +122,101 @@ onMounted(() => { loadConfig(); fetchOrder() })
 </script>
 
 <template>
-  <div class="card card-wide">
-    <PButton
-      type="button"
-      text
-      severity="secondary"
-      icon="pi pi-arrow-left"
-      class="back-btn"
-      @click="router.push('/my-orders')"
-    />
-
+  <div class="my-order-page card-full">
     <div v-if="loading" class="loading-state">
       <i class="pi pi-spin pi-spinner" style="font-size:24px" />
     </div>
 
     <PMessage v-else-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
-    <template v-else-if="order">
-      <div class="detail-summary">
-        <span class="detail-ref">{{ order.reference }}</span>
-        <PTag :value="t(`orders.status.${order.status}`)" :severity="statusSeverity[order.status]" />
-      </div>
+    <div v-else-if="order" class="my-order-split">
+      <div class="my-order-panel">
+        <PButton
+          type="button"
+          text
+          severity="secondary"
+          icon="pi pi-arrow-left"
+          class="back-btn"
+          @click="router.push('/my-orders')"
+        />
 
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">{{ t('tracking.company') }}</span>
-          <span class="info-value">{{ order.companyName }}</span>
+        <div class="detail-summary">
+          <span class="detail-ref">{{ order.reference }}</span>
+          <PTag :value="t(`orders.status.${order.status}`)" :severity="statusSeverity[order.status]" />
         </div>
-        <div class="info-item">
-          <span class="info-label">{{ t('tracking.origin') }}</span>
-          <span class="info-value">{{ order.originName }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">{{ t('tracking.destination') }}</span>
-          <span class="info-value">{{ order.destinationName || order.recipientName || order.recipientEmail || '—' }}</span>
-        </div>
-      </div>
 
-      <h3 class="timeline-heading">{{ t('orders.timeline') }}</h3>
-      <TimelineList :events="order.events ?? []" />
+        <PTabs v-model:value="activeTab">
+        <PTabList>
+          <PTab :value="0">{{ t('orders.details') }}</PTab>
+          <PTab :value="1">{{ t('orders.timeline') }}</PTab>
+          <PTab :value="2">{{ t('orders.chat') }}</PTab>
+        </PTabList>
 
-      <h3 class="timeline-heading" style="margin-top:24px">{{ t('orders.chat') }}</h3>
-      <div class="chat-panel" data-testid="chat-panel">
-        <div class="chat-messages" data-testid="chat-messages">
-          <div v-if="messages.length === 0" class="chat-empty">{{ t('orders.chatEmpty') }}</div>
-          <div v-for="msg in messages" :key="msg.id" class="chat-message">
-            <div class="chat-message-header">
-              <span class="chat-sender">{{ msg.senderName }}</span>
-              <span class="chat-time">{{ formatDateTime(msg.createdAt) }}</span>
+        <PTabPanels>
+          <PTabPanel :value="0">
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">{{ t('tracking.company') }}</span>
+                <span class="info-value">{{ order.companyName }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ t('tracking.origin') }}</span>
+                <span class="info-value">{{ order.originName }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">{{ t('tracking.destination') }}</span>
+                <span class="info-value">{{ order.destinationName || order.recipientName || order.recipientEmail || '—' }}</span>
+              </div>
             </div>
-            <p class="chat-content">{{ msg.content }}</p>
-          </div>
-        </div>
-        <div class="chat-input-row">
-          <PTextarea
-            v-model="newMessage"
-            :placeholder="t('orders.chatPlaceholder')"
-            rows="2"
-            class="chat-textarea"
-            @keydown.enter.exact.prevent="sendMessage"
-          />
-          <PButton
-            icon="pi pi-send"
-            :loading="sendingMessage"
-            :disabled="!newMessage.trim()"
-            data-testid="chat-send"
-            @click="sendMessage"
-          />
+          </PTabPanel>
+
+          <PTabPanel :value="1">
+            <TimelineList :events="order.events ?? []" />
+          </PTabPanel>
+
+          <PTabPanel :value="2">
+            <div class="chat-panel" data-testid="chat-panel">
+              <div class="chat-messages" data-testid="chat-messages">
+                <div v-if="messages.length === 0" class="chat-empty">{{ t('orders.chatEmpty') }}</div>
+                <div v-for="msg in messages" :key="msg.id" class="chat-message">
+                  <div class="chat-message-header">
+                    <span class="chat-sender">{{ msg.senderName }}</span>
+                    <span class="chat-time">{{ formatDateTime(msg.createdAt) }}</span>
+                  </div>
+                  <p class="chat-content">{{ msg.content }}</p>
+                </div>
+              </div>
+              <div class="chat-input-row">
+                <PTextarea
+                  v-model="newMessage"
+                  :placeholder="t('orders.chatPlaceholder')"
+                  rows="2"
+                  class="chat-textarea"
+                  @keydown.enter.exact.prevent="sendMessage"
+                />
+                <PButton
+                  icon="pi pi-send"
+                  :loading="sendingMessage"
+                  :disabled="!newMessage.trim()"
+                  data-testid="chat-send"
+                  @click="sendMessage"
+                />
+              </div>
+            </div>
+          </PTabPanel>
+        </PTabPanels>
+      </PTabs>
+      </div>
+
+      <div class="my-order-map-panel">
+        <div v-if="hasMap" ref="mapEl" class="my-order-map-el" data-testid="my-order-map" />
+        <div v-else class="map-no-coords">
+          <i class="pi pi-map-marker" style="font-size:28px;color:#cbd5e1;margin-bottom:8px" />
+          <span>{{ t('units.noCoords') }}</span>
         </div>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
-<style scoped>
-.card { text-align: left; }
-.back-btn { margin-bottom: 16px; }
-.loading-state { display: flex; justify-content: center; padding: 60px; color: #94a3b8; }
-
-.detail-summary {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.detail-ref { font-size: 20px; font-weight: 700; color: #1e293b; }
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px 32px;
-  background: #f8fafc;
-  border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-.info-item { display: flex; flex-direction: column; gap: 4px; }
-.info-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
-.info-value { font-size: 14px; font-weight: 500; color: #1e293b; }
-
-.timeline-heading { margin: 0 0 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
-
-.chat-panel { display: flex; flex-direction: column; gap: 12px; }
-.chat-messages { display: flex; flex-direction: column; gap: 10px; min-height: 80px; max-height: 300px; overflow-y: auto; }
-.chat-empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 16px 0; }
-.chat-message { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; }
-.chat-message-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-.chat-sender { font-size: 13px; font-weight: 600; color: #334155; }
-.chat-time { font-size: 11px; color: #94a3b8; }
-.chat-content { font-size: 14px; color: #1e293b; margin: 0; white-space: pre-wrap; }
-.chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
-.chat-textarea { flex: 1; }
-</style>
+<style scoped src="./MyOrderDetailView.css"></style>
