@@ -3,6 +3,7 @@ package com.delivera.repository;
 import com.delivera.model.OperationalUnit;
 import com.delivera.model.Worker;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,7 +23,7 @@ public interface OperationalUnitRepository extends JpaRepository<OperationalUnit
 
     List<OperationalUnit> findAllByCompanyIdAndWorkersContaining(UUID companyId, Worker worker);
 
-    @Query("SELECT u FROM OperationalUnit u JOIN FETCH u.workers WHERE u.id = :id AND u.company.id = :companyId")
+    @Query("SELECT u FROM OperationalUnit u LEFT JOIN FETCH u.workers WHERE u.id = :id AND u.company.id = :companyId")
     Optional<OperationalUnit> findByIdAndCompanyIdWithWorkers(@Param("id") UUID id, @Param("companyId") UUID companyId);
 
     @Query("SELECT u FROM OperationalUnit u WHERE u.company.organization.id = " +
@@ -30,5 +31,15 @@ public interface OperationalUnitRepository extends JpaRepository<OperationalUnit
            "AND u.company.id <> :companyId")
     List<OperationalUnit> findExternalByOrganization(@Param("companyId") UUID companyId);
 
+    @Query("SELECT u FROM OperationalUnit u WHERE u.id = :id AND u.company.organization.id = :orgId")
+    Optional<OperationalUnit> findByIdAndOrganizationId(@Param("id") UUID id, @Param("orgId") UUID orgId);
+
     long countByCompanyId(UUID companyId);
+
+    @Query("SELECT u FROM OperationalUnit u WHERE u.company.id = :companyId AND NOT EXISTS (SELECT o FROM Order o WHERE o.origin.id = u.id OR o.destination.id = u.id) ORDER BY u.createdAt DESC")
+    List<OperationalUnit> findByCompanyIdWithNoOrdersOrderByCreatedAtDesc(@Param("companyId") UUID companyId);
+
+    @Modifying
+    @Query("DELETE FROM OperationalUnit u WHERE u.company.id = :companyId")
+    void deleteByCompanyId(@Param("companyId") UUID companyId);
 }
