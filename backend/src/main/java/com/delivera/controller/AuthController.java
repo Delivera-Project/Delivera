@@ -1,5 +1,6 @@
 package com.delivera.controller;
 
+import com.delivera.security.AuthRateLimiter;
 import com.delivera.security.SecurityUtils;
 import com.delivera.dto.auth.CompanyRegisterRequest;
 import com.delivera.dto.auth.CompanyRegisterResponse;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +35,18 @@ public class AuthController {
     private AuthService authService;
     @Autowired
     private SecurityUtils securityUtils;
+    @Autowired
+    private AuthRateLimiter authRateLimiter;
 
     @Operation(summary = "Iniciar sesión", description = "Autenticación de usuario con email y contraseña")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login exitoso"),
-            @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
+            @ApiResponse(responseCode = "429", description = "Demasiados intentos")
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(HttpServletRequest httpRequest, @Valid @RequestBody LoginRequest request) {
+        authRateLimiter.check(httpRequest.getRemoteAddr(), "login");
         LoginResponse response = authService.login(request.identifier(), request.password());
         return ResponseEntity.ok(response);
     }
@@ -48,10 +54,12 @@ public class AuthController {
     @Operation(summary = "Registrar usuario", description = "Crear una nueva cuenta de usuario")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Registro exitoso"),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos")
+            @ApiResponse(responseCode = "400", description = "Datos inválidos"),
+            @ApiResponse(responseCode = "429", description = "Demasiados intentos")
     })
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<RegisterResponse> register(HttpServletRequest httpRequest, @Valid @RequestBody RegisterRequest request) {
+        authRateLimiter.check(httpRequest.getRemoteAddr(), "register");
         RegisterResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }
@@ -60,10 +68,12 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Empresa registrada"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-            @ApiResponse(responseCode = "409", description = "Email o código ya registrado")
+            @ApiResponse(responseCode = "409", description = "Email o código ya registrado"),
+            @ApiResponse(responseCode = "429", description = "Demasiados intentos")
     })
     @PostMapping("/register/company")
-    public ResponseEntity<CompanyRegisterResponse> registerCompany(@Valid @RequestBody CompanyRegisterRequest request) {
+    public ResponseEntity<CompanyRegisterResponse> registerCompany(HttpServletRequest httpRequest, @Valid @RequestBody CompanyRegisterRequest request) {
+        authRateLimiter.check(httpRequest.getRemoteAddr(), "register-company");
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.registerCompany(request));
     }
 

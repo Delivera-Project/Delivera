@@ -38,9 +38,12 @@ public class GlobalExceptionHandler {
         Map.entry(OrderAlreadyClaimedException.class,     new Mapping(CONFLICT,             "ORDER_ALREADY_CLAIMED")),
         Map.entry(OrderClaimEmailMismatchException.class, new Mapping(UNPROCESSABLE_ENTITY, "ORDER_CLAIM_EMAIL_MISMATCH")),
         Map.entry(ForbiddenException.class,               new Mapping(FORBIDDEN,            "FORBIDDEN")),
-        Map.entry(WorkerAlreadyExistsException.class,     new Mapping(CONFLICT,             "WORKER_ALREADY_EXISTS")),
-        Map.entry(WorkerNotFoundException.class,          new Mapping(NOT_FOUND,            "WORKER_NOT_FOUND")),
-        Map.entry(LastAdminException.class,               new Mapping(CONFLICT,             "LAST_ADMIN"))
+        Map.entry(WorkerAlreadyExistsException.class,         new Mapping(CONFLICT,             "WORKER_ALREADY_EXISTS")),
+        Map.entry(WorkerNotFoundException.class,            new Mapping(NOT_FOUND,            "WORKER_NOT_FOUND")),
+        Map.entry(LastAdminException.class,                 new Mapping(CONFLICT,             "LAST_ADMIN")),
+        Map.entry(LoyalUserCannotBeWorkerException.class,   new Mapping(CONFLICT,             "LOYAL_USER_CANNOT_BE_WORKER")),
+        Map.entry(MissingRecipientAddressException.class, new Mapping(UNPROCESSABLE_ENTITY, "MISSING_RECIPIENT_ADDRESS")),
+        Map.entry(RateLimitExceededException.class,       new Mapping(TOO_MANY_REQUESTS,    "RATE_LIMIT_EXCEEDED"))
     );
 
     @ExceptionHandler(RuntimeException.class)
@@ -79,18 +82,71 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
         Throwable cause = ex.getCause();
         while (cause != null) {
-            if (cause instanceof java.sql.SQLException sqlEx && "23514".equals(sqlEx.getSQLState())) {
+            if (cause instanceof java.sql.SQLException sqlEx) {
+                String sqlState = sqlEx.getSQLState();
                 String msg = sqlEx.getMessage();
-                if (msg != null && msg.contains("does not belong to company")) {
+                if ("23514".equals(sqlState) && msg != null && msg.contains("does not belong to company")) {
                     log.warn("Order units company violation: {}", msg);
                     return ResponseEntity.status(UNPROCESSABLE_ENTITY)
                             .body(new ErrorResponse("INVALID_ORDER_UNITS"));
+                }
+                // 23505 = unique_violation — traducir a error tipado si reconocemos la constraint
+                if ("23505".equals(sqlState) && msg != null) {
+                    String lower = msg.toLowerCase();
+                    if (lower.contains("users_email")) {
+                        log.warn("Unique violation on users.email: {}", msg);
+                        return ResponseEntity.status(CONFLICT).body(new ErrorResponse("EMAIL_ALREADY_EXISTS"));
+                    }
+                    if (lower.contains("users_username")) {
+                        log.warn("Unique violation on users.username: {}", msg);
+                        return ResponseEntity.status(CONFLICT).body(new ErrorResponse("USERNAME_ALREADY_EXISTS"));
+                    }
+                    if (lower.contains("organizations_handle")) {
+                        log.warn("Unique violation on organizations.handle: {}", msg);
+                        return ResponseEntity.status(CONFLICT).body(new ErrorResponse("HANDLE_CONFLICT"));
+                    }
                 }
             }
             cause = cause.getCause();
         }
         log.error("Data integrity violation: {}", ex.getMessage(), ex);
         return ResponseEntity.status(CONFLICT).body(new ErrorResponse("DATA_INTEGRITY_ERROR"));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+        log.warn("Max upload size exceeded: {}", ex.getMessage());
+        return ResponseEntity.status(PAYLOAD_TOO_LARGE).body(new ErrorResponse("FILE_TOO_LARGE"));
+    }
+
+    @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
+    public ResponseEntity<ErrorResponse> handleMultipart(org.springframework.web.multipart.MultipartException ex) {
+        log.warn("Multipart parsing error: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse("MALFORMED_MULTIPART"));
+    }
+
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+        log.warn("Method argument type mismatch: {}={}", ex.getName(), ex.getValue());
+        return ResponseEntity.badRequest().body(new ErrorResponse("INVALID_PARAMETER"));
+    }
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedJson(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        log.warn("Malformed request body: {}", ex.getMostSpecificCause().getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse("MALFORMED_REQUEST"));
+    }
+
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException ex) {
+        log.warn("Method not supported: {}", ex.getMessage());
+        return ResponseEntity.status(METHOD_NOT_ALLOWED).body(new ErrorResponse("METHOD_NOT_ALLOWED"));
+    }
+
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResource(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+        log.warn("No resource found: {}", ex.getMessage());
+        return ResponseEntity.status(NOT_FOUND).body(new ErrorResponse("NOT_FOUND"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
