@@ -54,7 +54,7 @@ class UserServiceTest {
 
     @Test
     void updateProfile_success() {
-        UpdateProfileRequest req = new UpdateProfileRequest("newusername", "John", "Doe", null);
+        UpdateProfileRequest req = new UpdateProfileRequest("newusername", "John", "Doe", null, null, null, null);
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
         when(userRepository.existsByUsername("newusername")).thenReturn(false);
         when(userRepository.save(user)).thenReturn(user);
@@ -85,4 +85,36 @@ class UserServiceTest {
                 .hasMessageContaining("NEW_PASSWORD_SAME_AS_CURRENT");
     }
 
+    @Test
+    void getProfile_notFound_throws() {
+        when(userRepository.findByEmail("x@t.com")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> userService.getProfile("x@t.com"))
+                .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    void updateProfile_usernameConflict_throws() {
+        UpdateProfileRequest req = new UpdateProfileRequest("taken", "A", "B", null, null, null, null);
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.existsByUsername("taken")).thenReturn(true);
+        assertThatThrownBy(() -> userService.updateProfile("user@test.com", req))
+                .isInstanceOf(UsernameAlreadyExistsException.class);
+    }
+
+    @Test
+    void updateAvatar_success() {
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+        assertThat(userService.updateAvatar("user@test.com", "data:image/png;base64,XX")).isNotNull();
+    }
+
+    @Test
+    void changePassword_wrongCurrent_throws() {
+        ChangePasswordRequest req = new ChangePasswordRequest("bad", "NewPass1");
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("bad", "hashed")).thenReturn(false);
+        assertThatThrownBy(() -> userService.changePassword("user@test.com", req))
+                .isInstanceOf(InvalidPasswordException.class)
+                .hasMessageContaining("CURRENT_PASSWORD_INVALID");
+    }
 }
