@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("${app.api-prefix}/orders/{orderId}/messages")
+@RequestMapping("/orders/{orderId}/messages")
 public class OrderMessageController {
 
     private final OrderMessageService service;
