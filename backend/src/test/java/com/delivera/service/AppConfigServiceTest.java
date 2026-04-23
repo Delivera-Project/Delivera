@@ -7,7 +7,6 @@ import com.delivera.repository.WorkerRoleConfigRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -16,6 +15,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import com.delivera.exception.InvalidStatusTransitionException;
 
 @ExtendWith(MockitoExtension.class)
 class AppConfigServiceTest {
@@ -26,13 +27,14 @@ class AppConfigServiceTest {
     private OrderPriorityConfigRepository priorityConfigRepository;
     @Mock
     private WorkerRoleConfigRepository roleConfigRepository;
-    @InjectMocks
+
     private AppConfigService appConfigService;
 
     private OrderStatusConfig pendingConfig;
 
     @BeforeEach
     void setUp() {
+        appConfigService = new AppConfigService(statusConfigRepository, priorityConfigRepository, roleConfigRepository, 2097152L);
         pendingConfig = new OrderStatusConfig();
         ReflectionTestUtils.setField(pendingConfig, "status", "PENDING");
         ReflectionTestUtils.setField(pendingConfig, "uiSeverity", "warn");
@@ -56,5 +58,19 @@ class AppConfigServiceTest {
     void validateTransition_validTransition_doesNotThrow() {
         org.mockito.Mockito.when(statusConfigRepository.findById("PENDING")).thenReturn(Optional.of(pendingConfig));
         appConfigService.validateTransition("PENDING", "IN_TRANSIT");
+    }
+
+    @Test
+    void validateTransition_invalidNext_throws() {
+        org.mockito.Mockito.when(statusConfigRepository.findById("PENDING")).thenReturn(Optional.of(pendingConfig));
+        assertThatThrownBy(() -> appConfigService.validateTransition("PENDING", "DELIVERED"))
+                .isInstanceOf(InvalidStatusTransitionException.class);
+    }
+
+    @Test
+    void validateTransition_unknownStatus_throws() {
+        org.mockito.Mockito.when(statusConfigRepository.findById("UNKNOWN")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> appConfigService.validateTransition("UNKNOWN", "ANY"))
+                .isInstanceOf(InvalidStatusTransitionException.class);
     }
 }

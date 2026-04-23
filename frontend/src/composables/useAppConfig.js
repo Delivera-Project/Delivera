@@ -6,6 +6,7 @@ const loading = ref(false)
 const _statuses = ref([])
 const _priorities = ref([])
 const _roles = ref({})
+const _fileMaxUploadBytes = ref(2 * 1024 * 1024)
 
 async function loadConfig() {
   if (loaded.value || loading.value) return
@@ -21,6 +22,7 @@ async function loadConfig() {
         caps[rc.role] = rc
       }
       _roles.value = caps
+      if (typeof data.fileMaxUploadBytes === 'number') _fileMaxUploadBytes.value = data.fileMaxUploadBytes
       loaded.value = true
     }
   } catch {
@@ -57,5 +59,6 @@ export function useAppConfig() {
     prioritySeverity,
     getNextStatuses,
     getRoleCapabilities,
+    fileMaxUploadBytes: _fileMaxUploadBytes,
   }
 }

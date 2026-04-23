@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,9 @@ import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
+
+    @Value("${app.contact-email:contact@delivera.com}")
+    private String contactEmail;
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -27,7 +31,7 @@ public class OpenApiConfig {
                         .description("API de autenticación y gestión de Delivera")
                         .contact(new Contact()
                                 .name("Delivera")
-                                .email("contact@delivera.com")))
+                                .email(contactEmail)))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
