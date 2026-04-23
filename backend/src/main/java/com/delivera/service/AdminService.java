@@ -4,12 +4,14 @@ import com.delivera.dto.admin.GlobalMetrics;
 import com.delivera.dto.admin.OrganizationSummary;
 import com.delivera.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class AdminService {
@@ -32,19 +34,21 @@ public class AdminService {
         this.userRepository = userRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<OrganizationSummary> listOrganizations() {
-        return organizationRepository.findAll().stream()
-                .map(org -> new OrganizationSummary(
-                        org.getId(),
-                        org.getName(),
-                        org.getHandle(),
-                        org.getCreatedAt(),
-                        companyRepository.countByOrganizationId(org.getId()),
-                        workerRepository.countByOrganizationId(org.getId()),
-                        orderRepository.countByOrganizationId(org.getId())))
+        return organizationRepository.findAllSummaries().stream()
+                .map(row -> new OrganizationSummary(
+                        (UUID) row[0],
+                        (String) row[1],
+                        (String) row[2],
+                        (Instant) row[3],
+                        (Long) row[4],
+                        (Long) row[5],
+                        (Long) row[6]))
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public GlobalMetrics getGlobalMetrics() {
         Instant monthStart = LocalDate.now(ZoneOffset.UTC)
                 .with(TemporalAdjusters.firstDayOfMonth())
