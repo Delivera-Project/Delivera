@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
+import { WORKER_ROLES } from '@/constants/roles'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -25,8 +26,7 @@ const workerRole = ref('OPERATOR')
 const workerSaving = ref(false)
 const workerError = ref('')
 
-const ROLES = ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR']
-const roleOptions = ROLES.map(r => ({ label: t('workers.roles.' + r), value: r }))
+const roleOptions = WORKER_ROLES.map(r => ({ label: t('workers.roles.' + r), value: r }))
 
 async function createUnit() {
   if (!unitName.value.trim()) { unitError.value = t('validation.required', { field: t('fields.unitName') }); return }
@@ -84,7 +84,7 @@ async function inviteWorker() {
 
         <div class="form-actions">
           <PButton :label="t('common.next')" :loading="unitSaving" icon-pos="right" icon="pi pi-arrow-right" @click="createUnit" />
-          <PButton :label="t('onboarding.skip')" severity="secondary" text @click="step = 2" />
+          <PButton :label="t('onboarding.skip')" severity="secondary" text icon="pi pi-forward" @click="step = 2" />
         </div>
       </template>
 
@@ -105,52 +105,12 @@ async function inviteWorker() {
         <PMessage v-if="workerError" severity="error" :closable="false" class="form-message">{{ workerError }}</PMessage>
 
         <div class="form-actions">
-          <PButton :label="t('onboarding.finish')" :loading="workerSaving" @click="inviteWorker" />
-          <PButton :label="t('onboarding.skip')" severity="secondary" text @click="router.push('/home')" />
+          <PButton :label="t('onboarding.finish')" icon="pi pi-check" :loading="workerSaving" @click="inviteWorker" />
+          <PButton :label="t('onboarding.skip')" severity="secondary" text icon="pi pi-forward" @click="router.push('/home')" />
         </div>
       </template>
     </div>
   </div>
 </template>
 
-<style scoped>
-.onboarding-wrapper {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8fafc;
-  padding: 24px;
-}
-.onboarding-card {
-  background: white;
-  border-radius: 16px;
-  padding: 40px 36px;
-  width: 100%;
-  max-width: 440px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-.onboarding-logo { text-align: center; }
-.logo-text { font-size: 22px; font-weight: 800; color: var(--p-primary-color, #7c3aed); letter-spacing: -0.5px; }
-
-.step-indicator { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.step-dot {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 700;
-  background: #f1f5f9; color: #94a3b8;
-  border: 2px solid #e2e8f0;
-}
-.step-dot.active { background: var(--p-primary-color, #7c3aed); color: white; border-color: var(--p-primary-color, #7c3aed); }
-.step-dot.done { background: #22c55e; color: white; border-color: #22c55e; }
-.step-line { flex: 1; max-width: 60px; height: 2px; background: #e2e8f0; }
-
-h2 { margin: 0; font-size: 18px; font-weight: 700; color: #1e293b; }
-.step-hint { margin: 0; font-size: 13px; color: #64748b; }
-.form-field { display: flex; flex-direction: column; gap: 6px; }
-.form-field label { font-size: 13px; font-weight: 500; color: #374151; }
-.form-actions { display: flex; flex-direction: column; gap: 8px; }
-</style>
+<style scoped src="./OnboardingView.css"></style>

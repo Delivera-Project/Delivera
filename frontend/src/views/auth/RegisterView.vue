@@ -1,17 +1,19 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
+import { useAvailabilityCheck } from '@/composables/useAvailabilityCheck'
 import BaseLayout from '@/components/BaseLayout.vue'
+import AvailabilityBadge from '@/components/AvailabilityBadge.vue'
 
 const { t } = useI18n()
 const router = useRouter()
 const auth = useAuthStore()
 const api = useApi()
-const { validate, required, email: emailRule, minLength, passwordStrength, usernameFormat, errors, invalids } = useValidation()
+const { validate, required, email: emailRule, minLength, maxLength, pattern, passwordStrength, usernameFormat, errors, invalids } = useValidation()
 
 const mode = ref(null)
 const hovered = ref(null)
@@ -19,13 +21,22 @@ const selectedTheme = ref(null)
 const activeTheme = computed(() => hovered.value ?? selectedTheme.value)
 const email = ref('')
 const username = ref('')
-const fullName = ref('')
+const firstName = ref('')
+const lastName = ref('')
 const phone = ref('')
 const password = ref('')
 const error = ref('')
 
-const usernameChecking = ref(false)
-const usernameAvailable = ref(null)
+function isUsernameFormat(val) {
+  return /^[a-z0-9_-]{3,50}$/.test(val)
+}
+
+const { checking: usernameChecking, available: usernameAvailable } =
+  useAvailabilityCheck(username, {
+    endpoint: '/auth/check-username',
+    paramName: 'username',
+    validate: isUsernameFormat
+  })
 
 const usernameState = computed(() => {
   if (!username.value || !isUsernameFormat(username.value)) return 'invalid'
@@ -35,31 +46,6 @@ const usernameState = computed(() => {
   return 'idle'
 })
 
-function isUsernameFormat(val) {
-  return /^[a-z0-9_-]{3,50}$/.test(val)
-}
-
-let usernameTimer = null
-watch(username, (val) => {
-  usernameAvailable.value = null
-  clearTimeout(usernameTimer)
-  if (!isUsernameFormat(val)) return
-  usernameTimer = setTimeout(() => checkUsername(val), 500)
-})
-
-async function checkUsername(val) {
-  usernameChecking.value = true
-  try {
-    const res = await api.get(`/auth/check-username?username=${encodeURIComponent(val)}`)
-    if (res.ok) {
-      const data = await res.json()
-      usernameAvailable.value = data.available
-    }
-  } catch { /* silencioso */ } finally {
-    usernameChecking.value = false
-  }
-}
-
 function handleSignIn() {
   selectedTheme.value = null
   hovered.value = null
@@ -68,13 +54,24 @@ function handleSignIn() {
 
 async function handleRegister() {
   error.value = ''
-  const parts = fullName.value.trim().split(/\s+/)
-  const firstNameVal = parts[0] || ''
-  const lastNameVal = parts.length > 1 ? parts.slice(1).join(' ') : null
+  const phoneRegex = /^[+0-9\s()-]+$/
   const valid = validate({
     email: [required(email.value, 'email'), emailRule(email.value)],
-    username: [required(username.value, 'username'), minLength(username.value, 3, 'username'), usernameFormat(username.value)],
-    fullName: [required(firstNameVal, 'fullName')],
+    username: [
+      required(username.value, 'username'),
+      minLength(username.value, 3, 'username'),
+      maxLength(username.value, 50, 'username'),
+      usernameFormat(username.value),
+    ],
+    firstName: [
+      required(firstName.value, 'firstName'),
+      maxLength(firstName.value, 100, 'firstName'),
+    ],
+    lastName: [maxLength(lastName.value, 100, 'lastName')],
+    phone: [
+      maxLength(phone.value, 20, 'phone'),
+      pattern(phone.value, phoneRegex, 'validation.phoneFormat'),
+    ],
     password: [required(password.value, 'password'), minLength(password.value, 8, 'password'), passwordStrength(password.value)],
   })
   if (!valid) return
@@ -82,8 +79,8 @@ async function handleRegister() {
     const response = await api.post('/auth/register', {
       email: email.value,
       username: username.value,
-      firstName: firstNameVal,
-      lastName: lastNameVal,
+      firstName: firstName.value.trim(),
+      lastName: lastName.value.trim() || null,
       phone: phone.value || null,
       password: password.value,
     })
@@ -148,29 +145,35 @@ async function handleRegister() {
 
       <div class="form-field">
         <label for="register-email">{{ t('fields.email') }}</label>
-        <InputText id="register-email" v-model="email" type="email" :placeholder="t('fields.emailPersonalPlaceholder')" :invalid="!!invalids.email" fluid />
+        <InputText id="register-email" v-model="email" type="email" :placeholder="t('fields.emailPersonalPlaceholder')" maxlength="255" :invalid="!!invalids.email" fluid />
         <small v-if="errors.email" class="field-error">{{ errors.email }}</small>
       </div>
       <div class="form-field">
         <label for="register-username">{{ t('fields.username') }}</label>
         <div class="check-field">
-          <InputText id="register-username" v-model="username" type="text" :placeholder="t('fields.usernamePlaceholder')" :invalid="!!invalids.username || usernameState === 'taken'" autocomplete="username" fluid />
-          <span v-if="usernameState === 'checking'" class="check-badge check-checking"><i class="pi pi-spin pi-spinner" /></span>
-          <span v-else-if="usernameState === 'available'" class="check-badge check-ok"><i class="pi pi-check" /></span>
-          <span v-else-if="usernameState === 'taken'" class="check-badge check-taken"><i class="pi pi-times" /></span>
+          <InputText id="register-username" v-model="username" type="text" :placeholder="t('fields.usernamePlaceholder')" maxlength="50" :invalid="!!invalids.username || usernameState === 'taken'" autocomplete="username" fluid />
+          <AvailabilityBadge :state="usernameState" />
         </div>
         <small v-if="errors.username" class="field-error">{{ errors.username }}</small>
         <small v-else-if="usernameState === 'taken'" class="field-error">{{ t('error.USERNAME_ALREADY_EXISTS') }}</small>
         <small v-else class="field-hint">{{ t('fields.usernameHint') }}</small>
       </div>
-      <div class="form-field">
-        <label for="register-fullname">{{ t('fields.fullName') }}</label>
-        <InputText id="register-fullname" v-model="fullName" type="text" :placeholder="t('fields.fullNamePlaceholder')" :invalid="!!invalids.fullName" fluid />
-        <small v-if="errors.fullName" class="field-error">{{ errors.fullName }}</small>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="register-first-name">{{ t('fields.firstName') }}</label>
+          <InputText id="register-first-name" v-model="firstName" type="text" :placeholder="t('fields.firstName')" maxlength="100" :invalid="!!invalids.firstName" fluid />
+          <small v-if="errors.firstName" class="field-error">{{ errors.firstName }}</small>
+        </div>
+        <div class="form-field">
+          <label for="register-last-name">{{ t('fields.lastName') }}</label>
+          <InputText id="register-last-name" v-model="lastName" type="text" :placeholder="t('fields.lastName')" maxlength="100" :invalid="!!invalids.lastName" fluid />
+          <small v-if="errors.lastName" class="field-error">{{ errors.lastName }}</small>
+        </div>
       </div>
       <div class="form-field">
         <label for="register-phone">{{ t('fields.phone') }}</label>
-        <InputText id="register-phone" v-model="phone" type="tel" :placeholder="t('fields.phonePlaceholder')" maxlength="20" fluid />
+        <InputText id="register-phone" v-model="phone" type="tel" :placeholder="t('fields.phonePlaceholder')" maxlength="20" :invalid="!!invalids.phone" fluid />
+        <small v-if="errors.phone" class="field-error">{{ errors.phone }}</small>
       </div>
       <div class="form-field">
         <label for="register-password">{{ t('fields.password') }}</label>
