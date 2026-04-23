@@ -1,0 +1,230 @@
+.profile-page {
+  width: 620px;
+  max-width: 100%;
+  padding: 16px 0;
+}
+
+.profile-card {
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+  padding: 24px;
+}
+
+/* Cabecera */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.profile-header-info { flex: 1; min-width: 0; }
+
+.btn-header-edit { flex-shrink: 0; }
+
+.avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  width: 52px;
+  height: 52px;
+}
+
+.avatar-wrap.avatar-editable { cursor: pointer; }
+
+.avatar-img {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-avatar {
+  width: 52px !important;
+  height: 52px !important;
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  font-weight: 700;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+}
+
+.avatar-wrap.avatar-editable:hover .avatar-overlay { opacity: 1; }
+
+.profile-name { font-size: 16px; font-weight: 700; color: #1e293b; }
+.profile-email { font-size: 13px; color: #64748b; margin-top: 2px; }
+
+/* Campos en modo readonly y edición — misma apariencia base */
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field-wide { grid-column: 1 / -1; }
+
+.field-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field-value {
+  font-size: 15px;
+  color: #1e293b;
+  padding: 2px 0;
+  overflow-wrap: anywhere;
+}
+
+.field-hint {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.edit-form { margin-top: 0; }
+
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 16px;
+}
+
+.profile-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  align-items: center;
+}
+
+/* Los botones PrimeVue nunca deben heredar ancho completo aquí */
+.profile-actions :deep(.p-button) {
+  width: auto;
+  flex-shrink: 0;
+}
+
+/* Vista lectura: logout empujado al extremo derecho */
+.btn-logout { margin-left: auto; }
+
+/* Vistas edición/contraseña: centrados en fila */
+.profile-actions--form { justify-content: center; }
+
+.field-language { gap: 8px; }
+
+/* Modal de preview del avatar */
+.avatar-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.avatar-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.avatar-modal-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.avatar-modal-hint {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Crop interactivo */
+.crop-stage {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto 8px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #2563eb;
+  background: #0f172a;
+  flex-shrink: 0;
+}
+
+.crop-canvas {
+  display: block;
+  width: 280px;
+  height: 280px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.crop-canvas.dragging { cursor: grabbing; }
+
+/* Overlay: oscurece la esquina para reforzar que el círculo es el recorte */
+.crop-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  box-shadow: 0 0 0 200px rgba(15, 23, 42, 0.55);
+}
+
+.crop-hint {
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0 0 16px;
+}
+
+.avatar-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

@@ -1,11 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import Chart from 'primevue/chart'
 
 const { t } = useI18n()
 const api = useApi()
+const router = useRouter()
 
 const period = ref('MONTH')
 const metrics = ref(null)
@@ -15,6 +17,7 @@ const loading = ref(false)
 const error = ref('')
 
 const PERIODS = ['TODAY', 'WEEK', 'MONTH']
+
 const METRIC_KEYS = ['totalOrders', 'completedOrders', 'cancelledOrders', 'activeOrders', 'newLoyalUsers']
 const METRIC_ICONS = {
   totalOrders: 'pi-send',
@@ -23,20 +26,58 @@ const METRIC_ICONS = {
   activeOrders: 'pi-sync',
   newLoyalUsers: 'pi-user-plus',
 }
+const METRIC_COLORS = {
+  totalOrders: '#7c3aed',
+  completedOrders: '#22c55e',
+  cancelledOrders: '#ef4444',
+  activeOrders: '#3b82f6',
+  newLoyalUsers: '#f59e0b',
+}
 
-const chartOptions = {
+const deliveryRate = computed(() => {
+  if (!metrics.value || !metrics.value.totalOrders) return null
+  return Math.round((metrics.value.completedOrders / metrics.value.totalOrders) * 100)
+})
+
+const chartOptions = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
-  plugins: { legend: { display: false } },
-  scales: {
-    y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
-    x: { grid: { display: false } },
+  plugins: {
+    legend: {
+      position: 'bottom',
+      labels: { boxWidth: 12, font: { size: 11 } }
+    },
+    onClick: (_e, elements) => {
+      if (elements.length > 0) router.push('/orders')
+    },
   },
-}
+  onClick: (_e, elements) => {
+    if (elements.length > 0) router.push('/orders')
+  },
+  scales: {
+    x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } },
+    y: { stacked: true, beginAtZero: true, grace: '15%', ticks: { stepSize: 1, precision: 0 } },
+  },
+  layout: { padding: { top: 12 } },
+}))
 
 function formatDateLabel(dateStr) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' })
+}
+
+function fillDateRange(entries, p) {
+  const days = p === 'TODAY' ? 1 : p === 'WEEK' ? 7 : 30
+  const dataMap = Object.fromEntries(entries.map(e => [e.date, e.count]))
+  const result = []
+  const now = new Date()
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - i)
+    const dateStr = d.toISOString().slice(0, 10)
+    result.push({ date: dateStr, count: dataMap[dateStr] ?? 0 })
+  }
+  return result
 }
 
 async function load() {
@@ -54,13 +95,14 @@ async function load() {
     else error.value = t('error.connection')
 
     if (chartRes.ok) {
-      const entries = await chartRes.json()
+      const raw = await chartRes.json()
+      const entries = fillDateRange(raw, period.value)
       chartData.value = {
         labels: entries.map(e => formatDateLabel(e.date)),
         datasets: [{
           label: t('activity.panel.chart.orders'),
           data: entries.map(e => e.count),
-          backgroundColor: 'rgba(124, 58, 237, 0.7)',
+          backgroundColor: 'rgba(124, 58, 237, 0.75)',
           borderRadius: 4,
         }],
       }
@@ -83,9 +125,13 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="card card-full activity-view">
+    <!-- Header -->
     <div class="activity-header">
-      <h1>{{ t('activity.panel.title') }}</h1>
+      <div>
+        <h1>{{ t('activity.panel.title') }}</h1>
+        <p class="activity-subtitle">{{ t('activity.panel.subtitle') }}</p>
+      </div>
       <div class="period-tabs">
         <button
           v-for="p in PERIODS" :key="p"
@@ -97,113 +143,80 @@ onMounted(load)
 
     <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
 
+    <!-- Métricas principales -->
     <div v-if="metrics && !loading" class="metrics-grid">
-      <div v-for="key in METRIC_KEYS" :key="key" class="metric-card">
-        <i :class="['pi', METRIC_ICONS[key], 'metric-icon']" />
-        <span class="metric-value">{{ metrics[key] }}</span>
-        <span class="metric-label">{{ t('activity.panel.metric.' + key) }}</span>
+      <div v-for="key in METRIC_KEYS" :key="key" class="metric-card" :style="{ '--mc': METRIC_COLORS[key] }">
+        <div class="metric-icon-wrap">
+          <i :class="['pi', METRIC_ICONS[key]]" />
+        </div>
+        <div class="metric-body">
+          <span class="metric-value">{{ metrics[key] }}</span>
+          <span class="metric-label">{{ t('activity.panel.metric.' + key) }}</span>
+        </div>
+      </div>
+
+      <!-- Tasa de entrega -->
+      <div v-if="deliveryRate !== null" class="metric-card" style="--mc:#10b981">
+        <div class="metric-icon-wrap">
+          <i class="pi pi-chart-pie" />
+        </div>
+        <div class="metric-body">
+          <span class="metric-value">{{ deliveryRate }}%</span>
+          <span class="metric-label">{{ t('activity.panel.metric.deliveryRate') }}</span>
+          <PProgressBar :value="deliveryRate" class="rate-bar" />
+        </div>
       </div>
     </div>
 
+    <!-- Skeleton métricas -->
     <div v-else-if="loading" class="metrics-grid">
-      <div v-for="i in 5" :key="i" class="metric-card metric-card--skeleton" />
+      <div v-for="i in 6" :key="i" class="metric-card metric-card--skeleton" />
     </div>
 
-    <div v-if="chartData && !loading" class="chart-section">
-      <h2>{{ t('activity.panel.chart.title') }}</h2>
-      <div class="chart-wrapper">
-        <Chart type="bar" :data="chartData" :options="chartOptions" />
+    <!-- Gráfica + Ranking en dos columnas -->
+    <div v-if="!loading" class="activity-content">
+      <div v-if="chartData" class="activity-chart-card">
+        <h2>{{ t('activity.panel.chart.title') }}</h2>
+        <div class="chart-wrapper">
+          <Chart type="bar" :data="chartData" :options="chartOptions" />
+        </div>
+        <p v-if="!chartData.labels.length" class="chart-empty">{{ t('activity.panel.chart.empty') }}</p>
       </div>
-      <p v-if="chartData.labels.length === 0" class="chart-empty">{{ t('activity.panel.chart.empty') }}</p>
-    </div>
 
-    <div v-if="!loading" class="ranking-section">
-      <h2>{{ t('activity.panel.ranking.title') }}</h2>
-      <table v-if="unitRanking.length" class="ranking-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>{{ t('activity.panel.ranking.unit') }}</th>
-            <th>{{ t('activity.panel.ranking.type') }}</th>
-            <th>{{ t('activity.panel.ranking.orders') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(entry, idx) in unitRanking" :key="entry.unitId">
-            <td class="ranking-pos">{{ idx + 1 }}</td>
-            <td>{{ entry.unitName }}</td>
-            <td>{{ t('units.' + entry.unitType) }}</td>
-            <td class="ranking-count">{{ entry.orderCount }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-else class="ranking-empty">{{ t('activity.panel.ranking.empty') }}</p>
+      <div class="activity-ranking-card">
+        <h2>{{ t('activity.panel.ranking.title') }}</h2>
+        <table v-if="unitRanking.length" class="ranking-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{{ t('activity.panel.ranking.unit') }}</th>
+              <th>{{ t('activity.panel.ranking.type') }}</th>
+              <th>{{ t('activity.panel.ranking.orders') }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(entry, idx) in unitRanking" :key="entry.unitId"
+              class="ranking-row"
+              style="cursor:pointer"
+              @click="router.push('/units/' + entry.unitId)"
+            >
+              <td class="ranking-pos">{{ idx + 1 }}</td>
+              <td>{{ entry.unitName }}</td>
+              <td>
+                <PTag :value="t('units.' + entry.unitType)" severity="secondary" />
+              </td>
+              <td class="ranking-count">
+                <span class="count-bar" :style="{ width: (entry.orderCount / unitRanking[0].orderCount * 100) + '%' }" />
+                {{ entry.orderCount }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <p v-else class="ranking-empty">{{ t('activity.panel.ranking.empty') }}</p>
+      </div>
     </div>
   </div>
 </template>
 
-<style scoped>
-.activity-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.activity-header h1 { margin: 0; }
-
-.period-tabs { display: flex; gap: 6px; }
-.period-btn {
-  padding: 6px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  background: white;
-  font-size: 13px;
-  font-weight: 500;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.12s;
-}
-.period-btn:hover { border-color: var(--p-primary-color, #7c3aed); color: var(--p-primary-color, #7c3aed); }
-.period-btn--active {
-  background: var(--p-primary-color, #7c3aed);
-  border-color: var(--p-primary-color, #7c3aed);
-  color: white;
-}
-
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-}
-.metric-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 24px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  text-align: center;
-}
-.metric-icon { font-size: 22px; color: var(--p-primary-color, #7c3aed); }
-.metric-value { font-size: 32px; font-weight: 700; color: #1e293b; line-height: 1; }
-.metric-label { font-size: 12px; color: #64748b; font-weight: 500; }
-.metric-card--skeleton { background: #f1f5f9; min-height: 120px; animation: pulse 1.2s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-.chart-section { margin-top: 32px; }
-.chart-section h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1e293b; }
-.chart-wrapper { position: relative; height: 300px; }
-.chart-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 24px; }
-
-.ranking-section { margin-top: 32px; }
-.ranking-section h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1e293b; }
-.ranking-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.ranking-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase; }
-.ranking-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
-.ranking-pos { font-weight: 700; color: var(--p-primary-color, #7c3aed); width: 40px; }
-.ranking-count { font-weight: 600; text-align: right; }
-.ranking-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 12px; }
-</style>
+<style scoped src="./ActivityView.css"></style>
