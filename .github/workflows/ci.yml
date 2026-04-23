@@ -10,6 +10,7 @@ jobs:
   backend:
     name: Backend — Test & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -32,6 +33,7 @@ jobs:
   frontend:
     name: Frontend — Lint, Test & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -71,6 +73,7 @@ jobs:
   security:
     name: Security — IaC Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -86,6 +89,7 @@ jobs:
   sonar:
     name: SonarCloud
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [backend, frontend]
     if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     steps:

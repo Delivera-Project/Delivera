@@ -8,6 +8,7 @@ import com.delivera.model.OrderStatus;
 import com.delivera.repository.LoyalUserRepository;
 import com.delivera.repository.OrderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.Instant;
@@ -30,6 +31,7 @@ public class ActivityService {
         this.loyalUserRepository = loyalUserRepository;
     }
 
+    @Transactional(readOnly = true)
     public ActivityMetricsResponse getMetrics(UUID companyId, String period) {
         Instant from = periodStart(period);
         return new ActivityMetricsResponse(
@@ -42,6 +44,7 @@ public class ActivityService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<OrdersByDayEntry> getOrdersByDay(UUID companyId, String period) {
         Instant from = periodStart(period);
         return orderRepository.countByDayForCompany(companyId, from).stream()
@@ -53,6 +56,7 @@ public class ActivityService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UnitRankingEntry> getUnitRanking(UUID companyId, String period) {
         Instant from = periodStart(period);
         return orderRepository.countByOriginUnitForCompany(companyId, from).stream()

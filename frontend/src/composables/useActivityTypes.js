@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 
@@ -22,16 +22,13 @@ export function useActivityTypes() {
     }
   }
 
-  const activityTypes = {
-    get value() {
-      return (cache.value ?? []).map(t => ({
-        value: t.code,
-        label: locale.value === 'es' ? t.labelEs : t.labelEn,
-        labelEs: t.labelEs,
-        labelEn: t.labelEn,
-      }))
-    }
-  }
+  // computed: solo se recalcula cuando cambian cache o locale.
+  const activityTypes = computed(() => (cache.value ?? []).map(t => ({
+    value: t.code,
+    label: locale.value === 'es' ? t.labelEs : t.labelEn,
+    labelEs: t.labelEs,
+    labelEn: t.labelEn,
+  })))
 
   return { activityTypes, loading, load }
 }

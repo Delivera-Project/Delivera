@@ -7,10 +7,23 @@ home:
   createFirstUnit: Create your first unit
   inviteFirstWorker: Invite your first worker
   quickActions: Quick actions
+  ordersChart: Orders per day
+  noOrdersChart: No orders in the last 14 days
+  unitsMap: Units map
   stats:
     units: Units
     workers: Workers
     orders: Active orders
+    totalOrders: Orders
+    active: In progress
+    delivered: Delivered
+  quick:
+    newOrderDesc: Register a new shipment
+    pendingOrders: Pending orders
+    pendingOrdersDesc: "{n} orders unassigned"
+    newUnitDesc: Add a warehouse or store
+    team: Team
+    teamDesc: Manage your team access
 
 auth:
   login: Sign in
@@ -37,6 +50,19 @@ profile:
   passwordChanged: Password updated successfully
   memberSince: Member since
   language: Language
+  uploadAvatar: Upload profile photo
+  avatarHint: "JPG or PNG, max 2 MB. Recommended square 512×512 px"
+  avatarInvalidType: Invalid format. Use JPG or PNG
+  avatarTooLarge: The image exceeds the 2 MB limit
+  avatarPreviewTitle: Profile photo preview
+  avatarPreviewHint: "Frame your photo by dragging and using the mouse wheel to zoom."
+  avatarCropHint: "Mouse wheel: zoom · Drag: reposition"
+  avatarConfirm: Use this image
+  avatarCancel: Discard
+  useCurrentLocation: Use my current location
+  locationCaptured: Location captured
+  locationDenied: Could not get your location
+  addressHint: Required to receive B2C orders at your home
 
 fields:
   email: Email
@@ -111,6 +137,7 @@ activity:
   other: Other
   panel:
     title: Activity panel
+    subtitle: Analyze your company performance
     period:
       MONTH: This month
       WEEK: This week
@@ -121,6 +148,7 @@ activity:
       cancelledOrders: Cancelled
       activeOrders: In progress
       newLoyalUsers: New loyal users
+      deliveryRate: Delivery rate
     chart:
       title: Orders by day
       orders: Orders
@@ -142,7 +170,9 @@ units:
   empty: No operational units yet. Create the first one to start managing shipments.
   deleteConfirm: Delete this unit?
   deleteActiveOrders: Cannot delete unit because it has associated orders.
+  locationLocked: This unit has associated orders. Location and coordinates cannot be modified.
   filterAll: All
+  searchPlaceholder: Search by name or email
   noCoords: No coordinates
   workers: Assigned workers
   noWorkers: No workers assigned to this unit.
@@ -155,6 +185,10 @@ units:
   mapTitle: Units map
   mapView: Map view
   listView: List view
+  mapClickHint: Click on the map to set the location
+  geocoding: Getting address...
+  geocodeSearch: Search on map
+  geocodeNotFound: Address not found, you can set the location by clicking the map
 
 orders:
   listTitle: Orders
@@ -203,7 +237,11 @@ orders:
   statusNotePlaceholder: Reason for status change...
   statusUpdated: Status updated successfully
   filterAll: All
+  searchPlaceholder: Search by name or email
   deleteConfirm: Delete this order?
+  viewDetail: View detail
+  noMapOrders: No pending orders with coordinates
+  routeUnavailable: Route could not be calculated
   chat: Chat
   chatEmpty: No messages yet.
   chatPlaceholder: Type a message...
@@ -256,27 +294,48 @@ loyalUsers:
   orders: Received orders
   since: Customer since
   ordersEmpty: This loyal user has no orders yet.
+  detail: View customer
+
+map:
+  legend:
+    ownUnit: Own unit
+    otherUnit: Partner unit
+    customer: Customer
+    routeSolid: Route
+    routeDashed: Estimated route
 
 workers:
   title: Team
+  subtitle: Manage your team access
   invite: Invite worker
   inviteTitle: Invite a worker
   inviteSubtitle: They will receive access to this company
+  inviteHint: If the email is not registered, an account will be created with a temporary password and they will be notified by email
+  copyPassword: Copy password
+  passwordCopied: Password copied
   email: Email
   role: Role
   name: Name
   since: Since
   empty: No workers yet. Invite the first one.
   invited: Worker invited successfully
+  invitedNewUser: "An account has been created for {email}. Copy the temporary password and share it:"
+  invitedExisting: "{email} already had a Delivera account. They have been added to the company."
   roleChanged: Role updated
   removed: Worker removed
-  tempPasswordHint: "Temporary password (share with the worker):"
+  tempPasswordHint: "Temporary password:"
+  tempPasswordChangeHint: Ask the worker to change it after their first login
   filterAll: All
+  searchPlaceholder: Search by name or email
+  changeRole: Change role
+  confirmRemove: Remove this worker?
+  confirmRemoveTitle: Confirm removal
+  confirmRemoveDesc: "The worker will lose access to the company."
+  removeWorker: Remove
   roles:
     COMPANY_ADMIN: Admin
     ANALYST: Analyst
     OPERATOR: Operator
-  confirmRemove: Remove this worker?
 
 myOrders:
   title: My orders
@@ -327,6 +386,7 @@ validation:
   maxLength: "{field} cannot exceed {max} characters"
   passwordsDoNotMatch: Passwords do not match
   passwordStrength: Password must include uppercase, lowercase and a number
+  phoneFormat: "Only digits, spaces and the symbols + - ( )"
   coordinatesIncomplete: Latitude and longitude must both be provided together
   coordinatesInvalid: Coordinates out of range (lat -90–90, lon -180–180)
   orgCodeRequired: Enter an organization code
@@ -359,6 +419,15 @@ error:
   FORBIDDEN: Unauthorized access
   DATA_INTEGRITY_ERROR: Data integrity error
   COMPANY_CONTEXT_MISSING: No company context in session
+  SUBSCRIPTION_LIMIT_UNITS: You have more operational units than the target plan allows
+  SUBSCRIPTION_LIMIT_WORKERS: You have more workers than the target plan allows
+  SUBSCRIPTION_LIMIT_ORDERS: You exceeded the monthly order limit of the target plan
+  SUBSCRIPTION_LIMIT_LOYAL_USERS: You have more loyal users than the target plan allows
+  SUBSCRIPTION_LIMIT_COMPANIES: You have more companies than the target plan allows
+  WORKER_ALREADY_EXISTS: This worker already belongs to the company
+  LOYAL_USER_CANNOT_BE_WORKER: This email belongs to a loyal user and cannot be invited as a worker
+  WORKER_NOT_FOUND: Worker not found
+  LAST_ADMIN: You cannot change the role of the only company administrator
 
 orgSelect:
   title: Select your organization
@@ -368,6 +437,7 @@ orgSelect:
 
 settings:
   title: Settings
+  subtitle: Manage your organization, company and subscription plan
   orgSection: Organization
   companySection: Company
   subscriptionSection: Plan
@@ -397,3 +467,16 @@ settings:
   deleteConfirm: "Are you sure you want to delete this company?"
   deleteActiveOrdersTitle: "This company has active orders"
   deleteActiveOrdersHint: "Deleting it will also remove all its orders and data. Continue anyway?"
+  uploadLogo: Upload logo
+  logoHint: "PNG, JPG or GIF — max. 2 MB"
+  logoTooLarge: The image exceeds the 2 MB limit
+  downgradeTitle: Confirm plan change
+  downgradeWarning: You are about to switch to a lower plan. Some resources or features may become unavailable.
+  downgradeRisksTitle: The following resources will be deleted
+  downgradeRiskDelete: "{count} will be deleted"
+  confirmDowngrade: Confirm change
+  downgradePlan: Switch to lower plan
+  companyLimitReached: You have reached your plan's company limit
+  noCompaniesFound: No companies found matching that criteria
+  searchByName: Search by name
+  filterAll: All

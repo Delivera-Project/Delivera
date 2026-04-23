@@ -44,4 +44,17 @@ class JwtServiceTest {
                 .isInstanceOf(JwtException.class);
     }
 
+    @Test
+    void parseTokenWithClaims_invalidCompanyId_throwsIllegalArgument() {
+        String token = io.jsonwebtoken.Jwts.builder()
+                .subject("u@t.com")
+                .claim("companyId", "not-a-uuid")
+                .issuedAt(new java.util.Date())
+                .expiration(java.util.Date.from(java.time.Instant.now().plusSeconds(3600)))
+                .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(SECRET.getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                .compact();
+        assertThatThrownBy(() -> jwtService.parseTokenWithClaims(token))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid companyId");
+    }
 }

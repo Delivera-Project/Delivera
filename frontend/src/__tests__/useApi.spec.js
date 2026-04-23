@@ -67,13 +67,24 @@ describe('useApi — request', () => {
     mockToken = ''
   })
 
-  it('calls logout and redirects to / on 401 outside /auth/', async () => {
-    mockToken = ''
+  it('calls logout and redirects to / on 401 outside /auth/ when authenticated', async () => {
+    mockToken = 'my-jwt'
     mountApi()
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 401 }))
     await expect(api.get('/orders')).rejects.toThrow()
     expect(mockLogout).toHaveBeenCalled()
     expect(mockPush).toHaveBeenCalledWith('/')
+    mockToken = ''
+  })
+
+  it('does NOT logout on 401 when user is not authenticated', async () => {
+    mockToken = ''
+    mountApi()
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 401 }))
+    const res = await api.get('/orders')
+    expect(res.status).toBe(401)
+    expect(mockLogout).not.toHaveBeenCalled()
+    expect(mockPush).not.toHaveBeenCalled()
   })
 })
 

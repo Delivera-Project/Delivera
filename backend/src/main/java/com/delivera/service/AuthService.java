@@ -11,7 +11,6 @@ import com.delivera.model.*;
 import com.delivera.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,26 +25,38 @@ public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private OrganizationRepository organizationRepository;
-    @Autowired
-    private CompanyRepository companyRepository;
-    @Autowired
-    private WorkerRepository workerRepository;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private LoyalUserRepository loyalUserRepository;
-    @Autowired
-    private ActivityTypeRepository activityTypeRepository;
-    @Autowired
-    private SubscriptionPlanRepository subscriptionPlanRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtService jwtService;
+    private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
+    private final CompanyRepository companyRepository;
+    private final WorkerRepository workerRepository;
+    private final OrderRepository orderRepository;
+    private final LoyalUserRepository loyalUserRepository;
+    private final ActivityTypeRepository activityTypeRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+
+    public AuthService(UserRepository userRepository,
+                       OrganizationRepository organizationRepository,
+                       CompanyRepository companyRepository,
+                       WorkerRepository workerRepository,
+                       OrderRepository orderRepository,
+                       LoyalUserRepository loyalUserRepository,
+                       ActivityTypeRepository activityTypeRepository,
+                       SubscriptionPlanRepository subscriptionPlanRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService) {
+        this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
+        this.companyRepository = companyRepository;
+        this.workerRepository = workerRepository;
+        this.orderRepository = orderRepository;
+        this.loyalUserRepository = loyalUserRepository;
+        this.activityTypeRepository = activityTypeRepository;
+        this.subscriptionPlanRepository = subscriptionPlanRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+    }
 
     public LoginResponse login(String identifier, String password) {
         User user = userRepository.findByEmailOrUsername(identifier)
@@ -61,8 +72,9 @@ public class AuthService {
                     worker.getRole().name(), worker.getCompany().getName(), org.getHandle(), org.getName());
         }
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new LoginResponse(token, user.getEmail(), null, null, null, null, null);
+        boolean isLoyal = !loyalUserRepository.findByEmail(user.getEmail()).isEmpty();
+        String token = jwtService.generateToken(user.getEmail(), isLoyal ? "LOYAL_USER" : null);
+        return new LoginResponse(token, user.getEmail(), null, isLoyal ? "LOYAL_USER" : null, null, null, null);
     }
 
     public LoginResponse switchCompany(String email, UUID targetCompanyId) {

@@ -60,15 +60,15 @@ class LoyalUserServiceTest {
     @Test
     void getByCompany_returnsUsersWithOrders() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId)).thenReturn(List.of(loyalUser));
-        when(orderRepository.countByLoyalUserId(loyalUser.getId())).thenReturn(2L);
+        when(loyalUserRepository.findWithOrderCountByCompanyId(companyId))
+                .thenReturn(List.<Object[]>of(new Object[]{loyalUser, 2L}));
 
         assertThat(loyalUserService.getByCompany()).hasSize(1);
     }
 
     @Test
     void add_success_noRegisteredUser() {
-        LoyalUserRequest req = new LoyalUserRequest("new@test.com");
+        LoyalUserRequest req = new LoyalUserRequest("new@test.com", null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
@@ -87,5 +87,47 @@ class LoyalUserServiceTest {
 
         assertThat(loyalUserService.getMyOrders()).isEmpty();
         verify(orderRepository).findByRecipientEmailOrderByCreatedAtDesc("loyal@test.com");
+    }
+
+    @Test
+    void updateAddress_success() {
+        LoyalUserRequest req = new LoyalUserRequest("loyal@test.com", "New Addr", new java.math.BigDecimal("1.0"), new java.math.BigDecimal("2.0"));
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(loyalUserRepository.findByIdAndCompaniesId(loyalUser.getId(), companyId)).thenReturn(Optional.of(loyalUser));
+        when(loyalUserRepository.save(loyalUser)).thenReturn(loyalUser);
+
+        var result = loyalUserService.updateAddress(loyalUser.getId(), req);
+        assertThat(result.address()).isEqualTo("New Addr");
+    }
+
+    @Test
+    void getOrdersForLoyalUser_returnsOrders() {
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(loyalUserRepository.findByIdAndCompaniesId(loyalUser.getId(), companyId)).thenReturn(Optional.of(loyalUser));
+        when(orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUser.getId())).thenReturn(List.of());
+
+        assertThat(loyalUserService.getOrdersForLoyalUser(loyalUser.getId())).isEmpty();
+    }
+
+    @Test
+    void add_alreadyExists_throws() {
+        LoyalUserRequest req = new LoyalUserRequest("dup@test.com", null, null, null);
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "dup@test.com")).thenReturn(Optional.of(loyalUser));
+        assertThatThrownBy(() -> loyalUserService.add(req)).isInstanceOf(LoyalUserConflictException.class);
+    }
+
+    @Test
+    void add_withAddress_setsCoordinates() {
+        LoyalUserRequest req = new LoyalUserRequest("new@test.com", "St 1",
+                new java.math.BigDecimal("5.0"), new java.math.BigDecimal("6.0"));
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(loyalUserRepository.findByEmail("new@test.com")).thenReturn(List.of());
+        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
+        when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        var result = loyalUserService.add(req);
+        assertThat(result.address()).isEqualTo("St 1");
     }
 }
