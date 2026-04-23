@@ -4,21 +4,20 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
+import { useAvailabilityCheck } from '@/composables/useAvailabilityCheck'
 
 export function useCompanyRegistration() {
   const { t } = useI18n()
   const router = useRouter()
   const auth = useAuthStore()
   const api = useApi()
-  const { validate, required, email: emailRule, minLength, passwordStrength, usernameFormat, errors, invalids } = useValidation()
+  const { validate, required, email: emailRule, minLength, maxLength, pattern, passwordStrength, usernameFormat, errors, invalids } = useValidation()
 
   const step = ref(1)
 
   // Paso 1 — organización
   const orgName = ref('')
   const orgHandle = ref('')
-  const handleChecking = ref(false)
-  const handleAvailable = ref(null) // null = no verificado, true/false
 
   // Paso 2 — empresa
   const activityType = ref(null)
@@ -27,12 +26,10 @@ export function useCompanyRegistration() {
   // Paso 3 — cuenta
   const email = ref('')
   const username = ref('')
-  const fullName = ref('')
+  const firstName = ref('')
+  const lastName = ref('')
   const phone = ref('')
   const password = ref('')
-
-  const usernameChecking = ref(false)
-  const usernameAvailable = ref(null)
 
   const error = ref('')
   const loading = ref(false)
@@ -41,26 +38,23 @@ export function useCompanyRegistration() {
     return /^[a-z0-9_-]{3,50}$/.test(val)
   }
 
-  let usernameTimer = null
-  watch(username, (val) => {
-    usernameAvailable.value = null
-    clearTimeout(usernameTimer)
-    if (!isUsernameFormat(val)) return
-    usernameTimer = setTimeout(() => checkUsername(val), 500)
-  })
-
-  async function checkUsername(val) {
-    usernameChecking.value = true
-    try {
-      const res = await api.get(`/auth/check-username?username=${encodeURIComponent(val)}`)
-      if (res.ok) {
-        const data = await res.json()
-        usernameAvailable.value = data.available
-      }
-    } catch { /* silencioso */ } finally {
-      usernameChecking.value = false
-    }
+  function isHandleFormat(val) {
+    return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(val)
   }
+
+  const { checking: usernameChecking, available: usernameAvailable } =
+    useAvailabilityCheck(username, {
+      endpoint: '/auth/check-username',
+      paramName: 'username',
+      validate: isUsernameFormat
+    })
+
+  const { checking: handleChecking, available: handleAvailable } =
+    useAvailabilityCheck(orgHandle, {
+      endpoint: '/organizations/check-handle',
+      paramName: 'handle',
+      validate: isHandleFormat
+    })
 
   // Auto-sugerir handle desde orgName
   watch(orgName, (val) => {
@@ -70,36 +64,8 @@ export function useCompanyRegistration() {
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '')
-      handleAvailable.value = null
     }
   })
-
-  let handleCheckTimer = null
-  watch(orgHandle, (val) => {
-    handleAvailable.value = null
-    clearTimeout(handleCheckTimer)
-    if (!val || !isHandleFormat(val)) return
-    handleCheckTimer = setTimeout(() => checkHandle(val), 500)
-  })
-
-  function isHandleFormat(val) {
-    return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(val)
-  }
-
-  async function checkHandle(handle) {
-    handleChecking.value = true
-    try {
-      const res = await api.get(`/organizations/check-handle?handle=${encodeURIComponent(handle)}`)
-      if (res.ok) {
-        const data = await res.json()
-        handleAvailable.value = data.available
-      }
-    } catch {
-      // silencioso — la validación definitiva la hace el backend
-    } finally {
-      handleChecking.value = false
-    }
-  }
 
   function goToStep2() {
     error.value = ''
@@ -127,13 +93,24 @@ export function useCompanyRegistration() {
 
   async function submitRegistration() {
     error.value = ''
-    const parts = fullName.value.trim().split(/\s+/)
-    const firstNameVal = parts[0] || ''
-    const lastNameVal = parts.length > 1 ? parts.slice(1).join(' ') : null
+    const phoneRegex = /^[+0-9\s()-]+$/
     const valid = validate({
       email: [required(email.value, 'email'), emailRule(email.value)],
-      username: [required(username.value, 'username'), minLength(username.value, 3, 'username'), usernameFormat(username.value)],
-      fullName: [required(firstNameVal, 'fullName')],
+      username: [
+        required(username.value, 'username'),
+        minLength(username.value, 3, 'username'),
+        maxLength(username.value, 50, 'username'),
+        usernameFormat(username.value),
+      ],
+      firstName: [
+        required(firstName.value, 'firstName'),
+        maxLength(firstName.value, 100, 'firstName'),
+      ],
+      lastName: [maxLength(lastName.value, 100, 'lastName')],
+      phone: [
+        maxLength(phone.value, 20, 'phone'),
+        pattern(phone.value, phoneRegex, 'validation.phoneFormat'),
+      ],
       password: [required(password.value, 'password'), minLength(password.value, 8, 'password'), passwordStrength(password.value)],
     })
     if (!valid) return
@@ -143,8 +120,8 @@ export function useCompanyRegistration() {
       const res = await api.post('/auth/register/company', {
         email: email.value,
         username: username.value,
-        firstName: firstNameVal,
-        lastName: lastNameVal,
+        firstName: firstName.value.trim(),
+        lastName: lastName.value.trim() || null,
         phone: phone.value || null,
         password: password.value,
         orgName: orgName.value,
@@ -171,7 +148,7 @@ export function useCompanyRegistration() {
     step,
     orgName, orgHandle, handleChecking, handleAvailable, isHandleFormat,
     activityType, companyName,
-    email, username, fullName, phone, usernameChecking, usernameAvailable, isUsernameFormat,
+    email, username, firstName, lastName, phone, usernameChecking, usernameAvailable, isUsernameFormat,
     password,
     error, errors, invalids, loading,
     goToStep2, goToStep3, submitRegistration,
