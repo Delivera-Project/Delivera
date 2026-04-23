@@ -50,6 +50,7 @@ public class SettingsService {
                 .orElseThrow(CompanyContextException::new);
     }
 
+    @Transactional(readOnly = true)
     public SettingsResponse getSettings() {
         Company c = currentCompany();
         Organization o = c.getOrganization();
@@ -99,7 +100,7 @@ public class SettingsService {
         worker.setRole(WorkerRole.COMPANY_ADMIN);
         workerRepository.save(worker);
 
-        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType().getCode());
+        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType().getCode(), null);
     }
 
     @Transactional
@@ -117,18 +118,28 @@ public class SettingsService {
             throw new CompanyHasActiveOrdersException(companyId);
         }
 
-        orderRepository.deleteAll(orderRepository.findByCompanyId(companyId));
+        orderRepository.deleteEventsByCompanyId(companyId);
+        orderRepository.deleteByCompanyId(companyId);
         loyalUserRepository.deleteAll(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId));
         operationalUnitRepository.deleteAll(operationalUnitRepository.findAllByCompanyId(companyId));
         workerRepository.deleteAll(workerRepository.findByCompanyId(companyId));
         companyRepository.delete(target);
     }
 
+    @Transactional(readOnly = true)
     public List<CompanySummary> getMyCompanies() {
         String email = securityUtils.getCurrentEmail();
         UUID orgId = currentCompany().getOrganization().getId();
         return workerRepository.findByUserEmailAndOrgId(email, orgId).stream()
-                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType().getCode()))
+                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType().getCode(), w.getCompany().getLogoData()))
                 .toList();
+    }
+
+    @Transactional
+    public CompanySummary updateCompanyLogo(String logoData) {
+        Company c = currentCompany();
+        c.setLogoData(logoData);
+        companyRepository.save(c);
+        return new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData());
     }
 }
