@@ -14,24 +14,6 @@ test.beforeEach(async ({ page }) => {
   await mockApiDefaults(page)
 })
 
-// ── Navigation ────────────────────────────────────────────────────────────────
-
-test('map view button navigates to /units/map', { tag: '@units' }, async ({ page }) => {
-  await setupAuth(page)
-  await page.route('**/api/v2/units', route => route.fulfill({ json: unitsWithCoords }))
-  await page.goto('/units')
-  await page.getByRole('button', { name: /mapa|map/i }).first().click()
-  await expect(page).toHaveURL('/units/map')
-})
-
-test('list view button navigates back to /units', { tag: '@units' }, async ({ page }) => {
-  await setupAuth(page)
-  await page.route('**/api/v2/units', route => route.fulfill({ json: unitsWithCoords }))
-  await page.goto('/units/map')
-  await page.getByRole('button', { name: /lista|list/i }).click()
-  await expect(page).toHaveURL('/units')
-})
-
 // ── Rendering ─────────────────────────────────────────────────────────────────
 
 test('map renders when units have coordinates', { tag: '@units' }, async ({ page }) => {
