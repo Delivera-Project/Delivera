@@ -24,20 +24,23 @@ const METRIC_ICONS = {
 async function load() {
   loading.value = true
   error.value = ''
-  try {
-    const [metricsRes, orgsRes] = await Promise.all([
-      api.get('/admin/metrics'),
-      api.get('/admin/organizations'),
-    ])
-    if (metricsRes.ok) metrics.value = await metricsRes.json()
-    else error.value = t('error.connection')
-
-    if (orgsRes.ok) organizations.value = await orgsRes.json()
-  } catch {
-    error.value = t('error.connection')
-  } finally {
-    loading.value = false
+  const [metricsResult, orgsResult] = await Promise.allSettled([
+    api.get('/admin/metrics'),
+    api.get('/admin/organizations'),
+  ])
+  let partialError = false
+  if (metricsResult.status === 'fulfilled' && metricsResult.value.ok) {
+    metrics.value = await metricsResult.value.json()
+  } else {
+    partialError = true
   }
+  if (orgsResult.status === 'fulfilled' && orgsResult.value.ok) {
+    organizations.value = await orgsResult.value.json()
+  } else {
+    partialError = true
+  }
+  if (partialError) error.value = t('error.connection')
+  loading.value = false
 }
 
 onMounted(load)
@@ -90,34 +93,4 @@ onMounted(load)
   </div>
 </template>
 
-<style scoped>
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
-  margin-bottom: 32px;
-}
-.metric-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 24px 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  text-align: center;
-}
-.metric-icon { font-size: 22px; color: var(--p-primary-color, #7c3aed); }
-.metric-value { font-size: 32px; font-weight: 700; color: #1e293b; line-height: 1; }
-.metric-label { font-size: 12px; color: #64748b; font-weight: 500; }
-.metric-card--skeleton { background: #f1f5f9; min-height: 120px; animation: pulse 1.2s infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-.orgs-section h2 { margin: 0 0 16px; font-size: 18px; font-weight: 600; color: #1e293b; }
-.orgs-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.orgs-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase; }
-.orgs-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
-.org-name { font-weight: 600; }
-.text-center { text-align: center; }
-.orgs-empty { text-align: center; color: #94a3b8; font-size: 14px; }
-</style>
+<style scoped src="./AdminDashboardView.css"></style>
