@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -158,7 +159,7 @@ class SubscriptionServiceTest {
         when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(5L);
         when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(1L);
 
-        var usage = subscriptionService.changePlan(companyId, "BASIC");
+        var usage = subscriptionService.changePlan(companyId, "BASIC", false);
         assertThat(usage.planCode()).isEqualTo("BASIC");
     }
 
@@ -168,7 +169,7 @@ class SubscriptionServiceTest {
         when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
         when(unitRepository.countByCompanyId(companyId)).thenReturn(5L);
 
-        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE", false))
                 .isInstanceOf(SubscriptionLimitException.class)
                 .hasMessageContaining("units");
     }
@@ -180,7 +181,7 @@ class SubscriptionServiceTest {
         when(unitRepository.countByCompanyId(companyId)).thenReturn(2L);
         when(workerRepository.countByCompanyId(companyId)).thenReturn(6L);
 
-        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE", false))
                 .isInstanceOf(SubscriptionLimitException.class)
                 .hasMessageContaining("workers");
     }
@@ -193,7 +194,7 @@ class SubscriptionServiceTest {
         when(workerRepository.countByCompanyId(companyId)).thenReturn(3L);
         when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(51L);
 
-        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE", false))
                 .isInstanceOf(SubscriptionLimitException.class)
                 .hasMessageContaining("orders");
     }
@@ -207,7 +208,7 @@ class SubscriptionServiceTest {
         when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(10L);
         when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(21L);
 
-        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE", false))
                 .isInstanceOf(SubscriptionLimitException.class)
                 .hasMessageContaining("loyal_users");
     }
@@ -222,9 +223,41 @@ class SubscriptionServiceTest {
         when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(5L);
         when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(2L);
 
-        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE"))
+        assertThatThrownBy(() -> subscriptionService.changePlan(companyId, "FREE", false))
                 .isInstanceOf(SubscriptionLimitException.class)
                 .hasMessageContaining("companies");
+    }
+
+    @Test
+    void changePlan_force_deletesExcessResources() {
+        SubscriptionPlan free = buildPlan("FREE", 1, 0, 0, 50, 0);
+        com.delivera.model.Worker admin = new com.delivera.model.Worker();
+        admin.setId(UUID.randomUUID());
+        admin.setRole(com.delivera.model.WorkerRole.COMPANY_ADMIN);
+        com.delivera.model.Worker analyst = new com.delivera.model.Worker();
+        analyst.setId(UUID.randomUUID());
+        analyst.setRole(com.delivera.model.WorkerRole.ANALYST);
+        com.delivera.model.LoyalUser lu = new com.delivera.model.LoyalUser();
+        lu.getCompanies().add(company);
+        com.delivera.model.OperationalUnit unit = new com.delivera.model.OperationalUnit();
+        unit.setId(UUID.randomUUID());
+
+        when(subscriptionPlanRepository.findById("FREE")).thenReturn(Optional.of(free));
+        when(workerRepository.findByCompanyIdOrderByCreatedAtAsc(companyId)).thenReturn(java.util.List.of(admin, analyst));
+        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId)).thenReturn(java.util.List.of(lu));
+        when(unitRepository.countByCompanyId(companyId)).thenReturn(1L);
+        when(unitRepository.findByCompanyIdWithNoOrdersOrderByCreatedAtDesc(companyId)).thenReturn(java.util.List.of(unit));
+        when(companyRepository.findByOrganizationIdOrderByCreatedAtDesc(company.getOrganization().getId())).thenReturn(java.util.List.of(company));
+        when(workerRepository.countByCompanyId(companyId)).thenReturn(0L);
+        when(orderRepository.countByCompanyIdAndCreatedAtAfter(eq(companyId), any(Instant.class))).thenReturn(0L);
+        when(loyalUserRepository.countByCompaniesId(companyId)).thenReturn(0L);
+        when(companyRepository.countByOrganizationId(company.getOrganization().getId())).thenReturn(1L);
+
+        subscriptionService.changePlan(companyId, "FREE", true);
+
+        verify(workerRepository).deleteAll(any());
+        verify(loyalUserRepository).save(lu);
+        verify(unitRepository).delete(unit);
     }
 
     // --- helpers ---
