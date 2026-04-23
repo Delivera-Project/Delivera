@@ -45,7 +45,7 @@ async function addLoyalUser() {
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="card card-full">
     <div class="list-header">
       <h1>{{ t('loyalUsers.title') }}</h1>
       <PButton :label="t('loyalUsers.new')" icon="pi pi-plus" @click="showAdd = !showAdd; addError = ''" />
@@ -56,15 +56,16 @@ async function addLoyalUser() {
     <div v-if="showAdd" class="add-form">
       <div class="form-row">
         <InputText v-model="addEmail" type="email" :placeholder="t('fields.emailPersonalPlaceholder')" fluid />
-        <PButton :label="adding ? t('common.loading') : t('loyalUsers.new')" :loading="adding" @click="addLoyalUser" />
-        <PButton :label="t('common.cancel')" severity="secondary" text @click="showAdd = false" />
+        <PButton :label="adding ? t('common.loading') : t('loyalUsers.new')" icon="pi pi-plus" :loading="adding" @click="addLoyalUser" />
+        <PButton :label="t('common.cancel')" severity="secondary" outlined icon="pi pi-times" @click="showAdd = false" />
       </div>
       <PMessage v-if="addError" severity="error" :closable="false" class="form-message">{{ addError }}</PMessage>
     </div>
 
     <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
-    <DataTable :value="loyalUsers" :loading="loading" striped-rows row-hover @row-click="e => router.push(`/loyal-users/${e.data.id}`)">
+    <div class="list-scroll">
+    <DataTable :value="loyalUsers" :loading="loading" paginator :rows="10" striped-rows row-hover @row-click="e => router.push(`/loyal-users/${e.data.id}`)">
       <template #empty>
         <EmptyState icon="pi-users" :message="t('loyalUsers.empty')" />
       </template>
@@ -88,14 +89,9 @@ async function addLoyalUser() {
         </template>
       </Column>
     </DataTable>
+    </div>
   </div>
 </template>
 
-<style scoped>
-.list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.list-header h1 { margin: 0; }
-.add-form { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
-.form-row { display: flex; gap: 10px; align-items: center; }
-.form-row .p-inputtext { flex: 1; }
-</style>
+<style scoped src="./LoyalUsersView.css"></style>
 

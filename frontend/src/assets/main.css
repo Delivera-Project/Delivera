@@ -497,3 +497,113 @@ body {
 .unit-table {
   margin-top: 4px;
 }
+
+/* === Layouts de pantalla completa y split === */
+.card-full {
+  width: 100%;
+  max-width: 1400px;
+}
+
+/* Layout con columnas list + map */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  align-items: start;
+  min-height: 0;
+}
+
+.split-layout__list {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.split-layout__map {
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 64px);
+  min-height: 500px;
+  border-left: 1px solid #e2e8f0;
+}
+
+.split-map-el {
+  height: 100%;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .split-layout {
+    grid-template-columns: 1fr;
+  }
+  .split-layout__map {
+    display: none;
+  }
+}
+
+/* === list-header global === */
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 24px 24px 0;
+}
+
+.list-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.list-header .header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* filters-wrapper global */
+.filters-wrapper {
+  padding: 0 24px 16px;
+}
+
+/* === action-btn global (estilo unificado Equipo) === */
+.action-btn,
+.delete-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 5px 7px;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: opacity 0.12s, color 0.12s, background 0.12s;
+}
+.action-btn:hover { color: #1e293b; background: #f1f5f9; }
+.action-btn--danger:hover,
+.delete-btn:hover { color: #ef4444; background: #fef2f2; }
+
+/* === Mapa: fix Leaflet tiles en Vite === */
+.leaflet-container {
+  z-index: 1;
+}
+
+/* === Home: stat-chip === */
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  white-space: nowrap;
+}
+
+.stat-chip i {
+  font-size: 13px;
+  color: var(--p-primary-color, #7c3aed);
+}

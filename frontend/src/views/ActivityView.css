@@ -1,0 +1,157 @@
+.activity-view {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.activity-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.activity-header h1 { margin: 0; }
+.activity-subtitle { font-size: 13px; color: #94a3b8; margin: 4px 0 0; }
+
+.period-tabs { display: flex; gap: 6px; }
+.period-btn {
+  padding: 6px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  background: white;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.period-btn:hover { border-color: var(--p-primary-color, #7c3aed); color: var(--p-primary-color, #7c3aed); }
+.period-btn--active {
+  background: var(--p-primary-color, #7c3aed);
+  border-color: var(--p-primary-color, #7c3aed);
+  color: white;
+}
+
+/* Métricas */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 14px;
+}
+
+.metric-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.metric-icon-wrap {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--mc, #7c3aed) 12%, white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.metric-icon-wrap .pi {
+  font-size: 18px;
+  color: var(--mc, #7c3aed);
+}
+
+.metric-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.metric-value { font-size: 26px; font-weight: 800; color: #1e293b; line-height: 1; }
+.metric-label { font-size: 11px; color: #64748b; font-weight: 500; line-height: 1.3; word-break: break-word; }
+
+.metric-card--rate { position: relative; }
+.rate-bar { height: 4px; border-radius: 4px; width: 100%; margin-top: 4px; }
+
+.metric-card--skeleton { background: #f1f5f9; min-height: 80px; animation: pulse 1.2s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* Contenido principal */
+.activity-content {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 900px) {
+  .activity-content { grid-template-columns: 1fr; }
+}
+
+.activity-chart-card,
+.activity-ranking-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.activity-chart-card h2,
+.activity-ranking-card h2 {
+  margin: 0 0 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.activity-ranking-card { overflow-y: auto; }
+
+.chart-wrapper { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.chart-wrapper :deep(.p-chart) { height: 100%; width: 100%; display: flex; flex-direction: column; }
+.chart-wrapper :deep(canvas) { flex: 1; min-height: 0; display: block; }
+.chart-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 24px; }
+
+/* Ranking */
+.ranking-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ranking-table th {
+  text-align: left; padding: 8px 10px;
+  border-bottom: 2px solid #e2e8f0;
+  color: #94a3b8; font-weight: 600; font-size: 11px; text-transform: uppercase;
+}
+.ranking-table td { padding: 10px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+.ranking-pos { font-weight: 800; color: var(--p-primary-color, #7c3aed); width: 32px; }
+.ranking-count {
+  font-weight: 700;
+  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.count-bar {
+  display: inline-block;
+  height: 6px;
+  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 30%, white);
+  border-radius: 4px;
+  min-width: 4px;
+  max-width: 80px;
+}
+.ranking-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 12px; }
+.ranking-row:hover td { background: #f8fafc; }

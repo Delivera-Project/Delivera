@@ -16,17 +16,9 @@ const router = useRouter()
       </svg>
       <div class="not-found-code">404</div>
       <p class="subtitle">{{ t('notFound.message') }}</p>
-      <PButton :label="t('notFound.goHome')" fluid @click="router.push('/')" />
+      <PButton :label="t('notFound.goHome')" icon="pi pi-home" fluid @click="router.push('/')" />
     </div>
   </div>
 </template>
 
-<style scoped>
-.not-found-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: #f8fafc;
-}
-</style>
+<style scoped src="./NotFoundView.css"></style>
