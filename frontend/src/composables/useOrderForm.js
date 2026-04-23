@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
+import { useGeolocation } from '@/composables/useGeolocation'
 
 export function useOrderForm() {
   const { t } = useI18n()
@@ -21,6 +22,11 @@ export function useOrderForm() {
   const b2bDestinationId = ref('')
   const recipientEmail = ref('')
   const recipientName = ref('')
+  const recipientAddress = ref('')
+  const recipientLatitude = ref(null)
+  const recipientLongitude = ref(null)
+  const { locating, getPosition } = useGeolocation()
+  const addressPrefilled = ref(false)
   const priority = ref('NORMAL')
   const notes = ref('')
   const loading = ref(false)
@@ -50,8 +56,25 @@ export function useOrderForm() {
 
   watch(recipientEmail, () => {
     if (orderType.value !== 'B2C') return
-    if (!recipientEmail.value) recipientName.value = ''
+    if (!recipientEmail.value) { recipientName.value = ''; return }
+    const match = loyalUserMatch.value
+    if (match && (match.address || match.latitude)) {
+      if (!recipientAddress.value || addressPrefilled.value) {
+        recipientAddress.value = match.address || ''
+        recipientLatitude.value = match.latitude ?? null
+        recipientLongitude.value = match.longitude ?? null
+        addressPrefilled.value = true
+      }
+    }
   })
+
+  async function captureLocation() {
+    try {
+      const { lat, lon } = await getPosition()
+      recipientLatitude.value = lat
+      recipientLongitude.value = lon
+    } catch { /* permiso denegado o no disponible */ }
+  }
 
   onMounted(async () => {
     try {
@@ -81,6 +104,7 @@ export function useOrderForm() {
       rules.destinationId = [required(destinationId.value, 'unitName')]
     } else if (orderType.value === 'B2C') {
       rules.recipientEmail = [required(recipientEmail.value, 'email'), emailRule(recipientEmail.value)]
+      rules.recipientAddress = [required(recipientAddress.value, 'address')]
     } else if (orderType.value === 'B2B') {
       rules.b2bCompanyId = [required(b2bCompanyId.value, 'company')]
       rules.b2bDestinationId = [required(b2bDestinationId.value, 'unitName')]
@@ -107,6 +131,9 @@ export function useOrderForm() {
       } else {
         body.recipientName = recipientName.value.trim() || null
         body.recipientEmail = recipientEmail.value.trim() || null
+        body.recipientAddress = recipientAddress.value.trim() || null
+        body.recipientLatitude = recipientLatitude.value
+        body.recipientLongitude = recipientLongitude.value
       }
 
       const res = await api.post('/orders', body)
@@ -128,6 +155,7 @@ export function useOrderForm() {
     units, loyalUsers, loyalUserMatch, loadError,
     orderType, originId, destinationId, b2bCompanyId, b2bDestinationId,
     recipientEmail, recipientName,
+    recipientAddress, recipientLatitude, recipientLongitude, locating, captureLocation,
     priority, notes, loading, error, errors, invalids,
     destinationOptions, b2bCompanies, b2bUnitOptions, handleSubmit,
   }

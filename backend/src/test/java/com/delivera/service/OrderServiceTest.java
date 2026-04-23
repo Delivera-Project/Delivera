@@ -8,12 +8,14 @@ import com.delivera.exception.InvalidOrderUnitsException;
 import com.delivera.exception.OrderNotFoundException;
 import com.delivera.model.*;
 import com.delivera.repository.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +44,8 @@ class OrderServiceTest {
     private AppConfigService appConfigService;
     @Mock
     private SubscriptionService subscriptionService;
+    @Mock
+    private EmailService emailService;
     @InjectMocks
     private OrderService orderService;
 
@@ -87,6 +92,13 @@ class OrderServiceTest {
         order.setOrderType(OrderType.INTERNAL);
     }
 
+    @AfterEach
+    void clearSync() {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
+    }
+
     @Test
     void getByCompany_returnsMappedList() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
@@ -97,7 +109,7 @@ class OrderServiceTest {
 
     @Test
     void create_internalOrder_success() {
-        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, OrderType.INTERNAL, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, null, null, null, OrderType.INTERNAL, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
@@ -113,13 +125,14 @@ class OrderServiceTest {
     void create_b2bOrder_success() {
         Company destCompany = new Company();
         destCompany.setId(UUID.randomUUID());
+        destCompany.setOrganization(organization);
         destination.setCompany(destCompany);
 
-        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, OrderType.B2B, null, null);
+        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, null, null, null, OrderType.B2B, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
         when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
-        when(unitRepository.findById(destination.getId())).thenReturn(Optional.of(destination));
+        when(unitRepository.findByIdAndOrganizationId(destination.getId(), organization.getId())).thenReturn(Optional.of(destination));
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
         when(orderRepository.nextReferenceSeq()).thenReturn(1L);
         when(orderRepository.save(any())).thenReturn(order);
@@ -153,6 +166,81 @@ class OrderServiceTest {
         order.setTrackingToken("abc123");
         when(orderRepository.findByTrackingToken("abc123")).thenReturn(Optional.of(order));
         assertThat(orderService.getPublicByToken("abc123")).isNotNull();
+    }
+
+    @Test
+    void getPublicByReference_normalizesAndFinds() {
+        when(orderRepository.findByReference("DEL-X")).thenReturn(Optional.of(order));
+        assertThat(orderService.getPublicByReference(" del-x ")).isNotNull();
+    }
+
+    @Test
+    void getDetail_found() {
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(orderRepository.findByIdForCompany(order.getId(), companyId)).thenReturn(Optional.of(order));
+        assertThat(orderService.getDetail(order.getId())).isNotNull();
+    }
+
+    @Test
+    void create_b2cOrder_withRecipientAddress_success() {
+        TransactionSynchronizationManager.initSynchronization();
+        OrderRequest req = new OrderRequest(
+                origin.getId(), null, "c@t.com", "Client", "Street 1",
+                new java.math.BigDecimal("40.0"), new java.math.BigDecimal("-3.0"),
+                OrderType.B2C, null, null);
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
+        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "c@t.com")).thenReturn(Optional.empty());
+        when(orderRepository.nextReferenceSeq()).thenReturn(1L);
+        when(orderRepository.save(any())).thenReturn(order);
+
+        assertThat(orderService.create(req)).isNotNull();
+    }
+
+    @Test
+    void create_internal_sameOriginDestination_throws() {
+        OrderRequest req = new OrderRequest(origin.getId(), origin.getId(), null, null, null, null, null, OrderType.INTERNAL, null, null);
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        assertThatThrownBy(() -> orderService.create(req)).isInstanceOf(InvalidOrderUnitsException.class);
+    }
+
+    @Test
+    void create_b2c_usesLoyalUserAddress_andFiresAfterCommit() {
+        TransactionSynchronizationManager.initSynchronization();
+        com.delivera.model.LoyalUser lu = new com.delivera.model.LoyalUser();
+        lu.setEmail("c@t.com");
+        lu.setAddress("Loyal St");
+        lu.setLatitude(new java.math.BigDecimal("1.0"));
+        lu.setLongitude(new java.math.BigDecimal("2.0"));
+        OrderRequest req = new OrderRequest(origin.getId(), null, "c@t.com", null, null, null, null, OrderType.B2C, null, null);
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
+        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "c@t.com")).thenReturn(Optional.of(lu));
+        when(orderRepository.nextReferenceSeq()).thenReturn(1L);
+        order.setTrackingToken("tok123");
+        order.setReference("DEL-REF");
+        when(orderRepository.save(any())).thenReturn(order);
+
+        assertThat(orderService.create(req)).isNotNull();
+        TransactionSynchronizationManager.getSynchronizations().forEach(s -> s.afterCommit());
+        verify(emailService).sendTrackingLink(eq("c@t.com"), any(), any(), any());
+    }
+
+    @Test
+    void create_b2b_sameCompany_throws() {
+        OrderRequest req = new OrderRequest(origin.getId(), destination.getId(), null, null, null, null, null, OrderType.B2B, null, null);
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findByIdAndCompanyId(origin.getId(), companyId)).thenReturn(Optional.of(origin));
+        when(unitRepository.findByIdAndOrganizationId(destination.getId(), organization.getId())).thenReturn(Optional.of(destination));
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+
+        assertThatThrownBy(() -> orderService.create(req)).isInstanceOf(InvalidOrderUnitsException.class);
     }
 
 }
