@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { WORKER_ROLES, ORDER_CREATOR_ROLES } from '@/constants/roles'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('token') || '')
@@ -9,14 +10,15 @@ export const useAuthStore = defineStore('auth', () => {
   const companyName = ref(localStorage.getItem('companyName') || null)
   const role = ref(localStorage.getItem('role') || null)
   const companyId = ref(localStorage.getItem('companyId') || null)
+  const planCode = ref(localStorage.getItem('planCode') || null)
 
   // Empresas del usuario en la misma org (en memoria, se recarga cuando es necesario)
   const companies = ref([])
 
   const isAuthenticated = computed(() => !!token.value)
   const isCompanyAdmin = computed(() => role.value === 'COMPANY_ADMIN')
-  const isWorker = computed(() => ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'].includes(role.value))
-  const canCreateOrders = computed(() => ['COMPANY_ADMIN', 'ANALYST'].includes(role.value))
+  const isWorker = computed(() => WORKER_ROLES.includes(role.value))
+  const canCreateOrders = computed(() => ORDER_CREATOR_ROLES.includes(role.value))
 
   function setToken(newToken) {
     token.value = newToken
@@ -58,6 +60,13 @@ export const useAuthStore = defineStore('auth', () => {
     else localStorage.removeItem('companyId')
   }
 
+  function setPlanCode(code) {
+    const v = code || null
+    planCode.value = v
+    if (v) localStorage.setItem('planCode', v)
+    else localStorage.removeItem('planCode')
+  }
+
   function applyLoginData(data) {
     setToken(data.token)
     setRole(data.role ?? null)
@@ -82,29 +91,39 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('companyName')
     localStorage.removeItem('role')
     localStorage.removeItem('companyId')
+    localStorage.removeItem('planCode')
+    planCode.value = null
   }
 
   function setUser(profile) {
     user.value = profile
   }
 
+  // Previene llamadas concurrentes (si ya hay una en vuelo, se reutiliza la promesa).
+  let companiesInFlight = null
   async function loadCompanies() {
     if (!isCompanyAdmin.value || !token.value) return
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/settings/companies`, {
-        headers: { Authorization: `Bearer ${token.value}` },
-      })
-      if (res.ok) companies.value = await res.json()
-    // eslint-disable-next-line no-empty
-    } catch {}
+    if (companiesInFlight) return companiesInFlight
+    companiesInFlight = (async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v2/settings/companies`, {
+          headers: { Authorization: `Bearer ${token.value}` },
+        })
+        if (res.ok) companies.value = await res.json()
+      // eslint-disable-next-line no-empty
+      } catch {} finally {
+        companiesInFlight = null
+      }
+    })()
+    return companiesInFlight
   }
 
   return {
-    token, user, organizationHandle, orgName, companyName, role, companyId,
+    token, user, organizationHandle, orgName, companyName, role, companyId, planCode,
     companies,
     isAuthenticated, isCompanyAdmin, isWorker, canCreateOrders,
     setToken, setUser, setOrganization, setOrgName, setCompanyName,
-    setRole, setCompanyId, applyLoginData,
+    setRole, setCompanyId, setPlanCode, applyLoginData,
     logout, loadCompanies,
   }
 })
