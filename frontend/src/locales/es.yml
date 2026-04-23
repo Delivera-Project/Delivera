@@ -441,6 +441,7 @@ settings:
   orgSection: Organización
   companySection: Empresa
   subscriptionSection: Plan
+  apiKeysSection: API keys
   currentPlan: Plan actual
   availablePlans: Planes disponibles
   selectPlan: Cambiar a este plan
@@ -480,3 +481,20 @@ settings:
   noCompaniesFound: No se encontraron empresas con ese criterio
   searchByName: Buscar por nombre
   filterAll: Todos
+
+apiKeys:
+  intro: Genera y gestiona claves para que sistemas externos accedan a la API de Delivera. La clave solo se muestra una vez al crearla.
+  create: Crear API key
+  name: Nombre
+  namePlaceholder: Ej. integración ERP
+  createdTitle: Tu nueva API key
+  createdWarning: Cópiala ahora. No volverá a mostrarse.
+  copy: Copiar
+  copied: Copiada
+  empty: Aún no has creado ninguna API key.
+  created: Creada
+  lastUsed: Último uso
+  neverUsed: Nunca usada
+  active: Activa
+  revoked: Revocada
+  revoke: Revocar
