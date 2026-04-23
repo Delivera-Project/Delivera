@@ -65,7 +65,13 @@ public class SettingsController {
     @Operation(summary = "Cambiar plan de suscripción")
     @PatchMapping("/subscription/plan")
     public ResponseEntity<SubscriptionUsageResponse> changePlan(@Valid @RequestBody ChangePlanRequest req) {
-        return ResponseEntity.ok(subscriptionService.changePlan(securityUtils.getCurrentCompanyId(), req.planCode()));
+        return ResponseEntity.ok(subscriptionService.changePlan(securityUtils.getCurrentCompanyId(), req.planCode(), req.force()));
+    }
+
+    @Operation(summary = "Actualizar logo de empresa")
+    @PutMapping("/company/logo")
+    public ResponseEntity<CompanySummary> updateCompanyLogo(@RequestBody java.util.Map<String, String> body) {
+        return ResponseEntity.ok(settingsService.updateCompanyLogo(body.get("data")));
     }
 
     @Operation(summary = "Eliminar empresa de la organización")

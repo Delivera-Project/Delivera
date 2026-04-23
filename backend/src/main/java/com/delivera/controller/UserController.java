@@ -50,6 +50,14 @@ public class UserController {
         return ResponseEntity.ok(profile);
     }
 
+    @Operation(summary = "Actualizar avatar", description = "Guarda la imagen de perfil del usuario como base64")
+    @PutMapping("/avatar")
+    public ResponseEntity<ProfileResponse> updateAvatar(Authentication authentication,
+                                                        @RequestBody java.util.Map<String, String> body) {
+        ProfileResponse profile = userService.updateAvatar(authentication.getName(), body.get("data"));
+        return ResponseEntity.ok(profile);
+    }
+
     @Operation(summary = "Cambiar contraseña", description = "Cambia la contraseña del usuario autenticado")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Contraseña cambiada exitosamente"),
