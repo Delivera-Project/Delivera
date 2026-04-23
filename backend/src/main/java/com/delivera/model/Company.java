@@ -35,6 +35,9 @@ public class Company {
     @JoinColumn(name = "plan_code", nullable = false)
     private SubscriptionPlan plan;
 
+    @Column(name = "logo_data", columnDefinition = "TEXT")
+    private String logoData;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 }
