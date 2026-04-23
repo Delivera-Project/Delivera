@@ -48,7 +48,7 @@ public class SecurityConfig {
                 auth.requestMatchers(SWAGGER_PATHS).permitAll();
                 auth.requestMatchers(api + "/auth/**").permitAll();
                 auth.requestMatchers(HttpMethod.GET, api + "/organizations/**").permitAll();
-                auth.requestMatchers(HttpMethod.GET, api + "/activity-types/**").permitAll();
+                auth.requestMatchers(HttpMethod.GET, api + "/activity-types", api + "/activity-types/**").permitAll();
                 auth.requestMatchers(HttpMethod.GET, api + "/app-config/**").permitAll();
                 auth.requestMatchers(api + "/orders/public/**").permitAll();
 
