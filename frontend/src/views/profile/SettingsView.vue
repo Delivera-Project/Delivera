@@ -8,6 +8,7 @@ import { useValidation } from '@/composables/useValidation'
 import { useActivityTypes } from '@/composables/useActivityTypes'
 import { useAppConfig } from '@/composables/useAppConfig'
 import DeleteConfirmPanel from '@/components/DeleteConfirmPanel.vue'
+import ApiKeysSection from './ApiKeysSection.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -471,6 +472,7 @@ async function copyHandle() {
           <PTab :value="0">{{ t('settings.orgSection') }}</PTab>
           <PTab :value="1">{{ t('settings.companySection') }}</PTab>
           <PTab :value="2">{{ t('settings.subscriptionSection') }}</PTab>
+          <PTab :value="3">{{ t('settings.apiKeysSection') }}</PTab>
         </PTabList>
 
         <PTabPanels>
@@ -705,6 +707,11 @@ async function copyHandle() {
                 </div>
               </div>
             </div>
+          </PTabPanel>
+
+          <!-- === API Keys === -->
+          <PTabPanel :value="3">
+            <ApiKeysSection />
           </PTabPanel>
         </PTabPanels>
       </PTabs>
