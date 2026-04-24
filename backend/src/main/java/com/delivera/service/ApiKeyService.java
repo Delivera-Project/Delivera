@@ -10,7 +10,7 @@ import com.delivera.model.Company;
 import com.delivera.repository.ApiKeyRepository;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.security.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,18 +24,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ApiKeyService {
 
     private static final String TOKEN_PREFIX = "dlv_";
     private static final int RANDOM_BYTES = 32;
     private static final int VISIBLE_PREFIX_LENGTH = 12;
+    private static final SecureRandom RANDOM = new SecureRandom();
 
-    @Autowired
-    private ApiKeyRepository apiKeyRepository;
-    @Autowired
-    private CompanyRepository companyRepository;
-    @Autowired
-    private SecurityUtils securityUtils;
+    private final ApiKeyRepository apiKeyRepository;
+    private final CompanyRepository companyRepository;
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public List<ApiKeyResponse> list() {
@@ -73,7 +72,7 @@ public class ApiKeyService {
 
     private String generateToken() {
         byte[] bytes = new byte[RANDOM_BYTES];
-        new SecureRandom().nextBytes(bytes);
+        RANDOM.nextBytes(bytes);
         return TOKEN_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 

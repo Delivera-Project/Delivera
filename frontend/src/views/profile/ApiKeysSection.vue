@@ -128,8 +128,8 @@ onMounted(load)
 
     <div v-if="!createdToken && creating" class="add-company-form">
       <div class="form-field">
-        <label>{{ t('apiKeys.name') }}</label>
-        <InputText v-model="newKeyName" :placeholder="t('apiKeys.namePlaceholder')" maxlength="100" fluid />
+        <label for="api-key-name">{{ t('apiKeys.name') }}</label>
+        <InputText id="api-key-name" v-model="newKeyName" :placeholder="t('apiKeys.namePlaceholder')" maxlength="100" fluid />
       </div>
       <PMessage v-if="createError" severity="error" :closable="false" class="form-message">{{ createError }}</PMessage>
       <div class="form-actions">

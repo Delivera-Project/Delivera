@@ -7,7 +7,7 @@ import com.delivera.service.ApiKeyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +17,11 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/settings/api-keys")
+@RequiredArgsConstructor
 @Tag(name = "API Keys", description = "Gestión de API keys de empresa")
 public class ApiKeyController {
 
-    @Autowired
-    private ApiKeyService apiKeyService;
+    private final ApiKeyService apiKeyService;
 
     @Operation(summary = "Listar API keys")
     @GetMapping
