@@ -8,7 +8,7 @@ import Chart from 'primevue/chart'
 import L from 'leaflet'
 import {
   createMap, addMarker, addRoute, clusterOptions,
-  attachRouteVisibilityHandler,
+  attachRouteVisibilityHandler, currentLocationOf,
 } from '@/composables/useDeliveraMap'
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_COUNTRY } from '@/constants/map'
 
@@ -202,6 +202,7 @@ async function initMap(unitList) {
       originMarker: markerByKey.get(originKey) || null,
       destMarker: markerByKey.get(destKey) || null,
       status: p.status,
+      currentLocation: currentLocationOf(p),
     })
     routeEntries.push(entry)
     entry.layer?.bringToFront?.()

@@ -69,6 +69,15 @@ public class Order {
     @Column(name = "recipient_longitude", precision = 9, scale = 6)
     private java.math.BigDecimal recipientLongitude;
 
+    @Column(name = "current_lat", precision = 9, scale = 6)
+    private java.math.BigDecimal currentLat;
+
+    @Column(name = "current_lon", precision = 9, scale = 6)
+    private java.math.BigDecimal currentLon;
+
+    @Column(name = "current_location_at")
+    private Instant currentLocationAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "loyal_user_id")
     private LoyalUser loyalUser;

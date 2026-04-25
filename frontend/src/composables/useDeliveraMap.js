@@ -36,6 +36,13 @@ export function routeColorFor(status) {
   return ROUTE_STATUS_COLORS[status] || ROUTE_COLOR
 }
 
+// Devuelve { lat, lon } parseado a partir de los campos currentLat/currentLon del pedido,
+// o null si alguno es nulo. Centralizado para reutilizar en todas las vistas y testear.
+export function currentLocationOf(order) {
+  if (!order || order.currentLat == null || order.currentLon == null) return null
+  return { lat: parseFloat(order.currentLat), lon: parseFloat(order.currentLon) }
+}
+
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 
@@ -163,8 +170,9 @@ export function addMarker(map, {
 export async function addRoute(map, {
   orderId, origin, dest, popupTitle, popupSubtitle, actionLabel, router,
   timeoutMs = 6000, originMarker = null, destMarker = null, status = null,
+  currentLocation = null,
 }) {
-  const entry = { layer: null, solid: true, originMarker, destMarker }
+  const entry = { layer: null, solid: true, originMarker, destMarker, currentMarker: null }
   const color = routeColorFor(status)
 
   async function fetchOSRM() {
@@ -222,7 +230,20 @@ export async function addRoute(map, {
   }
 
   if (map) { line.addTo(map); entry.layer = line }
+
+  entry.currentMarker = addCurrentLocationMarker(map, currentLocation, color, popupTitle, popupSubtitle)
   return entry
+}
+
+// Crea un marcador circular con el color del estado sobre la ruta. Aislado para poder
+// testearlo sin instanciar el Map completo.
+export function addCurrentLocationMarker(map, currentLocation, color, popupTitle, popupSubtitle) {
+  if (!map || !currentLocation || currentLocation.lat == null || currentLocation.lon == null) return null
+  const marker = L.circleMarker([currentLocation.lat, currentLocation.lon], {
+    radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1,
+  }).addTo(map)
+  if (popupTitle) marker.bindPopup(popupHtml({ title: popupTitle, subtitle: popupSubtitle, actionLabel: null }))
+  return marker
 }
 
 // ---------------------------------------------------------------------------

@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useFormatDate } from '@/composables/useFormatDate'
 import TimelineList from '@/components/TimelineList.vue'
-import { createMap, addMarker, addRoute, fitBounds } from '@/composables/useDeliveraMap'
+import { createMap, addMarker, addRoute, fitBounds, currentLocationOf } from '@/composables/useDeliveraMap'
 import { WORKER_ROLES } from '@/constants/roles'
 
 const { t } = useI18n()
@@ -105,6 +105,7 @@ async function initOrderMap() {
       actionLabel: t('orders.viewDetail'),
       router,
       status: o.status,
+      currentLocation: currentLocationOf(o),
     })
     if (entry && !entry.solid) routeFailed.value = true
     entry?.layer?.bringToFront?.()

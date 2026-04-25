@@ -1,6 +1,7 @@
 package com.delivera.controller;
 
 import com.delivera.dto.order.OrderDetailResponse;
+import com.delivera.dto.order.OrderLocationRequest;
 import com.delivera.dto.order.OrderRequest;
 import com.delivera.dto.order.OrderResponse;
 import com.delivera.dto.order.OrderStatusRequest;
@@ -33,5 +34,12 @@ public class ExternalOrderController {
     public ResponseEntity<OrderDetailResponse> updateStatus(@PathVariable UUID id,
                                                             @Valid @RequestBody OrderStatusRequest request) {
         return ResponseEntity.ok(orderService.updateStatus(id, request));
+    }
+
+    @Operation(summary = "Reportar última posición conocida del pedido desde sistema externo")
+    @PatchMapping("/{id}/location")
+    public ResponseEntity<OrderDetailResponse> updateLocation(@PathVariable UUID id,
+                                                              @Valid @RequestBody OrderLocationRequest request) {
+        return ResponseEntity.ok(orderService.updateLocation(id, request));
     }
 }

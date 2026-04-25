@@ -4,6 +4,7 @@ import com.delivera.security.SecurityUtils;
 import com.delivera.dto.order.OrderRequest;
 import com.delivera.model.OrderType;
 import com.delivera.dto.order.OrderStatusRequest;
+import com.delivera.dto.order.OrderLocationRequest;
 import com.delivera.exception.InvalidOrderUnitsException;
 import com.delivera.exception.OrderNotFoundException;
 import com.delivera.model.*;
@@ -150,6 +151,30 @@ class OrderServiceTest {
         when(orderRepository.save(order)).thenReturn(order);
 
         assertThat(orderService.updateStatus(order.getId(), req)).isNotNull();
+    }
+
+    @Test
+    void updateLocation_setsCoordinatesAndTimestamp() {
+        OrderLocationRequest req = new OrderLocationRequest(new java.math.BigDecimal("40.4"), new java.math.BigDecimal("-3.7"));
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(orderRepository.findByIdAndCompanyId(order.getId(), companyId)).thenReturn(Optional.of(order));
+        when(orderRepository.save(order)).thenReturn(order);
+
+        orderService.updateLocation(order.getId(), req);
+
+        assertThat(order.getCurrentLat()).isEqualByComparingTo("40.4");
+        assertThat(order.getCurrentLon()).isEqualByComparingTo("-3.7");
+        assertThat(order.getCurrentLocationAt()).isNotNull();
+    }
+
+    @Test
+    void updateLocation_orderNotFoundThrows() {
+        OrderLocationRequest req = new OrderLocationRequest(new java.math.BigDecimal("40"), new java.math.BigDecimal("-3"));
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(orderRepository.findByIdAndCompanyId(any(), any())).thenReturn(Optional.empty());
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> orderService.updateLocation(order.getId(), req))
+                .isInstanceOf(com.delivera.exception.OrderNotFoundException.class);
     }
 
     @Test
