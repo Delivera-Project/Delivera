@@ -1,5 +1,20 @@
-import { describe, it, expect } from 'vitest'
-import { routeColorFor, ROUTE_STATUS_COLORS, ROUTE_COLOR, currentLocationOf } from '@/composables/useDeliveraMap'
+import { describe, it, expect, vi } from 'vitest'
+
+const addToMock = vi.fn()
+const bindPopupMock = vi.fn()
+const circleMarkerMock = vi.fn(() => ({ addTo: addToMock, bindPopup: bindPopupMock }))
+addToMock.mockImplementation(() => ({ addTo: addToMock, bindPopup: bindPopupMock }))
+
+vi.mock('leaflet', () => ({
+  default: {
+    Icon: { Default: { prototype: {}, mergeOptions: vi.fn() } },
+    circleMarker: circleMarkerMock,
+  },
+}))
+vi.mock('leaflet.markercluster', () => ({}))
+
+const { routeColorFor, ROUTE_STATUS_COLORS, ROUTE_COLOR, currentLocationOf, addCurrentLocationMarker } =
+  await import('@/composables/useDeliveraMap')
 
 describe('routeColorFor', () => {
   it('mapea cada estado conocido a su color', () => {
@@ -28,5 +43,29 @@ describe('currentLocationOf', () => {
     expect(currentLocationOf({ currentLat: 1 })).toBeNull()
     expect(currentLocationOf({ currentLon: 1 })).toBeNull()
     expect(currentLocationOf({ currentLat: null, currentLon: 1 })).toBeNull()
+  })
+})
+
+describe('addCurrentLocationMarker', () => {
+  it('devuelve null si falta map, location, lat o lon', () => {
+    expect(addCurrentLocationMarker(null, { lat: 1, lon: 2 }, '#000')).toBeNull()
+    expect(addCurrentLocationMarker({}, null, '#000')).toBeNull()
+    expect(addCurrentLocationMarker({}, { lat: null, lon: 2 }, '#000')).toBeNull()
+    expect(addCurrentLocationMarker({}, { lat: 1, lon: null }, '#000')).toBeNull()
+  })
+
+  it('crea circleMarker con el color y vincula popup cuando hay título', () => {
+    circleMarkerMock.mockClear()
+    bindPopupMock.mockClear()
+    const marker = addCurrentLocationMarker({}, { lat: 40, lon: -3 }, '#abc', 'ref-1', 'sub')
+    expect(circleMarkerMock).toHaveBeenCalledWith([40, -3], expect.objectContaining({ fillColor: '#abc' }))
+    expect(bindPopupMock).toHaveBeenCalled()
+    expect(marker).not.toBeNull()
+  })
+
+  it('no vincula popup si no hay título', () => {
+    bindPopupMock.mockClear()
+    addCurrentLocationMarker({}, { lat: 1, lon: 2 }, '#000', null, null)
+    expect(bindPopupMock).not.toHaveBeenCalled()
   })
 })

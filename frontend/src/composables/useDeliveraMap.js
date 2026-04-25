@@ -231,15 +231,19 @@ export async function addRoute(map, {
 
   if (map) { line.addTo(map); entry.layer = line }
 
-  if (map && currentLocation && currentLocation.lat != null && currentLocation.lon != null) {
-    const marker = L.circleMarker([currentLocation.lat, currentLocation.lon], {
-      radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1,
-    }).addTo(map)
-    if (popupTitle) marker.bindPopup(popupHtml({ title: popupTitle, subtitle: popupSubtitle, actionLabel: null }))
-    entry.currentMarker = marker
-  }
-
+  entry.currentMarker = addCurrentLocationMarker(map, currentLocation, color, popupTitle, popupSubtitle)
   return entry
+}
+
+// Crea un marcador circular con el color del estado sobre la ruta. Aislado para poder
+// testearlo sin instanciar el Map completo.
+export function addCurrentLocationMarker(map, currentLocation, color, popupTitle, popupSubtitle) {
+  if (!map || !currentLocation || currentLocation.lat == null || currentLocation.lon == null) return null
+  const marker = L.circleMarker([currentLocation.lat, currentLocation.lon], {
+    radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1,
+  }).addTo(map)
+  if (popupTitle) marker.bindPopup(popupHtml({ title: popupTitle, subtitle: popupSubtitle, actionLabel: null }))
+  return marker
 }
 
 // ---------------------------------------------------------------------------
