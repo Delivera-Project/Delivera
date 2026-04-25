@@ -241,6 +241,7 @@ orders:
   deleteConfirm: "¿Eliminar este pedido?"
   viewDetail: Ver detalle
   noMapOrders: No hay pedidos pendientes con coordenadas
+  withoutCoordinates: Pedidos sin ubicación
   routeUnavailable: No se ha podido calcular la ruta
   chat: Chat
   chatEmpty: No hay mensajes todavía.

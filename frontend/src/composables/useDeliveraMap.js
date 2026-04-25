@@ -43,6 +43,16 @@ export function currentLocationOf(order) {
   return { lat: parseFloat(order.currentLat), lon: parseFloat(order.currentLon) }
 }
 
+// True para pedidos en estado activo (PENDING o IN_TRANSIT).
+export function isActiveOrder(o) {
+  return !!o && (o.status === 'PENDING' || o.status === 'IN_TRANSIT')
+}
+
+// True si el pedido tiene coordenadas de origen utilizables para pintar el mapa.
+export function hasOriginCoords(o) {
+  return !!o && o.originLat != null && o.originLon != null
+}
+
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 

@@ -11,7 +11,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import L from 'leaflet'
 import {
   createMap, addMarker, addRoute, clusterOptions, fitBounds,
-  attachRouteVisibilityHandler, currentLocationOf,
+  attachRouteVisibilityHandler, currentLocationOf, isActiveOrder, hasOriginCoords,
 } from '@/composables/useDeliveraMap'
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION } from '@/constants/map'
 
@@ -67,12 +67,14 @@ const filtered = computed(() => {
   })
 })
 
-// Solo pedidos pendientes con coords origen (para el mapa)
+// Pedidos activos con coordenadas de origen (visibles en el mapa)
 const mappableOrders = computed(() =>
-  filtered.value.filter(o =>
-    (o.status === 'PENDING' || o.status === 'IN_TRANSIT') &&
-    o.originLat && o.originLon
-  )
+  filtered.value.filter(o => isActiveOrder(o) && hasOriginCoords(o))
+)
+
+// Pedidos activos SIN coordenadas (no aparecen en el mapa) — listado lateral DSI-22.3
+const unmappableOrders = computed(() =>
+  filtered.value.filter(o => isActiveOrder(o) && !hasOriginCoords(o))
 )
 
 function isOwnCompany(companyId) {
@@ -352,6 +354,16 @@ watch(orders, async () => {
           <span class="legend-item"><span class="legend-line legend-line--solid"></span>{{ t('map.legend.routeSolid') }}</span>
           <span class="legend-item"><span class="legend-line legend-line--dashed"></span>{{ t('map.legend.routeDashed') }}</span>
         </div>
+        <!-- Listado lateral de pedidos activos sin coordenadas (DSI-22.3) -->
+        <aside v-if="unmappableOrders.length > 0" class="orders-no-coords">
+          <p class="orders-no-coords-title">{{ t('orders.withoutCoordinates') }} ({{ unmappableOrders.length }})</p>
+          <ul>
+            <li v-for="o in unmappableOrders" :key="o.id">
+              <a href="#" @click.prevent="router.push(`/orders/${o.id}`)">{{ o.reference }}</a>
+              <span class="orders-no-coords-meta">{{ o.originName }} → {{ o.destinationName || o.recipientName || o.recipientEmail || '—' }}</span>
+            </li>
+          </ul>
+        </aside>
       </div>
     </div>
   </div>

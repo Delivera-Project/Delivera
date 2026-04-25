@@ -241,6 +241,7 @@ orders:
   deleteConfirm: Delete this order?
   viewDetail: View detail
   noMapOrders: No pending orders with coordinates
+  withoutCoordinates: Orders without location
   routeUnavailable: Route could not be calculated
   chat: Chat
   chatEmpty: No messages yet.
