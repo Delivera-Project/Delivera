@@ -1,7 +1,10 @@
 package com.delivera.controller;
 
+import com.delivera.dto.order.OrderDetailResponse;
 import com.delivera.dto.order.OrderRequest;
 import com.delivera.dto.order.OrderResponse;
+import com.delivera.dto.order.OrderStatusRequest;
+import com.delivera.model.OrderStatus;
 import com.delivera.model.OrderType;
 import com.delivera.service.OrderService;
 import org.junit.jupiter.api.Test;
@@ -35,5 +38,21 @@ class ExternalOrderControllerTest {
         assertThat(resp.getStatusCode().value()).isEqualTo(201);
         assertThat(resp.getBody()).isSameAs(expected);
         verify(orderService).create(req);
+    }
+
+    @Test
+    void delegatesStatusUpdateToOrderService() {
+        UUID id = UUID.randomUUID();
+        OrderStatusRequest req = new OrderStatusRequest(OrderStatus.IN_TRANSIT, "actualizado por ERP");
+        OrderDetailResponse expected = new OrderDetailResponse(id, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, "IN_TRANSIT", null, null, false, null, null,
+                null, null, null, null, null, null);
+        when(orderService.updateStatus(id, req)).thenReturn(expected);
+
+        var resp = controller.updateStatus(id, req);
+
+        assertThat(resp.getStatusCode().value()).isEqualTo(200);
+        assertThat(resp.getBody()).isSameAs(expected);
+        verify(orderService).updateStatus(id, req);
     }
 }
