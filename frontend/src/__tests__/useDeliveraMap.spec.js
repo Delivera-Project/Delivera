@@ -23,8 +23,8 @@ vi.mock('leaflet', () => ({
 }))
 vi.mock('leaflet.markercluster', () => ({}))
 
-const { routeColorFor, ROUTE_STATUS_COLORS, ROUTE_COLOR, currentLocationOf, addCurrentLocationMarker, addRoute } =
-  await import('@/composables/useDeliveraMap')
+const { routeColorFor, ROUTE_STATUS_COLORS, ROUTE_COLOR, currentLocationOf, addCurrentLocationMarker, addRoute,
+  isActiveOrder, hasOriginCoords } = await import('@/composables/useDeliveraMap')
 
 describe('routeColorFor', () => {
   it('mapea cada estado conocido a su color', () => {
@@ -77,6 +77,32 @@ describe('addCurrentLocationMarker', () => {
     bindPopupMock.mockClear()
     addCurrentLocationMarker({}, { lat: 1, lon: 2 }, '#000', null, null)
     expect(bindPopupMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('isActiveOrder', () => {
+  it('true para PENDING e IN_TRANSIT', () => {
+    expect(isActiveOrder({ status: 'PENDING' })).toBe(true)
+    expect(isActiveOrder({ status: 'IN_TRANSIT' })).toBe(true)
+  })
+  it('false para otros estados, null o undefined', () => {
+    expect(isActiveOrder({ status: 'DELIVERED' })).toBe(false)
+    expect(isActiveOrder({ status: 'CANCELLED' })).toBe(false)
+    expect(isActiveOrder(null)).toBe(false)
+    expect(isActiveOrder(undefined)).toBe(false)
+  })
+})
+
+describe('hasOriginCoords', () => {
+  it('true cuando ambas coordenadas están presentes', () => {
+    expect(hasOriginCoords({ originLat: 1, originLon: 2 })).toBe(true)
+    expect(hasOriginCoords({ originLat: 0, originLon: 0 })).toBe(true)
+  })
+  it('false si alguna falta o el pedido es nulo', () => {
+    expect(hasOriginCoords(null)).toBe(false)
+    expect(hasOriginCoords({})).toBe(false)
+    expect(hasOriginCoords({ originLat: 1 })).toBe(false)
+    expect(hasOriginCoords({ originLat: null, originLon: 1 })).toBe(false)
   })
 })
 
