@@ -1,8 +1,11 @@
 package com.delivera.controller;
 
+import com.delivera.dto.order.OrderDetailResponse;
 import com.delivera.dto.order.OrderRequest;
 import com.delivera.dto.order.OrderResponse;
+import com.delivera.dto.order.OrderStatusRequest;
 import com.delivera.service.OrderService;
+import java.util.UUID;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,5 +26,12 @@ public class ExternalOrderController {
     @PostMapping
     public ResponseEntity<OrderResponse> create(@Valid @RequestBody OrderRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(orderService.create(request));
+    }
+
+    @Operation(summary = "Actualizar estado de pedido desde sistema externo")
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<OrderDetailResponse> updateStatus(@PathVariable UUID id,
+                                                            @Valid @RequestBody OrderStatusRequest request) {
+        return ResponseEntity.ok(orderService.updateStatus(id, request));
     }
 }
