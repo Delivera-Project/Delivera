@@ -443,6 +443,8 @@ settings:
   companySection: Empresa
   subscriptionSection: Plan
   apiKeysSection: API keys
+  defaultPriority: Prioridad por defecto
+  defaultPriorityHelp: Se aplica al crear pedidos cuando no se indica una prioridad
   currentPlan: Plan actual
   availablePlans: Planes disponibles
   selectPlan: Cambiar a este plan

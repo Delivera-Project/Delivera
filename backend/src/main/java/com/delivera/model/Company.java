@@ -38,6 +38,10 @@ public class Company {
     @Column(name = "logo_data", columnDefinition = "TEXT")
     private String logoData;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "default_priority", length = 10)
+    private OrderPriority defaultPriority;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 }

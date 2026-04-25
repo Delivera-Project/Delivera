@@ -54,7 +54,7 @@ public class SettingsService {
     public SettingsResponse getSettings() {
         Company c = currentCompany();
         Organization o = c.getOrganization();
-        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType().getCode());
+        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType().getCode(), c.getDefaultPriority());
     }
 
     @Transactional
@@ -75,6 +75,7 @@ public class SettingsService {
         Company c = currentCompany();
         c.setName(req.name());
         c.setActivityType(activityTypeRepository.getReferenceById(req.activityType()));
+        c.setDefaultPriority(req.defaultPriority());
         companyRepository.save(c);
         return getSettings();
     }

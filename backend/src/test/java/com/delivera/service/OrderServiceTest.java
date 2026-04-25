@@ -101,6 +101,17 @@ class OrderServiceTest {
     }
 
     @Test
+    void resolveDefaultPriority_prefersRequestedThenCompanyThenNormal() {
+        Company c = new Company();
+        assertThat(OrderService.resolveDefaultPriority(OrderPriority.HIGH, c)).isEqualTo(OrderPriority.HIGH);
+        assertThat(OrderService.resolveDefaultPriority(null, null)).isEqualTo(OrderPriority.NORMAL);
+        c.setDefaultPriority(OrderPriority.LOW);
+        assertThat(OrderService.resolveDefaultPriority(null, c)).isEqualTo(OrderPriority.LOW);
+        c.setDefaultPriority(null);
+        assertThat(OrderService.resolveDefaultPriority(null, c)).isEqualTo(OrderPriority.NORMAL);
+    }
+
+    @Test
     void getByCompany_returnsMappedList() {
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(orderRepository.findSentOrReceivedByCompanyId(companyId)).thenReturn(List.of(order));
