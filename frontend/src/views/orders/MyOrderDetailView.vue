@@ -6,7 +6,7 @@ import { useAppConfig } from '@/composables/useAppConfig'
 import { fetchPublicOrder, useApi } from '@/composables/useApi'
 import { useFormatDate } from '@/composables/useFormatDate'
 import TimelineList from '@/components/TimelineList.vue'
-import { createMap, addMarker, addRoute, fitBounds } from '@/composables/useDeliveraMap'
+import { createMap, addMarker, addRoute, fitBounds, currentLocationOf } from '@/composables/useDeliveraMap'
 
 const { t } = useI18n()
 const { formatDateTime } = useFormatDate()
@@ -69,8 +69,7 @@ async function initMap() {
     actionLabel: null,
     router,
     status: o.status,
-    currentLocation: o.currentLat != null && o.currentLon != null
-      ? { lat: parseFloat(o.currentLat), lon: parseFloat(o.currentLon) } : null,
+    currentLocation: currentLocationOf(o),
   })
   entry?.layer?.bringToFront?.()
 

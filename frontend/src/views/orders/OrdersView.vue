@@ -11,7 +11,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import L from 'leaflet'
 import {
   createMap, addMarker, addRoute, clusterOptions, fitBounds,
-  attachRouteVisibilityHandler,
+  attachRouteVisibilityHandler, currentLocationOf,
 } from '@/composables/useDeliveraMap'
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION } from '@/constants/map'
 
@@ -193,8 +193,7 @@ async function updateMapOrders() {
       originMarker: markerByKey.get(originKey) || null,
       destMarker: markerByKey.get(destKey) || null,
       status: o.status,
-      currentLocation: o.currentLat != null && o.currentLon != null
-        ? { lat: parseFloat(o.currentLat), lon: parseFloat(o.currentLon) } : null,
+      currentLocation: currentLocationOf(o),
     })
     if (token !== mapToken) { if (entry?.layer && map) map.removeLayer(entry.layer); return }
     routeEntries.push(entry)

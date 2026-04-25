@@ -36,6 +36,13 @@ export function routeColorFor(status) {
   return ROUTE_STATUS_COLORS[status] || ROUTE_COLOR
 }
 
+// Devuelve { lat, lon } parseado a partir de los campos currentLat/currentLon del pedido,
+// o null si alguno es nulo. Centralizado para reutilizar en todas las vistas y testear.
+export function currentLocationOf(order) {
+  if (!order || order.currentLat == null || order.currentLon == null) return null
+  return { lat: parseFloat(order.currentLat), lon: parseFloat(order.currentLon) }
+}
+
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 
