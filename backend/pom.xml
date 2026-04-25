@@ -146,7 +146,6 @@
                     <excludes>
                         <exclude>com/delivera/DeliveraApplication.class</exclude>
                         <exclude>com/delivera/config/**</exclude>
-                        <exclude>com/delivera/controller/**</exclude>
                         <exclude>com/delivera/dto/**</exclude>
                         <exclude>com/delivera/model/**</exclude>
                         <exclude>com/delivera/exception/*Exception.class</exclude>

@@ -54,6 +54,9 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.GET, api + "/app-config/**").permitAll();
                 auth.requestMatchers(api + "/orders/public/**").permitAll();
 
+                // API externa autenticada con API key
+                auth.requestMatchers(api + "/external/**").hasRole("API_KEY");
+
                 // Administración global
                 auth.requestMatchers(api + "/admin/**").hasRole("GLOBAL_ADMIN");
 
