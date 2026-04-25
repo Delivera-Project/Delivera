@@ -76,7 +76,7 @@ public class ApiKeyService {
         return TOKEN_PREFIX + Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    static String hash(String token) {
+    public static String hash(String token) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             return HexFormat.of().formatHex(digest.digest(token.getBytes()));
