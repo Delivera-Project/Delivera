@@ -201,6 +201,7 @@ async function initMap(unitList) {
       router,
       originMarker: markerByKey.get(originKey) || null,
       destMarker: markerByKey.get(destKey) || null,
+      status: p.status,
     })
     routeEntries.push(entry)
     entry.layer?.bringToFront?.()

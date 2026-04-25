@@ -104,6 +104,7 @@ async function initOrderMap() {
       popupSubtitle: `${o.originName} → ${o.destinationName || o.recipientName || o.recipientEmail || ''}`,
       actionLabel: t('orders.viewDetail'),
       router,
+      status: o.status,
     })
     if (entry && !entry.solid) routeFailed.value = true
     entry?.layer?.bringToFront?.()
