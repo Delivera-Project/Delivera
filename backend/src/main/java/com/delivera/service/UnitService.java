@@ -56,12 +56,7 @@ public class UnitService {
                 .orElseThrow(CompanyContextException::new);
         var unit = new OperationalUnit();
         unit.setCompany(company);
-        unit.setName(request.name());
-        unit.setType(request.type());
-        unit.setAddress(request.address());
-        unit.setLatitude(request.latitude());
-        unit.setLongitude(request.longitude());
-        unit.setDefaultPriority(request.defaultPriority());
+        applyRequest(unit, request);
         try {
             return UnitResponse.from(unitRepository.save(unit));
         } catch (DataIntegrityViolationException e) {
@@ -77,12 +72,7 @@ public class UnitService {
         if (unitRepository.existsByCompanyIdAndNameAndIdNot(companyId, request.name(), unitId)) {
             throw new UnitNameConflictException();
         }
-        unit.setName(request.name());
-        unit.setType(request.type());
-        unit.setAddress(request.address());
-        unit.setLatitude(request.latitude());
-        unit.setLongitude(request.longitude());
-        unit.setDefaultPriority(request.defaultPriority());
+        applyRequest(unit, request);
         try {
             return UnitResponse.from(unitRepository.save(unit));
         } catch (DataIntegrityViolationException e) {
@@ -156,5 +146,14 @@ public class UnitService {
         var unit = unitRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new UnitNotFoundException(id));
         unitRepository.delete(unit);
+    }
+
+    private void applyRequest(OperationalUnit unit, UnitRequest request) {
+        unit.setName(request.name());
+        unit.setType(request.type());
+        unit.setAddress(request.address());
+        unit.setLatitude(request.latitude());
+        unit.setLongitude(request.longitude());
+        unit.setDefaultPriority(request.defaultPriority());
     }
 }
