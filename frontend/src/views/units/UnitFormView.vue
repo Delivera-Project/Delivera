@@ -24,7 +24,7 @@ const unitId = computed(() => route.params.id || null)
 const isEdit = computed(() => !!unitId.value)
 
 const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
-const priorityOptions = computed(() => buildPriorityOptions(t))
+const priorityOptions = buildPriorityOptions(t)
 const loadError = ref('')
 
 const mapEl = ref(null)
