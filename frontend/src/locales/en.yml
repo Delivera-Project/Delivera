@@ -165,6 +165,10 @@ units:
   new: New unit
   edit: Edit unit
   detail: Unit details
+  defaultPriority: Default priority (overrides company)
+  defaultPriorityHelp: If empty, the company default priority is used
+  priorityOverridden: Overridden
+  priorityInheritedFromCompany: Inherited from company
   created: Unit created successfully
   updated: Unit updated successfully
   empty: No operational units yet. Create the first one to start managing shipments.

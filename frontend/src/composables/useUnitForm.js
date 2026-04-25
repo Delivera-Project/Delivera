@@ -15,6 +15,7 @@ export function useUnitForm() {
   const address = ref('')
   const latitude = ref('')
   const longitude = ref('')
+  const defaultPriority = ref(null)
   const error = ref('')
   const success = ref('')
   const loading = ref(false)
@@ -64,6 +65,7 @@ export function useUnitForm() {
         address: address.value?.trim() || null,
         latitude: Number.isFinite(lat) ? lat : null,
         longitude: Number.isFinite(lon) ? lon : null,
+        defaultPriority: defaultPriority.value || null,
       }
       const res = isEdit
         ? await api.put(`/units/${unitId}`, body)
@@ -86,5 +88,5 @@ export function useUnitForm() {
     }
   }
 
-  return { name, unitType, address, latitude, longitude, error, success, loading, errors, invalids, submitUnit }
+  return { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit }
 }

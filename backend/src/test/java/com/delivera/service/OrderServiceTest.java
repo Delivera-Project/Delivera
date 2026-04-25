@@ -101,14 +101,22 @@ class OrderServiceTest {
     }
 
     @Test
-    void resolveDefaultPriority_prefersRequestedThenCompanyThenNormal() {
+    void resolveDefaultPriority_followsRequestedUnitCompanyNormalChain() {
         Company c = new Company();
-        assertThat(OrderService.resolveDefaultPriority(OrderPriority.HIGH, c)).isEqualTo(OrderPriority.HIGH);
-        assertThat(OrderService.resolveDefaultPriority(null, null)).isEqualTo(OrderPriority.NORMAL);
+        OperationalUnit u = new OperationalUnit();
+        // Solicitada gana siempre
+        assertThat(OrderService.resolveDefaultPriority(OrderPriority.HIGH, u, c)).isEqualTo(OrderPriority.HIGH);
+        // Sin nada → NORMAL
+        assertThat(OrderService.resolveDefaultPriority(null, null, null)).isEqualTo(OrderPriority.NORMAL);
+        // Solo empresa
         c.setDefaultPriority(OrderPriority.LOW);
-        assertThat(OrderService.resolveDefaultPriority(null, c)).isEqualTo(OrderPriority.LOW);
-        c.setDefaultPriority(null);
-        assertThat(OrderService.resolveDefaultPriority(null, c)).isEqualTo(OrderPriority.NORMAL);
+        assertThat(OrderService.resolveDefaultPriority(null, null, c)).isEqualTo(OrderPriority.LOW);
+        // Unidad sobreescribe empresa
+        u.setDefaultPriority(OrderPriority.HIGH);
+        assertThat(OrderService.resolveDefaultPriority(null, u, c)).isEqualTo(OrderPriority.HIGH);
+        // Unidad sin valor → cae en empresa
+        u.setDefaultPriority(null);
+        assertThat(OrderService.resolveDefaultPriority(null, u, c)).isEqualTo(OrderPriority.LOW);
     }
 
     @Test
