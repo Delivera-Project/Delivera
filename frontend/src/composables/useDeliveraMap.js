@@ -25,6 +25,16 @@ L.Icon.Default.mergeOptions({ iconUrl: markerIcon, iconRetinaUrl: markerIcon2x, 
 export const CLUSTER_DISABLE_ZOOM = 10
 export const COLORS = { own: '#7c3aed', other: '#a78bfa', white: '#ffffff' }
 export const ROUTE_COLOR = '#7c3aed'
+// Colores de ruta por estado del pedido (DSI-22.1)
+export const ROUTE_STATUS_COLORS = {
+  PENDING:   '#f59e0b',
+  IN_TRANSIT:'#7c3aed',
+  DELIVERED: '#16a34a',
+  CANCELLED: '#94a3b8',
+}
+export function routeColorFor(status) {
+  return ROUTE_STATUS_COLORS[status] || ROUTE_COLOR
+}
 
 const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const TILE_ATTR = '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -152,9 +162,10 @@ export function addMarker(map, {
 // ---------------------------------------------------------------------------
 export async function addRoute(map, {
   orderId, origin, dest, popupTitle, popupSubtitle, actionLabel, router,
-  timeoutMs = 6000, originMarker = null, destMarker = null,
+  timeoutMs = 6000, originMarker = null, destMarker = null, status = null,
 }) {
   const entry = { layer: null, solid: true, originMarker, destMarker }
+  const color = routeColorFor(status)
 
   async function fetchOSRM() {
     const url = `https://router.project-osrm.org/route/v1/driving/${origin.lon},${origin.lat};${dest.lon},${dest.lat}?geometries=geojson&overview=simplified`
@@ -169,14 +180,14 @@ export async function addRoute(map, {
   function buildSolid(latlngs) {
     // Trazo morado grueso de alta opacidad — visible a corta y larga distancia.
     return L.polyline(latlngs, {
-      color: ROUTE_COLOR, weight: 5, opacity: 0.95,
+      color, weight: 5, opacity: 0.95,
       lineCap: 'round', lineJoin: 'round',
     })
   }
   function buildDashed() {
     return L.polyline(
       [[origin.lat, origin.lon], [dest.lat, dest.lon]],
-      { color: ROUTE_COLOR, weight: 4, opacity: 0.9, dashArray: '10,10', lineCap: 'round' },
+      { color, weight: 4, opacity: 0.9, dashArray: '10,10', lineCap: 'round' },
     )
   }
 

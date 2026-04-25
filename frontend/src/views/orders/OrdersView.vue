@@ -192,6 +192,7 @@ async function updateMapOrders() {
       router,
       originMarker: markerByKey.get(originKey) || null,
       destMarker: markerByKey.get(destKey) || null,
+      status: o.status,
     })
     if (token !== mapToken) { if (entry?.layer && map) map.removeLayer(entry.layer); return }
     routeEntries.push(entry)

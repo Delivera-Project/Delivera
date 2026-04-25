@@ -68,6 +68,7 @@ async function initMap() {
     popupSubtitle: `${o.originName} → ${o.destinationName || o.recipientName || ''}`,
     actionLabel: null,
     router,
+    status: o.status,
   })
   entry?.layer?.bringToFront?.()
 
