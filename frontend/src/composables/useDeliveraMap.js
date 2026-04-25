@@ -163,8 +163,9 @@ export function addMarker(map, {
 export async function addRoute(map, {
   orderId, origin, dest, popupTitle, popupSubtitle, actionLabel, router,
   timeoutMs = 6000, originMarker = null, destMarker = null, status = null,
+  currentLocation = null,
 }) {
-  const entry = { layer: null, solid: true, originMarker, destMarker }
+  const entry = { layer: null, solid: true, originMarker, destMarker, currentMarker: null }
   const color = routeColorFor(status)
 
   async function fetchOSRM() {
@@ -222,6 +223,15 @@ export async function addRoute(map, {
   }
 
   if (map) { line.addTo(map); entry.layer = line }
+
+  if (map && currentLocation && currentLocation.lat != null && currentLocation.lon != null) {
+    const marker = L.circleMarker([currentLocation.lat, currentLocation.lon], {
+      radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1,
+    }).addTo(map)
+    if (popupTitle) marker.bindPopup(popupHtml({ title: popupTitle, subtitle: popupSubtitle, actionLabel: null }))
+    entry.currentMarker = marker
+  }
+
   return entry
 }
 

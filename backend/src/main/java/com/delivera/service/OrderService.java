@@ -160,6 +160,17 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderDetailResponse updateLocation(UUID id, OrderLocationRequest request) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        Order order = orderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(OrderNotFoundException::new);
+        order.setCurrentLat(request.lat());
+        order.setCurrentLon(request.lon());
+        order.setCurrentLocationAt(java.time.Instant.now());
+        return OrderDetailResponse.from(orderRepository.save(order));
+    }
+
+    @Transactional
     public void delete(UUID id) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         Order order = orderRepository.findByIdAndCompanyId(id, companyId)

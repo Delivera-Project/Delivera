@@ -202,6 +202,8 @@ async function initMap(unitList) {
       originMarker: markerByKey.get(originKey) || null,
       destMarker: markerByKey.get(destKey) || null,
       status: p.status,
+      currentLocation: p.currentLat != null && p.currentLon != null
+        ? { lat: parseFloat(p.currentLat), lon: parseFloat(p.currentLon) } : null,
     })
     routeEntries.push(entry)
     entry.layer?.bringToFront?.()

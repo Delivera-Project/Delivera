@@ -69,6 +69,8 @@ async function initMap() {
     actionLabel: null,
     router,
     status: o.status,
+    currentLocation: o.currentLat != null && o.currentLon != null
+      ? { lat: parseFloat(o.currentLat), lon: parseFloat(o.currentLon) } : null,
   })
   entry?.layer?.bringToFront?.()
 

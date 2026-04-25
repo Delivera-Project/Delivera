@@ -32,7 +32,10 @@ public record OrderDetailResponse(
         Double originLat,
         Double originLon,
         Double destinationLat,
-        Double destinationLon) {
+        Double destinationLon,
+        Double currentLat,
+        Double currentLon,
+        Instant currentLocationAt) {
 
     public static OrderDetailResponse from(Order order) {
         var lu = order.getLoyalUser();
@@ -69,6 +72,9 @@ public record OrderDetailResponse(
                 order.getOrigin().getLatitude() != null ? order.getOrigin().getLatitude().doubleValue() : null,
                 order.getOrigin().getLongitude() != null ? order.getOrigin().getLongitude().doubleValue() : null,
                 destLat,
-                destLon);
+                destLon,
+                order.getCurrentLat() != null ? order.getCurrentLat().doubleValue() : null,
+                order.getCurrentLon() != null ? order.getCurrentLon().doubleValue() : null,
+                order.getCurrentLocationAt());
     }
 }

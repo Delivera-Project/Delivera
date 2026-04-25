@@ -105,6 +105,8 @@ async function initOrderMap() {
       actionLabel: t('orders.viewDetail'),
       router,
       status: o.status,
+      currentLocation: o.currentLat != null && o.currentLon != null
+        ? { lat: parseFloat(o.currentLat), lon: parseFloat(o.currentLon) } : null,
     })
     if (entry && !entry.solid) routeFailed.value = true
     entry?.layer?.bringToFront?.()
