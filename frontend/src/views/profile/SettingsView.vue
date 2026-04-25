@@ -6,6 +6,7 @@ import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
 import { useValidation } from '@/composables/useValidation'
 import { useActivityTypes } from '@/composables/useActivityTypes'
+import { buildPriorityOptions } from '@/composables/useOrderPriority'
 import { useAppConfig } from '@/composables/useAppConfig'
 import DeleteConfirmPanel from '@/components/DeleteConfirmPanel.vue'
 import ApiKeysSection from './ApiKeysSection.vue'
@@ -65,11 +66,7 @@ const companyTypeOptions = computed(() => [
   ...activityTypes.value.map(a => ({ label: a.label, value: a.value }))
 ])
 
-const defaultPriorityOptions = computed(() => [
-  { label: t('orders.priority.HIGH'), value: 'HIGH' },
-  { label: t('orders.priority.NORMAL'), value: 'NORMAL' },
-  { label: t('orders.priority.LOW'), value: 'LOW' },
-])
+const defaultPriorityOptions = computed(() => buildPriorityOptions(t))
 
 // Logo crop (igual que avatar en perfil)
 const LOGO_CANVAS_SIZE = 280
