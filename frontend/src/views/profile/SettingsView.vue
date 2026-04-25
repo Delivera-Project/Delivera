@@ -6,6 +6,7 @@ import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
 import { useValidation } from '@/composables/useValidation'
 import { useActivityTypes } from '@/composables/useActivityTypes'
+import { buildPriorityOptions } from '@/composables/useOrderPriority'
 import { useAppConfig } from '@/composables/useAppConfig'
 import DeleteConfirmPanel from '@/components/DeleteConfirmPanel.vue'
 import ApiKeysSection from './ApiKeysSection.vue'
@@ -36,6 +37,7 @@ const orgSuccess = ref(false)
 const editingCompanyId = ref(null)
 const companyName = ref('')
 const activityType = ref(null)
+const defaultPriority = ref(null)
 const companySaving = ref(false)
 const companyError = ref('')
 const companySuccess = ref(false)
@@ -63,6 +65,8 @@ const companyTypeOptions = computed(() => [
   { label: t('settings.filterAll'), value: 'ALL' },
   ...activityTypes.value.map(a => ({ label: a.label, value: a.value }))
 ])
+
+const defaultPriorityOptions = computed(() => buildPriorityOptions(t))
 
 // Logo crop (igual que avatar en perfil)
 const LOGO_CANVAS_SIZE = 280
@@ -322,6 +326,7 @@ function startEditCompany(company) {
   editingCompanyId.value = company.id
   companyName.value = company.name
   activityType.value = company.activityType
+  defaultPriority.value = company.defaultPriority || null
   companyError.value = ''
   companySuccess.value = false
 }
@@ -337,7 +342,7 @@ async function saveCompany() {
   companySaving.value = true
   companyError.value = ''
   try {
-    const res = await api.put('/settings/company', { name: companyName.value, activityType: activityType.value })
+    const res = await api.put('/settings/company', { name: companyName.value, activityType: activityType.value, defaultPriority: defaultPriority.value })
     if (res.ok) {
       const updated = await res.json()
       settings.value = updated
@@ -567,6 +572,11 @@ async function copyHandle() {
                       <div class="form-field">
                         <label>{{ t('fields.type') }}</label>
                         <PSelect v-model="activityType" :options="activityOptions" option-label="label" option-value="value" fluid />
+                      </div>
+                      <div class="form-field">
+                        <label>{{ t('settings.defaultPriority') }}</label>
+                        <PSelect v-model="defaultPriority" :options="defaultPriorityOptions" option-label="label" option-value="value" fluid show-clear />
+                        <small class="field-help">{{ t('settings.defaultPriorityHelp') }}</small>
                       </div>
                       <PMessage v-if="companyError" severity="error" :closable="false" class="form-message">{{ companyError }}</PMessage>
                       <div class="form-actions">

@@ -100,7 +100,7 @@ public class OrderService {
         order.setOrigin(origin);
         order.setDestination(destination);
         order.setStatus(OrderStatus.PENDING);
-        order.setPriority(request.priority() != null ? request.priority() : OrderPriority.NORMAL);
+        order.setPriority(resolveDefaultPriority(request.priority(), company));
         order.setNotes(request.notes() != null ? request.notes().trim() : null);
 
         if (orderType == OrderType.B2C && request.recipientEmail() != null) {
@@ -223,6 +223,14 @@ public class OrderService {
         order.setRecipientAddress(addr);
         order.setRecipientLatitude(lat);
         order.setRecipientLongitude(lon);
+    }
+
+    // Resuelve la prioridad efectiva: petición > config empresa > NORMAL.
+    // Centralizado para soportar herencia de configuración (DSI-23.1).
+    static OrderPriority resolveDefaultPriority(OrderPriority requested, com.delivera.model.Company company) {
+        if (requested != null) return requested;
+        if (company != null && company.getDefaultPriority() != null) return company.getDefaultPriority();
+        return OrderPriority.NORMAL;
     }
 
     private String generateReference() {
