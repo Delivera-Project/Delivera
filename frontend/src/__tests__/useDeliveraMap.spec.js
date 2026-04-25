@@ -83,7 +83,7 @@ describe('addCurrentLocationMarker', () => {
 describe('addRoute', () => {
   it('crea polilínea discontinua con color del estado cuando OSRM falla', async () => {
     polylineMock.mockClear()
-    global.fetch = vi.fn().mockRejectedValue(new Error('osrm down'))
+    globalThis.fetch = vi.fn().mockRejectedValue(new Error('osrm down'))
     const map = {}
     const entry = await addRoute(map, {
       orderId: 'o1',
