@@ -62,7 +62,7 @@ class UnitServiceTest {
         unit.setType(UnitType.WAREHOUSE);
         unit.setCompany(company);
 
-        request = new UnitRequest("Warehouse A", UnitType.WAREHOUSE, "1 Main St", null, null);
+        request = new UnitRequest("Warehouse A", UnitType.WAREHOUSE, "1 Main St", null, null, null);
     }
 
     @Test

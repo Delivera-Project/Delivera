@@ -61,6 +61,7 @@ public class UnitService {
         unit.setAddress(request.address());
         unit.setLatitude(request.latitude());
         unit.setLongitude(request.longitude());
+        unit.setDefaultPriority(request.defaultPriority());
         try {
             return UnitResponse.from(unitRepository.save(unit));
         } catch (DataIntegrityViolationException e) {
@@ -81,6 +82,7 @@ public class UnitService {
         unit.setAddress(request.address());
         unit.setLatitude(request.latitude());
         unit.setLongitude(request.longitude());
+        unit.setDefaultPriority(request.defaultPriority());
         try {
             return UnitResponse.from(unitRepository.save(unit));
         } catch (DataIntegrityViolationException e) {

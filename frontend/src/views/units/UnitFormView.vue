@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useUnitForm } from '@/composables/useUnitForm'
+import { buildPriorityOptions } from '@/composables/useOrderPriority'
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION } from '@/constants/map'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -22,7 +23,8 @@ const api = useApi()
 const unitId = computed(() => route.params.id || null)
 const isEdit = computed(() => !!unitId.value)
 
-const { name, unitType, address, latitude, longitude, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
+const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
+const priorityOptions = computed(() => buildPriorityOptions(t))
 const loadError = ref('')
 
 const mapEl = ref(null)
@@ -159,6 +161,7 @@ async function loadUnit(id) {
     address.value = unit.address || ''
     latitude.value = unit.latitude ?? ''
     longitude.value = unit.longitude ?? ''
+    defaultPriority.value = unit.defaultPriority || null
     if (ordersRes.ok) {
       const orders = await ordersRes.json()
       locationLocked.value = orders.some(o => o.originId === id || o.destinationId === id)
@@ -293,6 +296,12 @@ function handleSubmit() {
               fluid
             />
           </div>
+        </div>
+
+        <div class="form-field">
+          <label for="unit-default-priority">{{ t('units.defaultPriority') }}</label>
+          <PSelect id="unit-default-priority" v-model="defaultPriority" :options="priorityOptions" option-label="label" option-value="value" show-clear fluid />
+          <small class="field-hint">{{ t('units.defaultPriorityHelp') }}</small>
         </div>
 
         <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>

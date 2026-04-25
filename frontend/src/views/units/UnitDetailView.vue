@@ -122,6 +122,18 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
             <span class="info-label">{{ t('orders.date') }}</span>
             <span class="info-value">{{ formatDate(unit.createdAt) ?? '—' }}</span>
           </div>
+          <div class="info-item">
+            <span class="info-label">{{ t('settings.defaultPriority') }}</span>
+            <span class="info-value">
+              <template v-if="unit.defaultPriority">
+                {{ t('orders.priority.' + unit.defaultPriority) }}
+                <span class="priority-override-badge" :title="t('units.defaultPriority')">{{ t('units.priorityOverridden') }}</span>
+              </template>
+              <template v-else>
+                <em>{{ t('units.priorityInheritedFromCompany') }}</em>
+              </template>
+            </span>
+          </div>
         </div>
 
         <!-- Trabajadores asignados -->

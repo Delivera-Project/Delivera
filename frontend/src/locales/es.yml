@@ -165,6 +165,10 @@ units:
   new: Nueva unidad
   edit: Editar unidad
   detail: Detalles de la unidad
+  defaultPriority: Prioridad por defecto (sobreescribe la de la empresa)
+  defaultPriorityHelp: Si se deja vacío se usa la prioridad por defecto de la empresa
+  priorityOverridden: Sobreescrita
+  priorityInheritedFromCompany: Heredada de la empresa
   created: Unidad creada correctamente
   updated: Unidad actualizada correctamente
   empty: No hay unidades operativas. Crea la primera para poder gestionar envíos.

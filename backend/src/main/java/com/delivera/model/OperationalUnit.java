@@ -45,6 +45,10 @@ public class OperationalUnit {
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "default_priority", length = 10)
+    private OrderPriority defaultPriority;
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "unit_workers",
             joinColumns = @JoinColumn(name = "unit_id"),

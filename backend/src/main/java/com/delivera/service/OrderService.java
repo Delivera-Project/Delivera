@@ -100,7 +100,7 @@ public class OrderService {
         order.setOrigin(origin);
         order.setDestination(destination);
         order.setStatus(OrderStatus.PENDING);
-        order.setPriority(resolveDefaultPriority(request.priority(), company));
+        order.setPriority(resolveDefaultPriority(request.priority(), origin, company));
         order.setNotes(request.notes() != null ? request.notes().trim() : null);
 
         if (orderType == OrderType.B2C && request.recipientEmail() != null) {
@@ -225,10 +225,13 @@ public class OrderService {
         order.setRecipientLongitude(lon);
     }
 
-    // Resuelve la prioridad efectiva: petición > config empresa > NORMAL.
-    // Centralizado para soportar herencia de configuración (DSI-23.1).
-    static OrderPriority resolveDefaultPriority(OrderPriority requested, com.delivera.model.Company company) {
+    // Resuelve la prioridad efectiva: petición > unidad origen > empresa > NORMAL.
+    // Cadena de herencia con sobreescritura por unidad (DSI-23.1, DSI-23.2).
+    static OrderPriority resolveDefaultPriority(OrderPriority requested,
+                                                com.delivera.model.OperationalUnit originUnit,
+                                                com.delivera.model.Company company) {
         if (requested != null) return requested;
+        if (originUnit != null && originUnit.getDefaultPriority() != null) return originUnit.getDefaultPriority();
         if (company != null && company.getDefaultPriority() != null) return company.getDefaultPriority();
         return OrderPriority.NORMAL;
     }
