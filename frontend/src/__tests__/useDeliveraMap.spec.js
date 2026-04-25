@@ -2,18 +2,28 @@ import { describe, it, expect, vi } from 'vitest'
 
 const addToMock = vi.fn()
 const bindPopupMock = vi.fn()
+const closePopupMock = vi.fn()
+const onMock = vi.fn()
+const bringToFrontMock = vi.fn()
 const circleMarkerMock = vi.fn(() => ({ addTo: addToMock, bindPopup: bindPopupMock }))
-addToMock.mockImplementation(() => ({ addTo: addToMock, bindPopup: bindPopupMock }))
+const polylineMock = vi.fn(() => ({
+  addTo: addToMock, bindPopup: bindPopupMock, on: onMock, closePopup: closePopupMock, bringToFront: bringToFrontMock,
+}))
+addToMock.mockImplementation(() => ({
+  addTo: addToMock, bindPopup: bindPopupMock, on: onMock, closePopup: closePopupMock, bringToFront: bringToFrontMock,
+}))
 
 vi.mock('leaflet', () => ({
   default: {
     Icon: { Default: { prototype: {}, mergeOptions: vi.fn() } },
     circleMarker: circleMarkerMock,
+    polyline: polylineMock,
+    DomEvent: { stopPropagation: vi.fn() },
   },
 }))
 vi.mock('leaflet.markercluster', () => ({}))
 
-const { routeColorFor, ROUTE_STATUS_COLORS, ROUTE_COLOR, currentLocationOf, addCurrentLocationMarker } =
+const { routeColorFor, ROUTE_STATUS_COLORS, ROUTE_COLOR, currentLocationOf, addCurrentLocationMarker, addRoute } =
   await import('@/composables/useDeliveraMap')
 
 describe('routeColorFor', () => {
@@ -67,5 +77,24 @@ describe('addCurrentLocationMarker', () => {
     bindPopupMock.mockClear()
     addCurrentLocationMarker({}, { lat: 1, lon: 2 }, '#000', null, null)
     expect(bindPopupMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('addRoute', () => {
+  it('crea polilínea discontinua con color del estado cuando OSRM falla', async () => {
+    polylineMock.mockClear()
+    global.fetch = vi.fn().mockRejectedValue(new Error('osrm down'))
+    const map = {}
+    const entry = await addRoute(map, {
+      orderId: 'o1',
+      origin: { lat: 1, lon: 2 },
+      dest: { lat: 3, lon: 4 },
+      popupTitle: 'r-1', popupSubtitle: 'sub', actionLabel: null, router: null,
+      status: 'IN_TRANSIT',
+    })
+    expect(polylineMock).toHaveBeenCalled()
+    const optsArg = polylineMock.mock.calls[0][1]
+    expect(optsArg.color).toBe(ROUTE_STATUS_COLORS.IN_TRANSIT)
+    expect(entry.solid).toBe(false)
   })
 })
