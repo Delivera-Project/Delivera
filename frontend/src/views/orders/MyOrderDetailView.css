@@ -2,12 +2,10 @@
 .back-btn { margin-bottom: 16px; }
 .loading-state { display: flex; justify-content: center; padding: 60px; color: #94a3b8; }
 
+/* .my-order-page hereda apariencia de .surface-card; overrides locales */
 .my-order-page {
   text-align: left;
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 0;
   overflow: hidden;
 }
 .my-order-split {

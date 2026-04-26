@@ -195,7 +195,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div class="unit-form-page card-full">
+  <div class="surface-card unit-form-page card-full">
     <div class="unit-form-split">
       <!-- Panel izquierdo: formulario -->
       <form class="unit-form-panel" @submit.prevent="handleSubmit">

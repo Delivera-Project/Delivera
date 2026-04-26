@@ -210,7 +210,7 @@ async function submitStatusUpdate() {
 </script>
 
 <template>
-  <div class="order-detail-page card-full">
+  <div class="surface-card order-detail-page card-full">
     <div v-if="loading" class="loading-state">
       <i class="pi pi-spin pi-spinner" style="font-size:24px" />
     </div>

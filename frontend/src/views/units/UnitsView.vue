@@ -113,7 +113,7 @@ watch(units, async () => {
 </script>
 
 <template>
-  <div class="units-page card-full">
+  <div class="surface-card units-page card-full">
     <!-- Split layout -->
     <div class="units-split">
       <!-- Panel izquierdo: filtros + lista -->
