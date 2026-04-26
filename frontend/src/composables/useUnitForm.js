@@ -88,5 +88,16 @@ export function useUnitForm() {
     }
   }
 
-  return { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit }
+  // Inicializa los campos del formulario desde un objeto unidad recibido del backend.
+  function loadFromUnit(unit) {
+    if (!unit) return
+    name.value = unit.name ?? ''
+    unitType.value = unit.type ?? null
+    address.value = unit.address ?? ''
+    latitude.value = unit.latitude ?? ''
+    longitude.value = unit.longitude ?? ''
+    defaultPriority.value = unit.defaultPriority ?? null
+  }
+
+  return { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit, loadFromUnit }
 }

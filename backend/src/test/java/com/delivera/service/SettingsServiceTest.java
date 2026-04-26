@@ -145,7 +145,7 @@ class SettingsServiceTest {
 
     @Test
     void updateCompany_success() {
-        CompanyUpdateRequest req = new CompanyUpdateRequest("Renamed", "FOOD", null);
+        CompanyUpdateRequest req = new CompanyUpdateRequest("Renamed", "FOOD", null, false);
         ActivityType food = new ActivityType(); food.setCode("FOOD");
         when(activityTypeRepository.getReferenceById("FOOD")).thenReturn(food);
         when(companyRepository.save(company)).thenReturn(company);

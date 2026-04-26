@@ -36,6 +36,30 @@ beforeEach(() => {
   mockPush.mockReset()
 })
 
+describe('useUnitForm loadFromUnit', () => {
+  it('mapea los campos del backend al formulario', () => {
+    const f = useUnitForm()
+    f.loadFromUnit({ name: 'X', type: 'WAREHOUSE', address: 'a', latitude: 1, longitude: 2, defaultPriority: 'HIGH' })
+    expect(f.name.value).toBe('X')
+    expect(f.unitType.value).toBe('WAREHOUSE')
+    expect(f.address.value).toBe('a')
+    expect(f.latitude.value).toBe(1)
+    expect(f.longitude.value).toBe(2)
+    expect(f.defaultPriority.value).toBe('HIGH')
+  })
+  it('usa defaults seguros con campos ausentes o nulos', () => {
+    const f = useUnitForm()
+    f.loadFromUnit({})
+    expect(f.name.value).toBe('')
+    expect(f.unitType.value).toBeNull()
+    expect(f.defaultPriority.value).toBeNull()
+  })
+  it('no falla si recibe null', () => {
+    const f = useUnitForm()
+    expect(() => f.loadFromUnit(null)).not.toThrow()
+  })
+})
+
 describe('useUnitForm submitUnit', () => {
   it('envía defaultPriority cuando se indica', async () => {
     mockPost.mockResolvedValue({ ok: true })

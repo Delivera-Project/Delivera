@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useUnitForm } from '@/composables/useUnitForm'
 import { buildPriorityOptions } from '@/composables/useOrderPriority'
+import { useCompanySettings, canUnitOverridePriority } from '@/composables/useCompanySettings'
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION } from '@/constants/map'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -23,8 +24,10 @@ const api = useApi()
 const unitId = computed(() => route.params.id || null)
 const isEdit = computed(() => !!unitId.value)
 
-const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
+const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit, loadFromUnit } = useUnitForm()
 const priorityOptions = buildPriorityOptions(t)
+const priorityLockedByCompany = ref(false)
+const { load: loadCompanySettings } = useCompanySettings()
 const loadError = ref('')
 
 const mapEl = ref(null)
@@ -156,12 +159,7 @@ async function loadUnit(id) {
     ])
     if (!unitRes.ok) { loadError.value = t('error.connection'); return }
     const unit = await unitRes.json()
-    name.value = unit.name
-    unitType.value = unit.type
-    address.value = unit.address || ''
-    latitude.value = unit.latitude ?? ''
-    longitude.value = unit.longitude ?? ''
-    defaultPriority.value = unit.defaultPriority || null
+    loadFromUnit(unit)
     if (ordersRes.ok) {
       const orders = await ordersRes.json()
       locationLocked.value = orders.some(o => o.originId === id || o.destinationId === id)
@@ -183,6 +181,9 @@ onMounted(async () => {
   // Iniciar mapa primero, luego cargar datos
   await new Promise(r => setTimeout(r, 50)) // aguardar el DOM
   initMap()
+  // Cargar lock de prioridad de la empresa para deshabilitar el campo si procede
+  const s = await loadCompanySettings()
+  priorityLockedByCompany.value = !canUnitOverridePriority(s)
   await loadUnit(unitId.value)
 })
 
@@ -300,8 +301,11 @@ function handleSubmit() {
 
         <div class="form-field">
           <label for="unit-default-priority">{{ t('units.defaultPriority') }}</label>
-          <PSelect id="unit-default-priority" v-model="defaultPriority" :options="priorityOptions" option-label="label" option-value="value" show-clear fluid />
-          <small class="field-hint">{{ t('units.defaultPriorityHelp') }}</small>
+          <PSelect id="unit-default-priority" v-model="defaultPriority" :options="priorityOptions" option-label="label" option-value="value" :disabled="priorityLockedByCompany" show-clear fluid />
+          <small v-if="priorityLockedByCompany" class="field-hint" style="color:#b45309">
+            <i class="pi pi-lock" /> {{ t('units.defaultPriorityLockedByCompany') }}
+          </small>
+          <small v-else class="field-hint">{{ t('units.defaultPriorityHelp') }}</small>
         </div>
 
         <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>

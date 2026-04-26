@@ -227,11 +227,13 @@ public class OrderService {
 
     // Resuelve la prioridad efectiva: petición > unidad origen > empresa > NORMAL.
     // Cadena de herencia con sobreescritura por unidad (DSI-23.1, DSI-23.2).
+    // Si la empresa bloquea la configuración, ignora la sobreescritura de la unidad (DSI-23.3).
     static OrderPriority resolveDefaultPriority(OrderPriority requested,
                                                 com.delivera.model.OperationalUnit originUnit,
                                                 com.delivera.model.Company company) {
         if (requested != null) return requested;
-        if (originUnit != null && originUnit.getDefaultPriority() != null) return originUnit.getDefaultPriority();
+        boolean locked = company != null && company.isDefaultPriorityLocked();
+        if (!locked && originUnit != null && originUnit.getDefaultPriority() != null) return originUnit.getDefaultPriority();
         if (company != null && company.getDefaultPriority() != null) return company.getDefaultPriority();
         return OrderPriority.NORMAL;
     }
