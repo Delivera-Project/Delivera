@@ -175,7 +175,7 @@ onMounted(load)
 
     <!-- Gráfica + Ranking en dos columnas -->
     <div v-if="!loading" class="activity-content">
-      <div v-if="chartData" class="activity-chart-card">
+      <div v-if="chartData" class="surface-panel activity-chart-card">
         <h2>{{ t('activity.panel.chart.title') }}</h2>
         <div class="chart-wrapper">
           <Chart type="bar" :data="chartData" :options="chartOptions" />
@@ -183,7 +183,7 @@ onMounted(load)
         <p v-if="!chartData.labels.length" class="chart-empty">{{ t('activity.panel.chart.empty') }}</p>
       </div>
 
-      <div class="activity-ranking-card">
+      <div class="surface-panel activity-ranking-card">
         <h2>{{ t('activity.panel.ranking.title') }}</h2>
         <table v-if="unitRanking.length" class="ranking-table">
           <thead>

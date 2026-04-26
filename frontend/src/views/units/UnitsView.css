@@ -61,7 +61,7 @@
 .filter-select { width: 200px; }
 :deep(.p-tag) { white-space: nowrap; }
 .row-actions { display: flex; align-items: center; justify-content: center; gap: 2px; }
-.row-actions .action-btn { opacity: 0; }
+.row-actions .action-btn { opacity: 0; transition: opacity 0.15s; }
 :deep(tr:hover) .action-btn { opacity: 1; }
 
 /* list-header interno (override del global para este contexto) */

@@ -54,7 +54,7 @@ function copyPassword() {
 
 <template>
   <div class="invite-page">
-    <div class="invite-card">
+    <div class="surface-card invite-card">
       <template v-if="invited">
         <div class="success-icon"><i class="pi pi-check-circle" /></div>
         <h1 class="invite-title">{{ t('workers.invited') }}</h1>

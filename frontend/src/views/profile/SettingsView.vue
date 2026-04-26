@@ -467,7 +467,7 @@ async function copyHandle() {
 
 <template>
   <div class="settings-page">
-    <div class="settings-card">
+    <div class="surface-card settings-card">
       <h1 class="settings-title">{{ t('settings.title') }}</h1>
       <p class="settings-subtitle">{{ t('settings.subtitle') }}</p>
 

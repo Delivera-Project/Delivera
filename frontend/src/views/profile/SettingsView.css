@@ -4,13 +4,7 @@
   max-width: 100%;
 }
 
-.settings-card {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  padding: 32px;
-  box-shadow: 0 8px 32px rgba(12, 20, 69, 0.22), 0 2px 8px rgba(12, 20, 69, 0.12);
-}
+/* .settings-card hereda apariencia de .surface-card (main.css) */
 
 .settings-title { margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #1e293b; }
 .settings-subtitle { margin: 0 0 24px; font-size: 13px; color: #94a3b8; }
