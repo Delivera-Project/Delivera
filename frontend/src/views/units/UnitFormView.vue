@@ -25,6 +25,7 @@ const isEdit = computed(() => !!unitId.value)
 
 const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
 const priorityOptions = buildPriorityOptions(t)
+const priorityLockedByCompany = ref(false)
 const loadError = ref('')
 
 const mapEl = ref(null)
@@ -183,6 +184,14 @@ onMounted(async () => {
   // Iniciar mapa primero, luego cargar datos
   await new Promise(r => setTimeout(r, 50)) // aguardar el DOM
   initMap()
+  // Cargar lock de prioridad de la empresa para deshabilitar el campo si procede
+  try {
+    const sRes = await api.get('/settings')
+    if (sRes.ok) {
+      const s = await sRes.json()
+      priorityLockedByCompany.value = !!s.defaultPriorityLocked
+    }
+  } catch { /* opcional */ }
   await loadUnit(unitId.value)
 })
 
@@ -300,8 +309,11 @@ function handleSubmit() {
 
         <div class="form-field">
           <label for="unit-default-priority">{{ t('units.defaultPriority') }}</label>
-          <PSelect id="unit-default-priority" v-model="defaultPriority" :options="priorityOptions" option-label="label" option-value="value" show-clear fluid />
-          <small class="field-hint">{{ t('units.defaultPriorityHelp') }}</small>
+          <PSelect id="unit-default-priority" v-model="defaultPriority" :options="priorityOptions" option-label="label" option-value="value" :disabled="priorityLockedByCompany" show-clear fluid />
+          <small v-if="priorityLockedByCompany" class="field-hint" style="color:#b45309">
+            <i class="pi pi-lock" /> {{ t('units.defaultPriorityLockedByCompany') }}
+          </small>
+          <small v-else class="field-hint">{{ t('units.defaultPriorityHelp') }}</small>
         </div>
 
         <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>

@@ -117,6 +117,10 @@ class OrderServiceTest {
         // Unidad sin valor → cae en empresa
         u.setDefaultPriority(null);
         assertThat(OrderService.resolveDefaultPriority(null, u, c)).isEqualTo(OrderPriority.LOW);
+        // Empresa bloquea: ignora sobreescritura de unidad
+        u.setDefaultPriority(OrderPriority.HIGH);
+        c.setDefaultPriorityLocked(true);
+        assertThat(OrderService.resolveDefaultPriority(null, u, c)).isEqualTo(OrderPriority.LOW);
     }
 
     @Test

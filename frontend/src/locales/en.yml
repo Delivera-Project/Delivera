@@ -169,6 +169,7 @@ units:
   defaultPriorityHelp: If empty, the company default priority is used
   priorityOverridden: Overridden
   priorityInheritedFromCompany: Inherited from company
+  defaultPriorityLockedByCompany: Locked by the company administrator
   created: Unit created successfully
   updated: Unit updated successfully
   empty: No operational units yet. Create the first one to start managing shipments.
@@ -449,6 +450,8 @@ settings:
   apiKeysSection: API keys
   defaultPriority: Default priority
   defaultPriorityHelp: Applied to new orders when no priority is specified
+  defaultPriorityLock: Lock this setting for all units
+  defaultPriorityLockHelp: If enabled, units cannot override this priority
   currentPlan: Current plan
   availablePlans: Available plans
   selectPlan: Switch to this plan

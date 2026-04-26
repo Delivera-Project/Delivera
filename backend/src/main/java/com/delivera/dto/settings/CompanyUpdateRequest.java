@@ -11,5 +11,7 @@ public record CompanyUpdateRequest(
         @NotBlank @Size(max = 50)
         String activityType,
 
-        OrderPriority defaultPriority
+        OrderPriority defaultPriority,
+
+        boolean defaultPriorityLocked
 ) {}

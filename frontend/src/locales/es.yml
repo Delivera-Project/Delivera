@@ -169,6 +169,7 @@ units:
   defaultPriorityHelp: Si se deja vacío se usa la prioridad por defecto de la empresa
   priorityOverridden: Sobreescrita
   priorityInheritedFromCompany: Heredada de la empresa
+  defaultPriorityLockedByCompany: Bloqueado por el administrador de la empresa
   created: Unidad creada correctamente
   updated: Unidad actualizada correctamente
   empty: No hay unidades operativas. Crea la primera para poder gestionar envíos.
@@ -449,6 +450,8 @@ settings:
   apiKeysSection: API keys
   defaultPriority: Prioridad por defecto
   defaultPriorityHelp: Se aplica al crear pedidos cuando no se indica una prioridad
+  defaultPriorityLock: Bloquear esta configuración para todas las unidades
+  defaultPriorityLockHelp: Si está activado, las unidades no podrán sobreescribir esta prioridad
   currentPlan: Plan actual
   availablePlans: Planes disponibles
   selectPlan: Cambiar a este plan

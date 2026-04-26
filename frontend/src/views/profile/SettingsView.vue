@@ -10,6 +10,7 @@ import { buildPriorityOptions } from '@/composables/useOrderPriority'
 import { useAppConfig } from '@/composables/useAppConfig'
 import DeleteConfirmPanel from '@/components/DeleteConfirmPanel.vue'
 import ApiKeysSection from './ApiKeysSection.vue'
+import Checkbox from 'primevue/checkbox'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -38,6 +39,7 @@ const editingCompanyId = ref(null)
 const companyName = ref('')
 const activityType = ref(null)
 const defaultPriority = ref(null)
+const defaultPriorityLocked = ref(false)
 const companySaving = ref(false)
 const companyError = ref('')
 const companySuccess = ref(false)
@@ -327,6 +329,7 @@ function startEditCompany(company) {
   companyName.value = company.name
   activityType.value = company.activityType
   defaultPriority.value = company.defaultPriority || null
+  defaultPriorityLocked.value = !!company.defaultPriorityLocked
   companyError.value = ''
   companySuccess.value = false
 }
@@ -342,7 +345,7 @@ async function saveCompany() {
   companySaving.value = true
   companyError.value = ''
   try {
-    const res = await api.put('/settings/company', { name: companyName.value, activityType: activityType.value, defaultPriority: defaultPriority.value })
+    const res = await api.put('/settings/company', { name: companyName.value, activityType: activityType.value, defaultPriority: defaultPriority.value, defaultPriorityLocked: defaultPriorityLocked.value })
     if (res.ok) {
       const updated = await res.json()
       settings.value = updated
@@ -577,6 +580,13 @@ async function copyHandle() {
                         <label>{{ t('settings.defaultPriority') }}</label>
                         <PSelect v-model="defaultPriority" :options="defaultPriorityOptions" option-label="label" option-value="value" fluid show-clear />
                         <small class="field-help">{{ t('settings.defaultPriorityHelp') }}</small>
+                      </div>
+                      <div class="form-field">
+                        <label class="lock-checkbox">
+                          <Checkbox v-model="defaultPriorityLocked" :binary="true" />
+                          {{ t('settings.defaultPriorityLock') }}
+                        </label>
+                        <small class="field-help">{{ t('settings.defaultPriorityLockHelp') }}</small>
                       </div>
                       <PMessage v-if="companyError" severity="error" :closable="false" class="form-message">{{ companyError }}</PMessage>
                       <div class="form-actions">

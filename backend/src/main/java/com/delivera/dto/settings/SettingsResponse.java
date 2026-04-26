@@ -11,5 +11,6 @@ public record SettingsResponse(
         UUID companyId,
         String companyName,
         String activityType,
-        OrderPriority defaultPriority
+        OrderPriority defaultPriority,
+        boolean defaultPriorityLocked
 ) {}

@@ -42,6 +42,9 @@ public class Company {
     @Column(name = "default_priority", length = 10)
     private OrderPriority defaultPriority;
 
+    @Column(name = "default_priority_locked", nullable = false)
+    private boolean defaultPriorityLocked = false;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
 }
