@@ -18,6 +18,14 @@ describe('useCompanySettings.load', () => {
     expect(settings.value).toEqual({ defaultPriorityLocked: true })
   })
 
+  it('captura excepciones lanzadas durante el parseo y deja settings nulo', async () => {
+    mockGet.mockResolvedValue({ ok: true, json: async () => { throw new Error('parse') } })
+    const { settings, load } = useCompanySettings()
+    const result = await load()
+    expect(result).toBeNull()
+    expect(settings.value).toBeNull()
+  })
+
   it('mantiene settings nulo cuando la respuesta no es ok', async () => {
     mockGet.mockResolvedValue({ ok: false })
     const { settings, load } = useCompanySettings()

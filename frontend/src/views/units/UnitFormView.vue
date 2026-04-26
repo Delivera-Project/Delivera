@@ -24,7 +24,7 @@ const api = useApi()
 const unitId = computed(() => route.params.id || null)
 const isEdit = computed(() => !!unitId.value)
 
-const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
+const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit, loadFromUnit } = useUnitForm()
 const priorityOptions = buildPriorityOptions(t)
 const priorityLockedByCompany = ref(false)
 const { load: loadCompanySettings } = useCompanySettings()
@@ -159,12 +159,7 @@ async function loadUnit(id) {
     ])
     if (!unitRes.ok) { loadError.value = t('error.connection'); return }
     const unit = await unitRes.json()
-    name.value = unit.name
-    unitType.value = unit.type
-    address.value = unit.address || ''
-    latitude.value = unit.latitude ?? ''
-    longitude.value = unit.longitude ?? ''
-    defaultPriority.value = unit.defaultPriority || null
+    loadFromUnit(unit)
     if (ordersRes.ok) {
       const orders = await ordersRes.json()
       locationLocked.value = orders.some(o => o.originId === id || o.destinationId === id)
