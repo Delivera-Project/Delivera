@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useUnitForm } from '@/composables/useUnitForm'
 import { buildPriorityOptions } from '@/composables/useOrderPriority'
+import { useCompanySettings, canUnitOverridePriority } from '@/composables/useCompanySettings'
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION } from '@/constants/map'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -26,6 +27,7 @@ const isEdit = computed(() => !!unitId.value)
 const { name, unitType, address, latitude, longitude, defaultPriority, error, success, loading, errors, invalids, submitUnit } = useUnitForm()
 const priorityOptions = buildPriorityOptions(t)
 const priorityLockedByCompany = ref(false)
+const { load: loadCompanySettings } = useCompanySettings()
 const loadError = ref('')
 
 const mapEl = ref(null)
@@ -185,13 +187,8 @@ onMounted(async () => {
   await new Promise(r => setTimeout(r, 50)) // aguardar el DOM
   initMap()
   // Cargar lock de prioridad de la empresa para deshabilitar el campo si procede
-  try {
-    const sRes = await api.get('/settings')
-    if (sRes.ok) {
-      const s = await sRes.json()
-      priorityLockedByCompany.value = !!s.defaultPriorityLocked
-    }
-  } catch { /* opcional */ }
+  const s = await loadCompanySettings()
+  priorityLockedByCompany.value = !canUnitOverridePriority(s)
   await loadUnit(unitId.value)
 })
 
