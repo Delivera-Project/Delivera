@@ -21,6 +21,11 @@ import SelectButton from 'primevue/selectbutton'
 import Avatar from 'primevue/avatar'
 import Skeleton from 'primevue/skeleton'
 import Tooltip from 'primevue/tooltip'
+import Checkbox from 'primevue/checkbox'
+import InputNumber from 'primevue/inputnumber'
+import FileUpload from 'primevue/fileupload'
+import ConfirmationService from 'primevue/confirmationservice'
+import ConfirmDialog from 'primevue/confirmdialog'
 import 'primeicons/primeicons.css'
 
 import App from './App.vue'
@@ -63,6 +68,7 @@ app.use(PrimeVue, {
     options: { darkModeSelector: false },
   },
 })
+app.use(ConfirmationService)
 
 app.component('InputText', InputText)
 app.component('PInputText', InputText)
@@ -83,6 +89,10 @@ app.component('SelectButton', SelectButton)
 app.component('PAvatar', Avatar)
 app.component('PSkeleton', Skeleton)
 app.directive('tooltip', Tooltip)
+app.component('PCheckbox', Checkbox)
+app.component('PInputNumber', InputNumber)
+app.component('PFileUpload', FileUpload)
+app.component('PConfirmDialog', ConfirmDialog)
 app.component('EmptyState', EmptyState)
 app.component('TimelineList', TimelineList)
 

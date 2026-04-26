@@ -10,7 +10,6 @@ import { buildPriorityOptions } from '@/composables/useOrderPriority'
 import { useAppConfig } from '@/composables/useAppConfig'
 import DeleteConfirmPanel from '@/components/DeleteConfirmPanel.vue'
 import ApiKeysSection from './ApiKeysSection.vue'
-import Checkbox from 'primevue/checkbox'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -537,7 +536,7 @@ async function copyHandle() {
               <div class="company-filters">
                 <div class="company-search">
                   <span class="company-search-icon pi pi-search" />
-                  <input v-model="companySearch" class="company-search-input" :placeholder="t('settings.searchByName')" type="text" />
+                  <PInputText v-model="companySearch" class="company-search-input" :placeholder="t('settings.searchByName')" />
                 </div>
                 <PSelect
                   v-model="companyTypeFilter"
@@ -583,7 +582,7 @@ async function copyHandle() {
                       </div>
                       <div class="form-field">
                         <label class="lock-checkbox">
-                          <Checkbox v-model="defaultPriorityLocked" :binary="true" />
+                          <PCheckbox v-model="defaultPriorityLocked" :binary="true" />
                           {{ t('settings.defaultPriorityLock') }}
                         </label>
                         <small class="field-help">{{ t('settings.defaultPriorityLockHelp') }}</small>
@@ -609,12 +608,11 @@ async function copyHandle() {
                         </div>
                       </div>
                       <div class="company-item-meta" @click.stop>
-                        <button class="action-btn" :title="t('settings.editCompany')" @click="startEditCompany(c)">
-                          <i class="pi pi-pencil" />
-                        </button>
-                        <button v-if="allCompanies.length > 1" class="action-btn action-btn--danger" :title="t('common.delete')" @click="startDeleteCompany(c.id)">
-                          <i class="pi pi-times" />
-                        </button>
+                        <PButton icon="pi pi-pencil" text rounded size="small" :aria-label="t('settings.editCompany')"
+                                 v-tooltip.top="t('settings.editCompany')" @click="startEditCompany(c)" />
+                        <PButton v-if="allCompanies.length > 1" icon="pi pi-times" text rounded severity="danger" size="small"
+                                 :aria-label="t('common.delete')" v-tooltip.top="t('common.delete')"
+                                 @click="startDeleteCompany(c.id)" />
                       </div>
                     </div>
                     <Transition name="delete-panel">

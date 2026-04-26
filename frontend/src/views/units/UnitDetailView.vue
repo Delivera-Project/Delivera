@@ -147,9 +147,8 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
                 <span class="worker-email">{{ w.email }}</span>
               </span>
               <PTag :value="t('workers.roles.' + w.role)" severity="info" />
-              <button class="action-btn action-btn--danger" :title="t('common.delete')" @click="unassignWorker(w.id)">
-                <i class="pi pi-times" />
-              </button>
+              <PButton icon="pi pi-times" text rounded severity="danger" size="small" :aria-label="t('common.delete')"
+                       v-tooltip.top="t('common.delete')" @click="unassignWorker(w.id)" />
             </div>
           </div>
           <p v-else class="empty-workers">{{ t('units.noWorkers') }}</p>
