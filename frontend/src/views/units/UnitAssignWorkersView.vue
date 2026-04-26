@@ -47,7 +47,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="surface-card card-wide">
     <PButton type="button" text severity="secondary" icon="pi pi-arrow-left" class="detail-back-btn"
       @click="router.push(`/units/${route.params.id}`)" />
 

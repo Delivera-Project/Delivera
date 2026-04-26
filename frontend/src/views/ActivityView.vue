@@ -125,7 +125,7 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="card card-full activity-view">
+  <div class="surface-card card-full activity-view">
     <!-- Header -->
     <div class="activity-header">
       <div>
