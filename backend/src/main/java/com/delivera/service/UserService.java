@@ -23,6 +23,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private AppConfigService appConfigService;
+
     @Transactional(readOnly = true)
     public ProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
@@ -54,6 +57,7 @@ public class UserService {
 
     @Transactional
     public ProfileResponse updateAvatar(String email, String avatarData) {
+        appConfigService.checkUploadSize(avatarData);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
         user.setAvatarData(avatarData);

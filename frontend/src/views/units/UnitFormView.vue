@@ -232,6 +232,7 @@ function handleSubmit() {
             id="unit-name"
             v-model="name"
             :placeholder="t('fields.unitNamePlaceholder')"
+            maxlength="255"
             :invalid="!!invalids.name"
             fluid
           />
@@ -246,6 +247,7 @@ function handleSubmit() {
               v-model="address"
               :placeholder="t('fields.addressPlaceholder')"
               :disabled="locationLocked"
+              maxlength="500"
               fluid
               @keydown.enter.prevent="!locationLocked && geocodeAddress()"
             />

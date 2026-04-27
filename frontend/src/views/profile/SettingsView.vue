@@ -510,7 +510,7 @@ async function copyHandle() {
                 <p class="edit-form-title">{{ t('settings.editOrg') }}</p>
                 <div class="form-field">
                   <label>{{ t('fields.orgName') }}</label>
-                  <InputText v-model="orgName" :placeholder="t('fields.orgNamePlaceholder')" :invalid="!!invalids.orgName" fluid />
+                  <InputText v-model="orgName" :placeholder="t('fields.orgNamePlaceholder')" maxlength="255" :invalid="!!invalids.orgName" fluid />
                   <small v-if="vErrors.orgName" class="field-error">{{ vErrors.orgName }}</small>
                 </div>
                 <div class="form-field">
@@ -568,7 +568,7 @@ async function copyHandle() {
                       </div>
                       <div class="form-field">
                         <label>{{ t('fields.companyName') }}</label>
-                        <InputText v-model="companyName" :placeholder="t('fields.companyNamePlaceholder')" :invalid="!!invalids.companyName" fluid />
+                        <InputText v-model="companyName" :placeholder="t('fields.companyNamePlaceholder')" maxlength="255" :invalid="!!invalids.companyName" fluid />
                         <small v-if="vErrors.companyName" class="field-error">{{ vErrors.companyName }}</small>
                       </div>
                       <div class="form-field">
@@ -648,7 +648,7 @@ async function copyHandle() {
                 <div v-if="addingCompany" class="add-company-form">
                   <div class="form-field">
                     <label>{{ t('fields.companyName') }}</label>
-                    <InputText v-model="newCompanyName" :placeholder="t('fields.companyNamePlaceholder')" fluid />
+                    <InputText v-model="newCompanyName" :placeholder="t('fields.companyNamePlaceholder')" maxlength="255" fluid />
                   </div>
                   <div class="form-field">
                     <label>{{ t('fields.type') }}</label>

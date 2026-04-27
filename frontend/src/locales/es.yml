@@ -165,6 +165,7 @@ units:
   new: Nueva unidad
   edit: Editar unidad
   detail: Detalles de la unidad
+  notFound: Unidad no encontrada
   defaultPriority: Prioridad por defecto (sobreescribe la de la empresa)
   defaultPriorityHelp: Si se deja vacío se usa la prioridad por defecto de la empresa
   priorityOverridden: Sobreescrita
@@ -292,6 +293,7 @@ tracking:
 loyalUsers:
   title: Usuarios fidelizados
   new: Añadir fidelizado
+  notFound: Usuario fidelizado no encontrado
   empty: No hay usuarios fidelizados con pedidos todavía.
   email: Email
   registered: Registrado
@@ -413,6 +415,8 @@ error:
   CURRENT_PASSWORD_INVALID: La contraseña actual es incorrecta
   NEW_PASSWORD_SAME_AS_CURRENT: La nueva contraseña no puede ser igual a la actual
   VALIDATION_ERROR: Error de validación
+  INVALID_NUMBER_FORMAT: "Formato de número incorrecto. Usa el punto como separador decimal (ej. 40.4168)"
+  FILE_TOO_LARGE: La imagen supera el tamaño máximo permitido
   INTERNAL_ERROR: Error interno del servidor
   HANDLE_CONFLICT: Este código de organización ya está en uso
   handleInvalid: "Solo letras minúsculas, números y guiones (sin empezar ni terminar con guión)"
@@ -509,3 +513,4 @@ apiKeys:
   active: Activa
   revoked: Revocada
   revoke: Revocar
+  revokeConfirm: "¿Revocar esta API key? Las integraciones que la estén usando dejarán de funcionar."

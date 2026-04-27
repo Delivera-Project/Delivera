@@ -165,6 +165,7 @@ units:
   new: New unit
   edit: Edit unit
   detail: Unit details
+  notFound: Unit not found
   defaultPriority: Default priority (overrides company)
   defaultPriorityHelp: If empty, the company default priority is used
   priorityOverridden: Overridden
@@ -292,6 +293,7 @@ tracking:
 loyalUsers:
   title: Loyal users
   new: Add loyal user
+  notFound: Loyal user not found
   empty: No loyal users with orders yet.
   email: Email
   registered: Registered
@@ -413,6 +415,8 @@ error:
   CURRENT_PASSWORD_INVALID: Current password is incorrect
   NEW_PASSWORD_SAME_AS_CURRENT: New password cannot be the same as the current one
   VALIDATION_ERROR: Validation error
+  INVALID_NUMBER_FORMAT: "Invalid number format. Use a dot as the decimal separator (e.g. 40.4168)"
+  FILE_TOO_LARGE: The image exceeds the maximum allowed size
   INTERNAL_ERROR: Internal server error
   HANDLE_CONFLICT: This organization code is already in use
   handleInvalid: "Only lowercase letters, numbers and hyphens (cannot start or end with a hyphen)"
@@ -509,3 +513,4 @@ apiKeys:
   active: Active
   revoked: Revoked
   revoke: Revoke
+  revokeConfirm: Revoke this API key? Any integrations using it will stop working.

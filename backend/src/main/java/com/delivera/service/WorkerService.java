@@ -55,7 +55,7 @@ public class WorkerService {
         subscriptionService.checkWorkerLimit(companyId);
 
         String email = req.email().toLowerCase().trim();
-        WorkerRole role = WorkerRole.valueOf(req.role());
+        WorkerRole role = req.role();
 
         if (workerRepository.findByUserEmailAndCompanyId(email, companyId).isPresent()) {
             throw new WorkerAlreadyExistsException();
@@ -95,7 +95,7 @@ public class WorkerService {
         Worker worker = workerRepository.findByIdAndCompanyId(workerId, companyId)
                 .orElseThrow(WorkerNotFoundException::new);
 
-        WorkerRole newRole = WorkerRole.valueOf(req.role());
+        WorkerRole newRole = req.role();
 
         if (worker.getRole() == WorkerRole.COMPANY_ADMIN && newRole != WorkerRole.COMPANY_ADMIN) {
             if (workerRepository.countByCompanyIdAndRole(companyId, WorkerRole.COMPANY_ADMIN) <= 1) {

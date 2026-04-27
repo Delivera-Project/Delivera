@@ -71,7 +71,7 @@ class WorkerServiceTest {
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
         when(workerRepository.save(any())).thenReturn(worker);
 
-        WorkerResponse response = workerService.invite(new WorkerInviteRequest("worker@test.com", "OPERATOR"));
+        WorkerResponse response = workerService.invite(new WorkerInviteRequest("worker@test.com", WorkerRole.OPERATOR));
 
         assertThat(response.email()).isEqualTo("worker@test.com");
         assertThat(response.tempPassword()).isNull();
@@ -98,7 +98,7 @@ class WorkerServiceTest {
 
         when(workerRepository.save(any())).thenReturn(savedWorker);
 
-        WorkerResponse response = workerService.invite(new WorkerInviteRequest("new@test.com", "ANALYST"));
+        WorkerResponse response = workerService.invite(new WorkerInviteRequest("new@test.com", WorkerRole.ANALYST));
 
         assertThat(response.tempPassword()).isNotNull();
         verify(userRepository).save(any(User.class));
@@ -108,7 +108,7 @@ class WorkerServiceTest {
     void invite_alreadyWorker_throwsException() {
         when(workerRepository.findByUserEmailAndCompanyId("worker@test.com", companyId)).thenReturn(Optional.of(worker));
 
-        assertThatThrownBy(() -> workerService.invite(new WorkerInviteRequest("worker@test.com", "OPERATOR")))
+        assertThatThrownBy(() -> workerService.invite(new WorkerInviteRequest("worker@test.com", WorkerRole.OPERATOR)))
                 .isInstanceOf(WorkerAlreadyExistsException.class);
     }
 
@@ -118,7 +118,7 @@ class WorkerServiceTest {
         when(workerRepository.findByIdAndCompanyId(workerId, companyId)).thenReturn(Optional.of(worker));
         when(workerRepository.save(any())).thenReturn(worker);
 
-        WorkerResponse response = workerService.changeRole(workerId, new ChangeRoleRequest("ANALYST"));
+        WorkerResponse response = workerService.changeRole(workerId, new ChangeRoleRequest(WorkerRole.ANALYST));
 
         assertThat(response).isNotNull();
         verify(workerRepository).save(worker);
@@ -131,7 +131,7 @@ class WorkerServiceTest {
         when(workerRepository.findByIdAndCompanyId(workerId, companyId)).thenReturn(Optional.of(worker));
         when(workerRepository.countByCompanyIdAndRole(companyId, WorkerRole.COMPANY_ADMIN)).thenReturn(1L);
 
-        assertThatThrownBy(() -> workerService.changeRole(workerId, new ChangeRoleRequest("ANALYST")))
+        assertThatThrownBy(() -> workerService.changeRole(workerId, new ChangeRoleRequest(WorkerRole.ANALYST)))
                 .isInstanceOf(LastAdminException.class);
     }
 
@@ -169,7 +169,7 @@ class WorkerServiceTest {
     void invite_existingLoyalUser_throws() {
         when(workerRepository.findByUserEmailAndCompanyId("worker@test.com", companyId)).thenReturn(Optional.empty());
         when(loyalUserRepository.findByEmail("worker@test.com")).thenReturn(List.of(new LoyalUser()));
-        assertThatThrownBy(() -> workerService.invite(new WorkerInviteRequest("worker@test.com", "OPERATOR")))
+        assertThatThrownBy(() -> workerService.invite(new WorkerInviteRequest("worker@test.com", WorkerRole.OPERATOR)))
                 .isInstanceOf(LoyalUserCannotBeWorkerException.class);
     }
 

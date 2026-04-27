@@ -43,6 +43,7 @@ async function load() {
   try {
     const res = await api.get(`/units/${route.params.id}`)
     if (res.ok) unit.value = await res.json()
+    else if (res.status === 404 || res.status === 400) error.value = t('units.notFound')
     else error.value = t('error.connection')
   } catch {
     error.value = t('error.connection')

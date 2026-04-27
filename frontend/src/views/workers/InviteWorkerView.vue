@@ -90,7 +90,7 @@ function copyPassword() {
         <div class="invite-form">
           <div class="form-field">
             <label>{{ t('workers.email') }}</label>
-            <InputText v-model="email" type="email" :placeholder="t('fields.emailPlaceholder')" :invalid="!!error && !email.trim()" @input="error = ''" fluid />
+            <InputText v-model="email" type="email" :placeholder="t('fields.emailPlaceholder')" maxlength="255" :invalid="!!error && !email.trim()" @input="error = ''" fluid />
           </div>
           <div class="form-field">
             <label>{{ t('workers.role') }}</label>

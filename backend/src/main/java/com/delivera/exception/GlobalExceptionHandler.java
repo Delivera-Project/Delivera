@@ -44,7 +44,8 @@ public class GlobalExceptionHandler {
         Map.entry(LoyalUserCannotBeWorkerException.class,   new Mapping(CONFLICT,             "LOYAL_USER_CANNOT_BE_WORKER")),
         Map.entry(MissingRecipientAddressException.class, new Mapping(UNPROCESSABLE_ENTITY, "MISSING_RECIPIENT_ADDRESS")),
         Map.entry(RateLimitExceededException.class,       new Mapping(TOO_MANY_REQUESTS,    "RATE_LIMIT_EXCEEDED")),
-        Map.entry(ApiKeyNotFoundException.class,          new Mapping(NOT_FOUND,            "API_KEY_NOT_FOUND"))
+        Map.entry(ApiKeyNotFoundException.class,          new Mapping(NOT_FOUND,            "API_KEY_NOT_FOUND")),
+        Map.entry(FileTooLargeException.class,            new Mapping(PAYLOAD_TOO_LARGE,    "FILE_TOO_LARGE"))
     );
 
     @ExceptionHandler(RuntimeException.class)
@@ -134,7 +135,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMalformedJson(org.springframework.http.converter.HttpMessageNotReadableException ex) {
-        log.warn("Malformed request body: {}", ex.getMostSpecificCause().getMessage());
+        Throwable cause = ex.getMostSpecificCause();
+        log.warn("Malformed request body: {}", cause.getMessage());
+        // Diferenciar errores de tipo numérico — típicos por usar coma decimal en vez de punto.
+        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException ife
+                && ife.getTargetType() != null
+                && Number.class.isAssignableFrom(ife.getTargetType())) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("INVALID_NUMBER_FORMAT"));
+        }
         return ResponseEntity.badRequest().body(new ErrorResponse("MALFORMED_REQUEST"));
     }
 
