@@ -51,6 +51,8 @@ class SettingsServiceTest {
     private SecurityUtils securityUtils;
     @Mock
     private SubscriptionService subscriptionService;
+    @Mock
+    private AppConfigService appConfigService;
     @InjectMocks
     private SettingsService settingsService;
 
