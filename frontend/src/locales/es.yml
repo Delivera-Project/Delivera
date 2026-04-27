@@ -165,6 +165,7 @@ units:
   new: Nueva unidad
   edit: Editar unidad
   detail: Detalles de la unidad
+  notFound: Unidad no encontrada
   defaultPriority: Prioridad por defecto (sobreescribe la de la empresa)
   defaultPriorityHelp: Si se deja vacío se usa la prioridad por defecto de la empresa
   priorityOverridden: Sobreescrita
@@ -292,6 +293,7 @@ tracking:
 loyalUsers:
   title: Usuarios fidelizados
   new: Añadir fidelizado
+  notFound: Usuario fidelizado no encontrado
   empty: No hay usuarios fidelizados con pedidos todavía.
   email: Email
   registered: Registrado

@@ -81,6 +81,10 @@ onMounted(async () => {
       const list = await luRes.json()
       loyalUser.value = list.find(l => l.id === route.params.id) || null
     }
+    // Si no encontramos el fidelizado mostrar error en lugar de la ficha vacía
+    if (!loyalUser.value) {
+      error.value = t('loyalUsers.notFound')
+    }
   } catch {
     error.value = t('error.connection')
   } finally {
