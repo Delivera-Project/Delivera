@@ -44,6 +44,8 @@ public class SettingsService {
     private SecurityUtils securityUtils;
     @Autowired
     private SubscriptionService subscriptionService;
+    @Autowired
+    private AppConfigService appConfigService;
 
     private Company currentCompany() {
         return companyRepository.findById(securityUtils.getCurrentCompanyId())
@@ -139,6 +141,7 @@ public class SettingsService {
 
     @Transactional
     public CompanySummary updateCompanyLogo(String logoData) {
+        appConfigService.checkUploadSize(logoData);
         Company c = currentCompany();
         c.setLogoData(logoData);
         companyRepository.save(c);

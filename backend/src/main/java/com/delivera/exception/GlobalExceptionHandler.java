@@ -44,7 +44,8 @@ public class GlobalExceptionHandler {
         Map.entry(LoyalUserCannotBeWorkerException.class,   new Mapping(CONFLICT,             "LOYAL_USER_CANNOT_BE_WORKER")),
         Map.entry(MissingRecipientAddressException.class, new Mapping(UNPROCESSABLE_ENTITY, "MISSING_RECIPIENT_ADDRESS")),
         Map.entry(RateLimitExceededException.class,       new Mapping(TOO_MANY_REQUESTS,    "RATE_LIMIT_EXCEEDED")),
-        Map.entry(ApiKeyNotFoundException.class,          new Mapping(NOT_FOUND,            "API_KEY_NOT_FOUND"))
+        Map.entry(ApiKeyNotFoundException.class,          new Mapping(NOT_FOUND,            "API_KEY_NOT_FOUND")),
+        Map.entry(FileTooLargeException.class,            new Mapping(PAYLOAD_TOO_LARGE,    "FILE_TOO_LARGE"))
     );
 
     @ExceptionHandler(RuntimeException.class)
