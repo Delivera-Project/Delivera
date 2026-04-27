@@ -4,6 +4,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
 import { useApi } from '@/composables/useApi'
+import { buildDeleteConfirmOptions } from '@/composables/useConfirmDelete'
 import { useAuthStore } from '@/stores/auth'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useFormatDate } from '@/composables/useFormatDate'
@@ -218,18 +219,10 @@ onUnmounted(() => clearTimeout(filterDebounce))
 
 async function deleteOrder(e, id) {
   e.stopPropagation()
-  confirm.require({
-    message: t('orders.deleteConfirm'),
-    header: t('common.delete'),
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: t('common.delete'),
-    rejectLabel: t('common.cancel'),
-    acceptProps: { severity: 'danger' },
-    accept: async () => {
-      const res = await api.del(`/orders/${id}`)
-      if (res.ok) orders.value = orders.value.filter(o => o.id !== id)
-    },
-  })
+  confirm.require(buildDeleteConfirmOptions(t, t('orders.deleteConfirm'), async () => {
+    const res = await api.del(`/orders/${id}`)
+    if (res.ok) orders.value = orders.value.filter(o => o.id !== id)
+  }))
 }
 
 onMounted(async () => {

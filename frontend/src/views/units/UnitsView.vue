@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
 import { useApi } from '@/composables/useApi'
+import { buildDeleteConfirmOptions } from '@/composables/useConfirmDelete'
 import { useAuthStore } from '@/stores/auth'
 import { useResourceList } from '@/composables/useResourceList'
 import EmptyState from '@/components/EmptyState.vue'
@@ -84,24 +85,16 @@ watch(filtered, () => { if (map) updateMapMarkers() })
 async function deleteUnit(e, id) {
   e.stopPropagation()
   deleteError.value = ''
-  confirm.require({
-    message: t('units.deleteConfirm'),
-    header: t('common.delete'),
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: t('common.delete'),
-    rejectLabel: t('common.cancel'),
-    acceptProps: { severity: 'danger' },
-    accept: async () => {
-      const res = await api.del(`/units/${id}`)
-      if (res.ok) {
-        units.value = units.value.filter(u => u.id !== id)
-      } else {
-        deleteError.value = res.status === 409
-          ? t('units.deleteActiveOrders')
-          : t('error.connection')
-      }
-    },
-  })
+  confirm.require(buildDeleteConfirmOptions(t, t('units.deleteConfirm'), async () => {
+    const res = await api.del(`/units/${id}`)
+    if (res.ok) {
+      units.value = units.value.filter(u => u.id !== id)
+    } else {
+      deleteError.value = res.status === 409
+        ? t('units.deleteActiveOrders')
+        : t('error.connection')
+    }
+  }))
 }
 
 onMounted(async () => {
