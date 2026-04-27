@@ -511,3 +511,4 @@ apiKeys:
   active: Activa
   revoked: Revocada
   revoke: Revocar
+  revokeConfirm: "¿Revocar esta API key? Las integraciones que la estén usando dejarán de funcionar."

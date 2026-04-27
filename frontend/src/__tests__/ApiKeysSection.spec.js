@@ -97,11 +97,26 @@ describe('ApiKeysSection', () => {
       { id: 'k', name: 'k1', prefix: 'dlv_a', createdAt: '2026-01-01' },
     ] })
     mockDel.mockResolvedValueOnce({ ok: true })
+    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
     const w = makeWrapper()
     await flushPromises()
 
     await w.vm.revoke('k')
     expect(mockDel).toHaveBeenCalledWith('/settings/api-keys/k')
+    confirmSpy.mockRestore()
+  })
+
+  it('does not revoke if confirm is cancelled', async () => {
+    mockGet.mockResolvedValueOnce({ ok: true, json: async () => [
+      { id: 'k', name: 'k1', prefix: 'dlv_a', createdAt: '2026-01-01' },
+    ] })
+    const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(false)
+    const w = makeWrapper()
+    await flushPromises()
+
+    await w.vm.revoke('k')
+    expect(mockDel).not.toHaveBeenCalled()
+    confirmSpy.mockRestore()
   })
 
   it('copies token to clipboard', async () => {

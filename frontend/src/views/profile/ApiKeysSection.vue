@@ -84,6 +84,8 @@ function dismissCreated() {
 }
 
 async function revoke(id) {
+  // Evita revocar accidentalmente la clave en uso por una integración activa.
+  if (!globalThis.confirm(t('apiKeys.revokeConfirm'))) return
   revokingId.value = id
   revokeError.value = ''
   try {

@@ -511,3 +511,4 @@ apiKeys:
   active: Active
   revoked: Revoked
   revoke: Revoke
+  revokeConfirm: Revoke this API key? Any integrations using it will stop working.
