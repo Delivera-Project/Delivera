@@ -73,4 +73,23 @@ class AppConfigServiceTest {
         assertThatThrownBy(() -> appConfigService.validateTransition("UNKNOWN", "ANY"))
                 .isInstanceOf(InvalidStatusTransitionException.class);
     }
+
+    @Test
+    void getFileMaxUploadBytes_returnsConfiguredValue() {
+        assertThat(appConfigService.getFileMaxUploadBytes()).isEqualTo(2097152L);
+    }
+
+    @Test
+    void checkUploadSize_acceptsNullAndSmallPayload() {
+        appConfigService.checkUploadSize(null);
+        appConfigService.checkUploadSize("data:image/png;base64,YWJj"); // ~3 bytes
+    }
+
+    @Test
+    void checkUploadSize_throwsWhenExceedsLimit() {
+        // 3 MB de base64 ≈ 2.25 MB binarios → debe superar el límite de 2 MB
+        String payload = "x".repeat(3 * 1024 * 1024);
+        assertThatThrownBy(() -> appConfigService.checkUploadSize(payload))
+                .isInstanceOf(com.delivera.exception.FileTooLargeException.class);
+    }
 }
