@@ -66,6 +66,9 @@ async function initOrderMap() {
   const originLon = parseFloat(o.originLon)
 
   map = createMap(mapEl.value)
+  // Forzar a Leaflet a recalcular el tamaño antes de añadir capas: el panel
+  // del grid puede haberse mostrado tras el v-if y aún tener dimensiones cero.
+  map.invalidateSize()
 
   const bounds = [[originLat, originLon]]
   const ownOrigin = o.originCompanyId && auth.companyId && o.originCompanyId === auth.companyId
@@ -108,7 +111,7 @@ async function initOrderMap() {
       currentLocation: currentLocationOf(o),
     })
     if (entry && !entry.solid) routeFailed.value = true
-    entry?.layer?.bringToFront?.()
+    try { entry?.layer?.bringToFront?.() } catch { /* layer aún sin parentNode si el panel no tiene tamaño todavía */ }
   }
 
   fitBounds(map, bounds)
