@@ -2,7 +2,9 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from 'primevue/useconfirm'
 import { useApi } from '@/composables/useApi'
+import { buildDeleteConfirmOptions } from '@/composables/useConfirmDelete'
 import { useAuthStore } from '@/stores/auth'
 import { useResourceList } from '@/composables/useResourceList'
 import EmptyState from '@/components/EmptyState.vue'
@@ -13,6 +15,7 @@ import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION } from '@/constants/map'
 const { t } = useI18n()
 const router = useRouter()
 const api = useApi()
+const confirm = useConfirm()
 const auth = useAuthStore()
 const { items: units, loading, error } = useResourceList('/units')
 
@@ -82,15 +85,16 @@ watch(filtered, () => { if (map) updateMapMarkers() })
 async function deleteUnit(e, id) {
   e.stopPropagation()
   deleteError.value = ''
-  if (!confirm(t('units.deleteConfirm'))) return
-  const res = await api.del(`/units/${id}`)
-  if (res.ok) {
-    units.value = units.value.filter(u => u.id !== id)
-  } else {
-    deleteError.value = res.status === 409
-      ? t('units.deleteActiveOrders')
-      : t('error.connection')
-  }
+  confirm.require(buildDeleteConfirmOptions(t, t('units.deleteConfirm'), async () => {
+    const res = await api.del(`/units/${id}`)
+    if (res.ok) {
+      units.value = units.value.filter(u => u.id !== id)
+    } else {
+      deleteError.value = res.status === 409
+        ? t('units.deleteActiveOrders')
+        : t('error.connection')
+    }
+  }))
 }
 
 onMounted(async () => {
@@ -185,12 +189,12 @@ watch(units, async () => {
           <Column v-if="auth.isCompanyAdmin" style="width:80px;padding:0">
             <template #body="{ data }">
               <div class="row-actions">
-                <button class="action-btn" @click.stop="router.push(`/units/${data.id}/edit`)" :title="t('units.edit')">
-                  <i class="pi pi-pencil" />
-                </button>
-                <button class="action-btn action-btn--danger" @click="deleteUnit($event, data.id)" :title="t('common.delete')">
-                  <i class="pi pi-times" />
-                </button>
+                <PButton icon="pi pi-pencil" text rounded size="small" :aria-label="t('units.edit')"
+                         v-tooltip.top="t('units.edit')"
+                         @click.stop="router.push(`/units/${data.id}/edit`)" />
+                <PButton icon="pi pi-times" text rounded severity="danger" size="small" :aria-label="t('common.delete')"
+                         v-tooltip.top="t('common.delete')"
+                         @click="deleteUnit($event, data.id)" />
               </div>
             </template>
           </Column>

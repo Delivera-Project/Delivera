@@ -2,5 +2,5 @@
 
 <template>
   <router-view />
+  <PConfirmDialog />
 </template>
-

@@ -2,7 +2,9 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useConfirm } from 'primevue/useconfirm'
 import { useApi } from '@/composables/useApi'
+import { buildDeleteConfirmOptions } from '@/composables/useConfirmDelete'
 import { useAuthStore } from '@/stores/auth'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useFormatDate } from '@/composables/useFormatDate'
@@ -20,6 +22,7 @@ const { formatDate } = useFormatDate()
 const router = useRouter()
 const route = useRoute()
 const api = useApi()
+const confirm = useConfirm()
 const auth = useAuthStore()
 const { load: loadConfig, statusSeverity } = useAppConfig()
 const { items: orders, loading, error } = useResourceList('/orders')
@@ -216,9 +219,10 @@ onUnmounted(() => clearTimeout(filterDebounce))
 
 async function deleteOrder(e, id) {
   e.stopPropagation()
-  if (!confirm(t('orders.deleteConfirm'))) return
-  const res = await api.del(`/orders/${id}`)
-  if (res.ok) orders.value = orders.value.filter(o => o.id !== id)
+  confirm.require(buildDeleteConfirmOptions(t, t('orders.deleteConfirm'), async () => {
+    const res = await api.del(`/orders/${id}`)
+    if (res.ok) orders.value = orders.value.filter(o => o.id !== id)
+  }))
 }
 
 onMounted(async () => {
@@ -332,9 +336,9 @@ watch(orders, async () => {
           </Column>
           <Column v-if="auth.isCompanyAdmin" style="width:48px;padding:0">
             <template #body="{ data }">
-              <button class="delete-btn" @click="deleteOrder($event, data.id)" :title="t('common.delete')">
-                <i class="pi pi-times" />
-              </button>
+              <PButton icon="pi pi-times" severity="danger" text rounded size="small" class="delete-btn"
+                       :aria-label="t('common.delete')" v-tooltip.top="t('common.delete')"
+                       @click="deleteOrder($event, data.id)" />
             </template>
           </Column>
         </DataTable>

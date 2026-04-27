@@ -378,6 +378,7 @@ admin:
 common:
   back: Back
   next: Next
+  previous: Previous
   loading: Loading...
   save: Save
   cancel: Cancel

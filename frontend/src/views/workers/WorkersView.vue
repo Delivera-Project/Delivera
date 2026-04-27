@@ -146,18 +146,18 @@ onMounted(load)
 
       <div class="search-bar">
         <span class="search-icon pi pi-search" />
-        <input v-model="filterText" class="search-input" :placeholder="t('workers.searchPlaceholder')" type="text" />
+        <PInputText v-model="filterText" class="search-input" :placeholder="t('workers.searchPlaceholder')" />
       </div>
 
       <div class="filter-bar">
-        <button :class="['role-filter-btn', { active: filterRole === null }]" @click="filterRole = null">
-          {{ t('workers.filterAll') }}
-        </button>
-        <button
-          v-for="r in ROLES" :key="r"
-          :class="['role-filter-btn', { active: filterRole === r }]"
-          @click="filterRole = filterRole === r ? null : r"
-        >{{ t('workers.roles.' + r) }}</button>
+        <PButton :label="t('workers.filterAll')" size="small"
+                 :severity="filterRole === null ? 'primary' : 'secondary'"
+                 :outlined="filterRole !== null"
+                 @click="filterRole = null" />
+        <PButton v-for="r in ROLES" :key="r" :label="t('workers.roles.' + r)" size="small"
+                 :severity="filterRole === r ? 'primary' : 'secondary'"
+                 :outlined="filterRole !== r"
+                 @click="filterRole = filterRole === r ? null : r" />
       </div>
 
       <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
@@ -209,25 +209,22 @@ onMounted(load)
               </template>
             </div>
             <div v-if="changingRoleId !== data.id" class="worker-actions">
-              <button class="worker-action-btn" @click.stop="startChangeRole(data)" :title="t('workers.changeRole')">
-                <i class="pi pi-pencil" />
-              </button>
-              <button v-if="data.email !== auth.user?.email" class="worker-action-btn worker-action-btn--danger" @click.stop="changingRoleId = null; removingId = data.id; removeError = ''" :title="t('workers.confirmRemove')">
-                <i class="pi pi-times" />
-              </button>
+              <PButton icon="pi pi-pencil" text rounded size="small" :aria-label="t('workers.changeRole')"
+                       v-tooltip.top="t('workers.changeRole')" @click.stop="startChangeRole(data)" />
+              <PButton v-if="data.email !== auth.user?.email" icon="pi pi-times" text rounded severity="danger" size="small"
+                       :aria-label="t('workers.confirmRemove')" v-tooltip.top="t('workers.confirmRemove')"
+                       @click.stop="changingRoleId = null; removingId = data.id; removeError = ''" />
             </div>
           </template>
         </div>
       </div>
 
       <div v-if="totalPages > 1" class="pagination">
-        <button class="page-btn" :disabled="currentPage === 1" @click="currentPage--">
-          <i class="pi pi-chevron-left" />
-        </button>
+        <PButton icon="pi pi-chevron-left" text rounded :disabled="currentPage === 1"
+                 :aria-label="t('common.previous')" @click="currentPage--" />
         <span class="page-info">{{ currentPage }} / {{ totalPages }}</span>
-        <button class="page-btn" :disabled="currentPage === totalPages" @click="currentPage++">
-          <i class="pi pi-chevron-right" />
-        </button>
+        <PButton icon="pi pi-chevron-right" text rounded :disabled="currentPage === totalPages"
+                 :aria-label="t('common.next')" @click="currentPage++" />
       </div>
 
       <div v-else-if="!loading && !filtered.length" class="workers-empty">
