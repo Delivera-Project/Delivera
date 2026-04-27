@@ -49,11 +49,9 @@
 .chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
 .chat-textarea { flex: 1; }
 
+/* .order-detail-page hereda apariencia de .surface-card; overrides locales */
 .order-detail-page {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 0;
   overflow: hidden;
 }
 

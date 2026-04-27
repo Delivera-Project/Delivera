@@ -288,7 +288,7 @@ onUnmounted(() => {
     <!-- Gráfica + Mapa en dos columnas -->
     <div v-if="!loadingStats && (isAdmin || isAnalyst)" class="home-content">
       <!-- Gráfica pedidos por día -->
-      <div class="home-card">
+      <div class="surface-panel home-card">
         <h2>{{ t('home.ordersChart') }}</h2>
         <div v-if="chartData" class="chart-wrapper">
           <Chart type="bar" :data="chartData" :options="chartOptions" />
@@ -297,7 +297,7 @@ onUnmounted(() => {
       </div>
 
       <!-- Mapa unidades -->
-      <div class="home-card">
+      <div class="surface-panel home-card">
         <h2>{{ t('home.unitsMap') }}</h2>
         <div ref="mapEl" class="home-map" />
         <p v-if="!loadingStats && units.length === 0" class="map-hint">{{ t('units.noCoords') }}</p>

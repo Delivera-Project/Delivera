@@ -113,7 +113,7 @@ watch(units, async () => {
 </script>
 
 <template>
-  <div class="units-page card-full">
+  <div class="surface-card units-page card-full">
     <!-- Split layout -->
     <div class="units-split">
       <!-- Panel izquierdo: filtros + lista -->
@@ -189,10 +189,10 @@ watch(units, async () => {
           <Column v-if="auth.isCompanyAdmin" style="width:80px;padding:0">
             <template #body="{ data }">
               <div class="row-actions">
-                <PButton icon="pi pi-pencil" text rounded size="small" :aria-label="t('units.edit')"
+                <PButton icon="pi pi-pencil" text rounded size="small" class="action-btn" :aria-label="t('units.edit')"
                          v-tooltip.top="t('units.edit')"
                          @click.stop="router.push(`/units/${data.id}/edit`)" />
-                <PButton icon="pi pi-times" text rounded severity="danger" size="small" :aria-label="t('common.delete')"
+                <PButton icon="pi pi-times" text rounded severity="danger" size="small" class="action-btn" :aria-label="t('common.delete')"
                          v-tooltip.top="t('common.delete')"
                          @click="deleteUnit($event, data.id)" />
               </div>

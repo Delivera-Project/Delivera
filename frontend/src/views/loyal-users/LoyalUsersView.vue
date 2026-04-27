@@ -45,7 +45,7 @@ async function addLoyalUser() {
 </script>
 
 <template>
-  <div class="card card-full">
+  <div class="surface-card card-full">
     <div class="list-header">
       <h1>{{ t('loyalUsers.title') }}</h1>
       <PButton :label="t('loyalUsers.new')" icon="pi pi-plus" @click="showAdd = !showAdd; addError = ''" />

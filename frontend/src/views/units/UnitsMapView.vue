@@ -69,7 +69,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="surface-card card-wide">
     <div class="list-header">
       <h1>{{ t('units.mapTitle') }}</h1>
       <PButton

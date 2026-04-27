@@ -100,12 +100,9 @@
   .activity-content { grid-template-columns: 1fr; }
 }
 
+/* .activity-chart-card y .activity-ranking-card heredan de .surface-panel; overrides locales */
 .activity-chart-card,
 .activity-ranking-card {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;

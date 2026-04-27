@@ -241,7 +241,7 @@ watch(orders, async () => {
 </script>
 
 <template>
-  <div class="orders-page card-full">
+  <div class="surface-card orders-page card-full">
     <div class="orders-split">
       <!-- Panel izquierdo: lista -->
       <div class="orders-list-panel">

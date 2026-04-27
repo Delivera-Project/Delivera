@@ -90,7 +90,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="surface-card card-wide">
     <PButton
       type="button"
       text

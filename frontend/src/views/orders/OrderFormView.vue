@@ -29,7 +29,7 @@ const priorityOptions = computed(() => [
 </script>
 
 <template>
-  <form class="card card-wide" @submit.prevent="handleSubmit">
+  <form class="surface-card card-wide" @submit.prevent="handleSubmit">
     <PButton
       type="button"
       text

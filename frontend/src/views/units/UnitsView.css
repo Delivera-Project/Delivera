@@ -1,8 +1,6 @@
+/* .units-page hereda apariencia de .surface-card; overrides locales */
 .units-page {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 0;
   overflow: hidden;
 }
 
@@ -61,7 +59,7 @@
 .filter-select { width: 200px; }
 :deep(.p-tag) { white-space: nowrap; }
 .row-actions { display: flex; align-items: center; justify-content: center; gap: 2px; }
-.row-actions .action-btn { opacity: 0; }
+.row-actions .action-btn { opacity: 0; transition: opacity 0.15s; }
 :deep(tr:hover) .action-btn { opacity: 1; }
 
 /* list-header interno (override del global para este contexto) */

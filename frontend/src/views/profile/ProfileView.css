@@ -4,11 +4,10 @@
   padding: 16px 0;
 }
 
+/* .profile-card hereda apariencia de .surface-card (main.css); solo overrides locales */
 .profile-card {
   width: 100%;
   text-align: left;
-  box-sizing: border-box;
-  padding: 24px;
 }
 
 /* Cabecera */

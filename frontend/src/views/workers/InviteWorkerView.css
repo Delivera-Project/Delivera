@@ -3,12 +3,7 @@
   max-width: 100%;
 }
 
-.invite-card {
-  background: #fff;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  padding: 32px;
-}
+/* .invite-card hereda apariencia de .surface-card (main.css) */
 
 .invite-title { margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #1e293b; }
 .invite-subtitle { margin: 0 0 28px; font-size: 13px; color: #94a3b8; }

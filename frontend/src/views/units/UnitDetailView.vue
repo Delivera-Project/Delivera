@@ -70,7 +70,7 @@ onUnmounted(() => { if (map) { map.remove(); map = null } })
 </script>
 
 <template>
-  <div class="unit-detail-page card-full">
+  <div class="surface-card unit-detail-page card-full">
     <div v-if="loading" class="loading-state" style="padding:48px;text-align:center">
       <i class="pi pi-spin pi-spinner" style="font-size:24px" />
     </div>

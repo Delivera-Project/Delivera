@@ -127,7 +127,7 @@ onMounted(load)
 
 <template>
   <div class="workers-page">
-    <div class="workers-card">
+    <div class="surface-card workers-card">
       <div class="workers-header">
         <div>
           <h1 class="workers-title">{{ t('workers.title') }}</h1>

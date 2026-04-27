@@ -349,7 +349,7 @@ onMounted(() => { fetchProfile(); loadAppConfig() })
 <template>
   <div class="profile-page">
     <!-- Skeleton -->
-    <div v-if="!profile" class="card profile-card">
+    <div v-if="!profile" class="surface-card profile-card">
       <PSkeleton width="7rem" height="1.4rem" border-radius="8px" class="mb-4" style="margin-inline:auto" />
       <div class="profile-header">
         <PSkeleton shape="circle" size="3.25rem" />
@@ -366,7 +366,7 @@ onMounted(() => { fetchProfile(); loadAppConfig() })
       </div>
     </div>
 
-    <div v-else class="card profile-card">
+    <div v-else class="surface-card profile-card">
       <!-- Cabecera siempre presente -->
       <div class="profile-header">
         <div

@@ -124,7 +124,7 @@ onMounted(() => { loadConfig(); fetchOrder() })
 </script>
 
 <template>
-  <div class="my-order-page card-full">
+  <div class="surface-card my-order-page card-full">
     <div v-if="loading" class="loading-state">
       <i class="pi pi-spin pi-spinner" style="font-size:24px" />
     </div>
