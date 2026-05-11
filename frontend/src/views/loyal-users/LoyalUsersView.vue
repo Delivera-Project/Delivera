@@ -69,7 +69,7 @@ async function addLoyalUser() {
       </div>
       <div class="form-row">
         <PButton :label="adding ? t('common.loading') : t('loyalUsers.new')" icon="pi pi-plus" :loading="adding" @click="addLoyalUser" />
-        <PButton :label="t('common.cancel')" severity="secondary" outlined icon="pi pi-times" @click="showAdd = false" />
+        <PButton :label="t('common.cancel')" severity="secondary" outlined icon="pi pi-times" @click="showAdd = false; addEmail = ''; addName = ''; addPhone = ''; addError = ''" />
       </div>
       <PMessage v-if="addError" severity="error" :closable="false" class="form-message">{{ addError }}</PMessage>
     </div>

@@ -74,6 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
     setCompanyName(data.companyName ?? null)
     setOrganization(data.orgHandle ?? null)
     setOrgName(data.orgName ?? null)
+    setPlanCode(null)
   }
 
   function logout() {

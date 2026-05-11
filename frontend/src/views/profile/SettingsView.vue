@@ -324,6 +324,7 @@ async function saveOrg() {
 }
 
 function startEditCompany(company) {
+  if (company.id !== settings.value?.companyId) return
   editingCompanyId.value = company.id
   companyName.value = company.name
   activityType.value = company.activityType
@@ -349,7 +350,7 @@ async function saveCompany() {
       const updated = await res.json()
       settings.value = updated
       const idx = allCompanies.value.findIndex(c => c.id === editingCompanyId.value)
-      if (idx !== -1) allCompanies.value[idx] = { ...allCompanies.value[idx], name: companyName.value, activityType: activityType.value }
+      if (idx !== -1) allCompanies.value[idx] = { ...allCompanies.value[idx], name: companyName.value, activityType: activityType.value, defaultPriority: defaultPriority.value, defaultPriorityLocked: defaultPriorityLocked.value }
       if (updated.companyId === editingCompanyId.value) auth.setCompanyName(updated.companyName)
       editingCompanyId.value = null
       companySuccess.value = true

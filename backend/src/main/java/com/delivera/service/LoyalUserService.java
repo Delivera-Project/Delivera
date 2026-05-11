@@ -6,7 +6,7 @@ import com.delivera.dto.loyaluser.LoyalUserResponse;
 import com.delivera.dto.order.OrderResponse;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.LoyalUserConflictException;
-import com.delivera.exception.OrderNotFoundException;
+import com.delivera.exception.LoyalUserNotFoundException;
 import com.delivera.model.LoyalUser;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.LoyalUserRepository;
@@ -86,7 +86,7 @@ public class LoyalUserService {
     public LoyalUserResponse updateAddress(UUID loyalUserId, LoyalUserRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         var lu = loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)
-                .orElseThrow(OrderNotFoundException::new);
+                .orElseThrow(LoyalUserNotFoundException::new);
         lu.setAddress(request.address() != null && !request.address().isBlank() ? request.address() : null);
         lu.setLatitude(request.latitude());
         lu.setLongitude(request.longitude());
@@ -98,7 +98,7 @@ public class LoyalUserService {
     public List<OrderResponse> getOrdersForLoyalUser(UUID loyalUserId) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)
-                .orElseThrow(OrderNotFoundException::new);
+                .orElseThrow(LoyalUserNotFoundException::new);
         return orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUserId)
                 .stream().map(OrderResponse::from).toList();
     }
