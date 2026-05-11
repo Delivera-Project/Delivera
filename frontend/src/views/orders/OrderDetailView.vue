@@ -87,7 +87,8 @@ async function initOrderMap() {
     const destLon = Number.parseFloat(o.destinationLon)
     const kind = destKind(o)
     const navTo = destNav(o)
-    const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : (navTo ? t('loyalUsers.detail') : null)
+    const navLabel = navTo ? t('loyalUsers.detail') : null
+    const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : navLabel
     addMarker(map, {
       id: o.destinationId || o.loyalUserId || 'customer',
       lat: destLat, lon: destLon, kind,

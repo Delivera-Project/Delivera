@@ -141,7 +141,7 @@ public class SubscriptionService {
     private void deleteExcessWorkers(UUID companyId, SubscriptionPlan newPlan) {
         if (newPlan.getMaxWorkers() == -1) return;
         List<Worker> workers = workerRepository.findByCompanyIdOrderByCreatedAtAsc(companyId);
-        long excess = workers.size() - newPlan.getMaxWorkers();
+        long excess = (long) workers.size() - newPlan.getMaxWorkers();
         if (excess <= 0) return;
         List<Worker> reversed = workers.reversed();
         List<Worker> toDelete = new ArrayList<>();
@@ -160,7 +160,7 @@ public class SubscriptionService {
     private void deleteExcessLoyalUsers(UUID companyId, SubscriptionPlan newPlan) {
         if (newPlan.getMaxLoyalUsers() == -1) return;
         List<LoyalUser> loyalUsers = loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId);
-        long excess = loyalUsers.size() - newPlan.getMaxLoyalUsers();
+        long excess = (long) loyalUsers.size() - newPlan.getMaxLoyalUsers();
         for (int i = 0; i < excess && i < loyalUsers.size(); i++) {
             LoyalUser lu = loyalUsers.get(i);
             lu.getCompanies().removeIf(c -> c.getId().equals(companyId));
@@ -183,7 +183,7 @@ public class SubscriptionService {
         Company current = companyRepository.findById(companyId).orElseThrow();
         UUID orgId = current.getOrganization().getId();
         List<Company> companies = companyRepository.findByOrganizationIdOrderByCreatedAtDesc(orgId);
-        long excess = companies.size() - newPlan.getMaxCompanies();
+        long excess = (long) companies.size() - newPlan.getMaxCompanies();
         for (Company c : companies) {
             if (excess <= 0) break;
             if (c.getId().equals(companyId)) continue;

@@ -58,7 +58,7 @@ export function useOrderForm() {
     if (orderType.value !== 'B2C') return
     if (!recipientEmail.value) { recipientName.value = ''; return }
     const match = loyalUserMatch.value
-    if (match && match.address && match.latitude && match.longitude) {
+    if (match?.address && match?.latitude && match?.longitude) {
       if (!recipientAddress.value || addressPrefilled.value) {
         recipientAddress.value = match.address
         recipientLatitude.value = match.latitude

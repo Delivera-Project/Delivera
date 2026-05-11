@@ -165,7 +165,8 @@ async function updateMapOrders() {
       const kind = destinationKind(o)
       const destSuffix = o.loyalUserId ? 'l:' + o.loyalUserId : `c:${dLat},${dLon},${o.recipientEmail || ''}`
       const key = o.destinationId ? 'u:' + o.destinationId : destSuffix
-      const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : (kind === 'CUSTOMER' && o.loyalUserId ? t('loyalUsers.detail') : null)
+      const loyalLabel = (kind === 'CUSTOMER' && o.loyalUserId) ? t('loyalUsers.detail') : null
+      const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : loyalLabel
       markerFor(key, {
         id: key, lat: dLat, lon: dLon, kind,
         title: destinationTitle(o),
