@@ -122,11 +122,13 @@ class AuthServiceTest {
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(passwordEncoder.encode("Password1")).thenReturn("hashed");
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(jwtService.generateToken("new@test.com")).thenReturn("token");
+        when(loyalUserRepository.findByEmail("new@test.com")).thenReturn(List.of());
+        when(jwtService.generateToken("new@test.com", (String) null)).thenReturn("token");
 
         RegisterResponse result = authService.register(req);
         assertThat(result.token()).isEqualTo("token");
         assertThat(result.email()).isEqualTo("new@test.com");
+        assertThat(result.role()).isNull();
     }
 
     // --- registerCompany ---

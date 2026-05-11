@@ -7,24 +7,22 @@ import com.delivera.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/settings")
 @Tag(name = "Configuración", description = "Gestión de organización y empresa")
 public class SettingsController {
 
-    @Autowired
-    private SettingsService settingsService;
-    @Autowired
-    private SubscriptionService subscriptionService;
-    @Autowired
-    private SecurityUtils securityUtils;
+    private final SettingsService settingsService;
+    private final SubscriptionService subscriptionService;
+    private final SecurityUtils securityUtils;
 
     @Operation(summary = "Obtener configuración de organización y empresa")
     @GetMapping

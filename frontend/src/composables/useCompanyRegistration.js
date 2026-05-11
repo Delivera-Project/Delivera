@@ -6,6 +6,14 @@ import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
 import { useAvailabilityCheck } from '@/composables/useAvailabilityCheck'
 
+function isUsernameFormat(val) {
+  return /^[a-z0-9_-]{3,50}$/.test(val)
+}
+
+function isHandleFormat(val) {
+  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(val)
+}
+
 export function useCompanyRegistration() {
   const { t } = useI18n()
   const router = useRouter()
@@ -33,14 +41,6 @@ export function useCompanyRegistration() {
 
   const error = ref('')
   const loading = ref(false)
-
-  function isUsernameFormat(val) {
-    return /^[a-z0-9_-]{3,50}$/.test(val)
-  }
-
-  function isHandleFormat(val) {
-    return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(val)
-  }
 
   const { checking: usernameChecking, available: usernameAvailable } =
     useAvailabilityCheck(username, {

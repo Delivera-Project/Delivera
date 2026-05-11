@@ -79,6 +79,8 @@ public class SecurityConfig {
 
                 // Usuarios fidelizados
                 auth.requestMatchers(HttpMethod.POST, api + "/loyal-users").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.PUT, api + "/loyal-users/**").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.GET, api + "/loyal-users/me/orders").authenticated();
 
                 // Trabajadores
                 auth.requestMatchers(HttpMethod.POST, api + "/workers/invite").hasRole(ADMIN);
@@ -89,11 +91,11 @@ public class SecurityConfig {
                 auth.requestMatchers(api + "/orders/*/messages/**").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
                 auth.requestMatchers(HttpMethod.POST, api + "/orders/*/messages").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
 
-                // Endpoints autenticados: cualquier trabajador activo
-                auth.requestMatchers(api + "/workers/**").authenticated();
-                auth.requestMatchers(api + UNITS_ALL).authenticated();
-                auth.requestMatchers(api + "/orders/**").authenticated();
-                auth.requestMatchers(api + "/loyal-users/**").authenticated();
+                // Endpoints de trabajadores (excluye LOYAL_USER)
+                auth.requestMatchers(api + "/workers/**").hasAnyRole(ADMIN, ANALYST, OPERATOR);
+                auth.requestMatchers(api + UNITS_ALL).hasAnyRole(ADMIN, ANALYST, OPERATOR);
+                auth.requestMatchers(api + "/orders/**").hasAnyRole(ADMIN, ANALYST, OPERATOR);
+                auth.requestMatchers(api + "/loyal-users/**").hasAnyRole(ADMIN, ANALYST, OPERATOR);
                 auth.requestMatchers(api + "/user/**").authenticated();
                 auth.requestMatchers(api + "/activity/**").hasAnyRole(ADMIN, ANALYST);
 

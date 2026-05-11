@@ -28,7 +28,7 @@ export function useValidation() {
 
   function required(value, fieldKey) {
     return () => {
-      if (!value || !value.toString().trim()) {
+      if (!value?.toString().trim()) {
         return { message: t('validation.required', { field: t(`fields.${fieldKey}`) }), type: 'required' }
       }
       return null

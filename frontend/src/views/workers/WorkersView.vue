@@ -134,6 +134,7 @@ onMounted(load)
           <p class="workers-subtitle">{{ t('workers.subtitle') }}</p>
         </div>
         <PButton
+          v-if="auth.isCompanyAdmin"
           :label="t('workers.invite')"
           icon="pi pi-plus"
           @click="router.push('/workers/invite')"
@@ -208,7 +209,7 @@ onMounted(load)
                 <PTag :value="t('workers.roles.' + data.role)" :severity="data.role === 'COMPANY_ADMIN' ? 'warn' : 'info'" />
               </template>
             </div>
-            <div v-if="changingRoleId !== data.id" class="worker-actions">
+            <div v-if="changingRoleId !== data.id && auth.isCompanyAdmin" class="worker-actions">
               <PButton icon="pi pi-pencil" text rounded size="small" :aria-label="t('workers.changeRole')"
                        v-tooltip.top="t('workers.changeRole')" @click.stop="startChangeRole(data)" />
               <PButton v-if="data.email !== auth.user?.email" icon="pi pi-times" text rounded severity="danger" size="small"

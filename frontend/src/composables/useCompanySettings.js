@@ -13,7 +13,10 @@ export function useCompanySettings() {
     try {
       const res = await api.get('/settings')
       if (res.ok) settings.value = await res.json()
-    } catch (_e) { settings.value = null }
+    } catch (e) {
+      console.error('useCompanySettings: failed to load settings', e)
+      settings.value = null
+    }
     return settings.value
   }
 

@@ -85,34 +85,39 @@ public class GlobalExceptionHandler {
         Throwable cause = ex.getCause();
         while (cause != null) {
             if (cause instanceof java.sql.SQLException sqlEx) {
-                String sqlState = sqlEx.getSQLState();
-                String msg = sqlEx.getMessage();
-                if ("23514".equals(sqlState) && msg != null && msg.contains("does not belong to company")) {
-                    log.warn("Order units company violation: {}", msg);
-                    return ResponseEntity.status(UNPROCESSABLE_ENTITY)
-                            .body(new ErrorResponse("INVALID_ORDER_UNITS"));
-                }
-                // 23505 = unique_violation — traducir a error tipado si reconocemos la constraint
-                if ("23505".equals(sqlState) && msg != null) {
-                    String lower = msg.toLowerCase();
-                    if (lower.contains("users_email")) {
-                        log.warn("Unique violation on users.email: {}", msg);
-                        return ResponseEntity.status(CONFLICT).body(new ErrorResponse("EMAIL_ALREADY_EXISTS"));
-                    }
-                    if (lower.contains("users_username")) {
-                        log.warn("Unique violation on users.username: {}", msg);
-                        return ResponseEntity.status(CONFLICT).body(new ErrorResponse("USERNAME_ALREADY_EXISTS"));
-                    }
-                    if (lower.contains("organizations_handle")) {
-                        log.warn("Unique violation on organizations.handle: {}", msg);
-                        return ResponseEntity.status(CONFLICT).body(new ErrorResponse("HANDLE_CONFLICT"));
-                    }
-                }
+                ResponseEntity<ErrorResponse> typed = resolveSqlCause(sqlEx);
+                if (typed != null) return typed;
             }
             cause = cause.getCause();
         }
         log.error("Data integrity violation: {}", ex.getMessage(), ex);
         return ResponseEntity.status(CONFLICT).body(new ErrorResponse("DATA_INTEGRITY_ERROR"));
+    }
+
+    private ResponseEntity<ErrorResponse> resolveSqlCause(java.sql.SQLException sqlEx) {
+        String sqlState = sqlEx.getSQLState();
+        String msg = sqlEx.getMessage();
+        if ("23514".equals(sqlState) && msg != null && msg.contains("does not belong to company")) {
+            log.warn("Order units company violation: {}", msg);
+            return ResponseEntity.status(UNPROCESSABLE_ENTITY).body(new ErrorResponse("INVALID_ORDER_UNITS"));
+        }
+        if ("23505".equals(sqlState)) {
+            String code = resolveUniqueViolation(msg);
+            if (code != null) {
+                log.warn("Unique violation: {}", msg);
+                return ResponseEntity.status(CONFLICT).body(new ErrorResponse(code));
+            }
+        }
+        return null;
+    }
+
+    private static String resolveUniqueViolation(String msg) {
+        if (msg == null) return null;
+        String lower = msg.toLowerCase();
+        if (lower.contains("users_email")) return "EMAIL_ALREADY_EXISTS";
+        if (lower.contains("users_username")) return "USERNAME_ALREADY_EXISTS";
+        if (lower.contains("organizations_handle")) return "HANDLE_CONFLICT";
+        return null;
     }
 
     @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)

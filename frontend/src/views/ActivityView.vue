@@ -67,7 +67,8 @@ function formatDateLabel(dateStr) {
 }
 
 function fillDateRange(entries, p) {
-  const days = p === 'TODAY' ? 1 : p === 'WEEK' ? 7 : 30
+  const daysMap = { TODAY: 1, WEEK: 7 }
+  const days = daysMap[p] ?? 30
   const dataMap = Object.fromEntries(entries.map(e => [e.date, e.count]))
   const result = []
   const now = new Date()

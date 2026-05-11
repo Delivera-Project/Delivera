@@ -8,23 +8,19 @@ import com.delivera.exception.UsernameAlreadyExistsException;
 import com.delivera.exception.UserNotFoundException;
 import com.delivera.model.User;
 import com.delivera.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private AppConfigService appConfigService;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final AppConfigService appConfigService;
 
     @Transactional(readOnly = true)
     public ProfileResponse getProfile(String email) {
@@ -68,7 +64,7 @@ public class UserService {
     @Transactional
     public void changePassword(String email, ChangePasswordRequest request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException());
+                .orElseThrow(UserNotFoundException::new);
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPasswordHash())) {
             throw new InvalidPasswordException("CURRENT_PASSWORD_INVALID");

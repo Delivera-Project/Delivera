@@ -126,8 +126,8 @@ const usernameState = computed(() => {
         </div>
 
         <div class="form-field">
-          <label>{{ t('fields.type') }}</label>
-          <div class="activity-grid">
+          <label id="activity-type-label">{{ t('fields.type') }}</label>
+          <div class="activity-grid" role="group" aria-labelledby="activity-type-label">
             <button
               v-for="at in activityTypes"
               :key="at.value"
