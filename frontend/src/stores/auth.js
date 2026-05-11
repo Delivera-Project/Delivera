@@ -25,45 +25,39 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('token', newToken)
   }
 
-  function setOrganization(handle) {
-    const v = handle || null
-    organizationHandle.value = v
-    if (v) localStorage.setItem('organizationHandle', v)
+  function setOrganization(handle = null) {
+    organizationHandle.value = handle
+    if (handle) localStorage.setItem('organizationHandle', handle)
     else localStorage.removeItem('organizationHandle')
   }
 
-  function setOrgName(name) {
-    const v = name || null
-    orgName.value = v
-    if (v) localStorage.setItem('orgName', v)
+  function setOrgName(name = null) {
+    orgName.value = name
+    if (name) localStorage.setItem('orgName', name)
     else localStorage.removeItem('orgName')
   }
 
-  function setCompanyName(name) {
-    const v = name || null
-    companyName.value = v
-    if (v) localStorage.setItem('companyName', v)
+  function setCompanyName(name = null) {
+    companyName.value = name
+    if (name) localStorage.setItem('companyName', name)
     else localStorage.removeItem('companyName')
   }
 
-  function setRole(newRole) {
-    const v = newRole || null
-    role.value = v
-    if (v) localStorage.setItem('role', v)
+  function setRole(newRole = null) {
+    role.value = newRole
+    if (newRole) localStorage.setItem('role', newRole)
     else localStorage.removeItem('role')
   }
 
-  function setCompanyId(id) {
-    const v = id || null
-    companyId.value = v
-    if (v) localStorage.setItem('companyId', v)
+  function setCompanyId(id = null) {
+    companyId.value = id
+    if (id) localStorage.setItem('companyId', id)
     else localStorage.removeItem('companyId')
   }
 
-  function setPlanCode(code) {
-    const v = code || null
-    planCode.value = v
-    if (v) localStorage.setItem('planCode', v)
+  function setPlanCode(code = null) {
+    planCode.value = code
+    if (code) localStorage.setItem('planCode', code)
     else localStorage.removeItem('planCode')
   }
 

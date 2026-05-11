@@ -44,7 +44,7 @@ const passwordForm = ref({ currentPassword: '', newPassword: '' })
 const avatarInput = ref(null)
 const avatarSaving = ref(false)
 const avatarPreview = ref(null)
-const ACCEPTED_AVATAR_TYPES = ['image/jpeg', 'image/png']
+const ACCEPTED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png'])
 const CANVAS_SIZE = 280
 
 const cropCanvas = ref(null)

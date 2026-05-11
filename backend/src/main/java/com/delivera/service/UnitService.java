@@ -109,7 +109,7 @@ public class UnitService {
         return companyRepository.findByOrganizationId(company.getOrganization().getId())
                 .stream()
                 .filter(c -> !c.getId().equals(companyId))
-                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData()))
+                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData(), c.getDefaultPriority(), c.isDefaultPriorityLocked()))
                 .toList();
     }
 

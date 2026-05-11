@@ -146,8 +146,8 @@ async function updateMapOrders() {
   }
 
   items.forEach(o => {
-    const oLat = parseFloat(o.originLat)
-    const oLon = parseFloat(o.originLon)
+    const oLat = Number.parseFloat(o.originLat)
+    const oLon = Number.parseFloat(o.originLon)
 
     const oKind = originKind(o)
     const oNav = originNavigateTo(o)
@@ -160,15 +160,18 @@ async function updateMapOrders() {
     bounds.push([oLat, oLon])
 
     if (o.destinationLat != null && o.destinationLon != null) {
-      const dLat = parseFloat(o.destinationLat)
-      const dLon = parseFloat(o.destinationLon)
+      const dLat = Number.parseFloat(o.destinationLat)
+      const dLon = Number.parseFloat(o.destinationLon)
       const kind = destinationKind(o)
-      const key = o.destinationId ? 'u:' + o.destinationId : (o.loyalUserId ? 'l:' + o.loyalUserId : `c:${dLat},${dLon},${o.recipientEmail || ''}`)
+      const destSuffix = o.loyalUserId ? 'l:' + o.loyalUserId : `c:${dLat},${dLon},${o.recipientEmail || ''}`
+      const key = o.destinationId ? 'u:' + o.destinationId : destSuffix
+      const loyalLabel = (kind === 'CUSTOMER' && o.loyalUserId) ? t('loyalUsers.detail') : null
+      const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : loyalLabel
       markerFor(key, {
         id: key, lat: dLat, lon: dLon, kind,
         title: destinationTitle(o),
         subtitle: kind === 'CUSTOMER' ? t('orders.recipientName') : t('units.detail'),
-        actionLabel: kind === 'OWN_UNIT' ? t('units.detail') : (kind === 'CUSTOMER' && o.loyalUserId ? t('loyalUsers.detail') : null),
+        actionLabel: destActionLabel,
         navigateTo: destinationNavigateTo(o), router,
       })
       bounds.push([dLat, dLon])
@@ -186,11 +189,12 @@ async function updateMapOrders() {
   for (const o of routeable) {
     if (token !== mapToken || !map) return
     const originKey = 'u:' + o.originId
-    const destKey = o.destinationId ? 'u:' + o.destinationId : (o.loyalUserId ? 'l:' + o.loyalUserId : `c:${o.destinationLat},${o.destinationLon},${o.recipientEmail || ''}`)
+    const destRouteSuffix = o.loyalUserId ? 'l:' + o.loyalUserId : `c:${o.destinationLat},${o.destinationLon},${o.recipientEmail || ''}`
+    const destKey = o.destinationId ? 'u:' + o.destinationId : destRouteSuffix
     const entry = await addRoute(map, {
       orderId: o.id,
-      origin: { lat: parseFloat(o.originLat), lon: parseFloat(o.originLon) },
-      dest:   { lat: parseFloat(o.destinationLat), lon: parseFloat(o.destinationLon) },
+      origin: { lat: Number.parseFloat(o.originLat), lon: Number.parseFloat(o.originLon) },
+      dest:   { lat: Number.parseFloat(o.destinationLat), lon: Number.parseFloat(o.destinationLon) },
       popupTitle: o.reference,
       popupSubtitle: `${o.originName} → ${destinationTitle(o)}`,
       actionLabel: t('orders.viewDetail'),
@@ -200,7 +204,10 @@ async function updateMapOrders() {
       status: o.status,
       currentLocation: currentLocationOf(o),
     })
-    if (token !== mapToken) { if (entry?.layer && map) map.removeLayer(entry.layer); return }
+    if (token !== mapToken) {
+      if (entry?.layer && map) map.removeLayer(entry.layer)
+      return
+    }
     routeEntries.push(entry)
     // Traer rutas al frente para que queden por encima de los tiles.
     entry.layer?.bringToFront?.()

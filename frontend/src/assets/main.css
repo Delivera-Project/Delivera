@@ -304,6 +304,9 @@ body {
   gap: 10px;
   margin-bottom: 24px;
   text-align: left;
+  border: none;
+  padding: 0;
+  margin-top: 0;
 }
 
 .activity-option {

@@ -193,20 +193,16 @@ public class DemoDataSeeder implements CommandLineRunner {
                 null, null, null);
         LoyalUser luRaul     = createLoyalUser(raul.getEmail(),  raul,  List.of(dsFood),
                 null, null, null);
-        LoyalUser luMaria    = createLoyalUser("maria.gomez@correo.com",     null, List.of(rlRetail),
+        createLoyalUser("maria.gomez@correo.com",     null, List.of(rlRetail),
                 "Calle Mallorca 230, Barcelona", 41.3960, 2.1620);
         LoyalUser luIgnacio  = createLoyalUser("ignacio.serrano@correo.com", null, List.of(rlRetail, dsFood),
                 "Av. Diagonal 500, Barcelona",   41.3920, 2.1510);
-        LoyalUser luTeresa   = createLoyalUser("teresa.mendez@correo.com",   null, List.of(dsFood),
+        createLoyalUser("teresa.mendez@correo.com",   null, List.of(dsFood),
                 "Av. Constitución 3, Granada",   37.1770, -3.6000);
         LoyalUser luAlberto  = createLoyalUser("alberto.ibanez@correo.com",  null, List.of(tnLog),
                 "Calle Mayor 18, Bilbao",        43.2620, -2.9340);
 
         // --- 7. Pedidos ---
-        // Distribución homogénea de estados/prioridades/fechas para llenar gráficas.
-        OrderStatus[] st = OrderStatus.values();
-        OrderPriority[] pr = OrderPriority.values();
-
         // Internos RapidLog Central
         createInternalOrder(rlCentral, rlMadridCd, rlValencia, OrderStatus.DELIVERED, OrderPriority.NORMAL, 11, carlos);
         createInternalOrder(rlCentral, rlMadridCd, rlSevilla,  OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   3, marcos);
@@ -266,9 +262,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         createB2CUnregistered(tnLog,    tnZgz,       "manuel.lopez@mail.com",  "Manuel López",
                 "Paseo Independencia 20, Zaragoza", 41.6510, -0.8840,
                 OrderStatus.DELIVERED, OrderPriority.NORMAL, 9, sofia);
-
-        // (evita warning unused si se reduce el set)
-        if (st.length < 0 || pr.length < 0) { log.debug("noop"); }
 
         log.info("DemoDataSeeder: demo cargada (usuarios={}, empresas={}, unidades={}, pedidos={}).",
                 users.count(), companies.count(), units.count(), orders.count());

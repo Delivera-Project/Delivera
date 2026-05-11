@@ -218,8 +218,9 @@ public class OrderService {
                 if (lat == null) lat = matchedLu.getUser().getLatitude();
                 if (lon == null) lon = matchedLu.getUser().getLongitude();
             }
+            if (lat == null || lon == null) { lat = null; lon = null; }
         }
-        if (addr == null) throw new MissingRecipientAddressException();
+        if (addr == null || lat == null) throw new MissingRecipientAddressException();
         order.setRecipientAddress(addr);
         order.setRecipientLatitude(lat);
         order.setRecipientLongitude(lon);

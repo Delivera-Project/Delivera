@@ -9,7 +9,7 @@ import com.delivera.exception.HandleConflictException;
 import com.delivera.exception.UserNotFoundException;
 import com.delivera.model.*;
 import com.delivera.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,33 +19,22 @@ import java.util.UUID;
 import static com.delivera.model.OrderStatus.IN_TRANSIT;
 import static com.delivera.model.OrderStatus.PENDING;
 
+@RequiredArgsConstructor
 @Service
 public class SettingsService {
 
-    @Autowired
-    private CompanyRepository companyRepository;
-    @Autowired
-    private OrganizationRepository organizationRepository;
-    @Autowired
-    private WorkerRepository workerRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private LoyalUserRepository loyalUserRepository;
-    @Autowired
-    private OperationalUnitRepository operationalUnitRepository;
-    @Autowired
-    private ActivityTypeRepository activityTypeRepository;
-    @Autowired
-    private SubscriptionPlanRepository subscriptionPlanRepository;
-    @Autowired
-    private SecurityUtils securityUtils;
-    @Autowired
-    private SubscriptionService subscriptionService;
-    @Autowired
-    private AppConfigService appConfigService;
+    private final CompanyRepository companyRepository;
+    private final OrganizationRepository organizationRepository;
+    private final WorkerRepository workerRepository;
+    private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final LoyalUserRepository loyalUserRepository;
+    private final OperationalUnitRepository operationalUnitRepository;
+    private final ActivityTypeRepository activityTypeRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
+    private final SecurityUtils securityUtils;
+    private final SubscriptionService subscriptionService;
+    private final AppConfigService appConfigService;
 
     private Company currentCompany() {
         return companyRepository.findById(securityUtils.getCurrentCompanyId())
@@ -54,9 +43,7 @@ public class SettingsService {
 
     @Transactional(readOnly = true)
     public SettingsResponse getSettings() {
-        Company c = currentCompany();
-        Organization o = c.getOrganization();
-        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType().getCode(), c.getDefaultPriority(), c.isDefaultPriorityLocked());
+        return buildSettingsResponse(currentCompany());
     }
 
     @Transactional
@@ -69,7 +56,7 @@ public class SettingsService {
         o.setName(req.name());
         o.setHandle(req.handle());
         organizationRepository.save(o);
-        return getSettings();
+        return buildSettingsResponse(c);
     }
 
     @Transactional
@@ -80,7 +67,12 @@ public class SettingsService {
         c.setDefaultPriority(req.defaultPriority());
         c.setDefaultPriorityLocked(req.defaultPriorityLocked());
         companyRepository.save(c);
-        return getSettings();
+        return buildSettingsResponse(c);
+    }
+
+    private SettingsResponse buildSettingsResponse(Company c) {
+        Organization o = c.getOrganization();
+        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType().getCode(), c.getDefaultPriority(), c.isDefaultPriorityLocked());
     }
 
     @Transactional
@@ -124,7 +116,11 @@ public class SettingsService {
 
         orderRepository.deleteEventsByCompanyId(companyId);
         orderRepository.deleteByCompanyId(companyId);
-        loyalUserRepository.deleteAll(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId));
+        for (LoyalUser lu : loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId)) {
+            lu.getCompanies().removeIf(c -> c.getId().equals(companyId));
+            if (lu.getCompanies().isEmpty()) loyalUserRepository.delete(lu);
+            else loyalUserRepository.save(lu);
+        }
         operationalUnitRepository.deleteAll(operationalUnitRepository.findAllByCompanyId(companyId));
         workerRepository.deleteAll(workerRepository.findByCompanyId(companyId));
         companyRepository.delete(target);

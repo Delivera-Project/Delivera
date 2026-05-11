@@ -97,10 +97,9 @@ public class WorkerService {
 
         WorkerRole newRole = req.role();
 
-        if (worker.getRole() == WorkerRole.COMPANY_ADMIN && newRole != WorkerRole.COMPANY_ADMIN) {
-            if (workerRepository.countByCompanyIdAndRole(companyId, WorkerRole.COMPANY_ADMIN) <= 1) {
-                throw new LastAdminException();
-            }
+        if (worker.getRole() == WorkerRole.COMPANY_ADMIN && newRole != WorkerRole.COMPANY_ADMIN
+                && workerRepository.countByCompanyIdAndRole(companyId, WorkerRole.COMPANY_ADMIN) <= 1) {
+            throw new LastAdminException();
         }
 
         worker.setRole(newRole);

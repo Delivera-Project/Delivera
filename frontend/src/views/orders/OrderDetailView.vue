@@ -62,8 +62,8 @@ async function initOrderMap() {
   if (map) { map.remove(); map = null }
 
   const o = order.value
-  const originLat = parseFloat(o.originLat)
-  const originLon = parseFloat(o.originLon)
+  const originLat = Number.parseFloat(o.originLat)
+  const originLon = Number.parseFloat(o.originLon)
 
   map = createMap(mapEl.value)
   // Forzar a Leaflet a recalcular el tamaño antes de añadir capas: el panel
@@ -83,16 +83,18 @@ async function initOrderMap() {
   }).addTo(map)
 
   if (o.destinationLat != null && o.destinationLon != null) {
-    const destLat = parseFloat(o.destinationLat)
-    const destLon = parseFloat(o.destinationLon)
+    const destLat = Number.parseFloat(o.destinationLat)
+    const destLon = Number.parseFloat(o.destinationLon)
     const kind = destKind(o)
     const navTo = destNav(o)
+    const navLabel = navTo ? t('loyalUsers.detail') : null
+    const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : navLabel
     addMarker(map, {
       id: o.destinationId || o.loyalUserId || 'customer',
       lat: destLat, lon: destLon, kind,
       title: o.destinationName || o.recipientName || o.recipientEmail || '',
       subtitle: o.destinationCompanyName || (kind === 'CUSTOMER' ? t('orders.recipientName') : ''),
-      actionLabel: kind === 'OWN_UNIT' ? t('units.detail') : (navTo ? t('loyalUsers.detail') : null),
+      actionLabel: destActionLabel,
       navigateTo: navTo,
       router,
     }).addTo(map)

@@ -1,6 +1,7 @@
 package com.delivera.dto.loyaluser;
 
 import com.delivera.model.LoyalUser;
+import com.delivera.model.User;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -29,15 +30,21 @@ public record LoyalUserResponse(
         String name = lu.getName();
         String phone = lu.getPhone();
         if (lu.getUser() != null) {
-            if (addr == null) addr = lu.getUser().getAddress();
-            if (addrLat == null) addrLat = lu.getUser().getLatitude();
-            if (addrLon == null) addrLon = lu.getUser().getLongitude();
-            if (name == null) name = lu.getUser().getFirstName() != null
-                    ? (lu.getUser().getFirstName() + (lu.getUser().getLastName() != null ? " " + lu.getUser().getLastName() : "")).trim()
-                    : null;
-            if (phone == null) phone = lu.getUser().getPhone();
+            User u = lu.getUser();
+            addrLat = addrLat != null ? addrLat : u.getLatitude();
+            addrLon = addrLon != null ? addrLon : u.getLongitude();
+            addr    = addr    != null ? addr    : u.getAddress();
+            name    = name    != null ? name    : resolveFullName(u);
+            phone   = phone   != null ? phone   : u.getPhone();
         }
         return new LoyalUserResponse(lu.getId(), lu.getEmail(), name, phone,
                 lu.getUser() != null, orderCount, addr, addrLat, addrLon, lu.getCreatedAt());
+    }
+
+    private static String resolveFullName(User user) {
+        if (user.getFirstName() == null) return null;
+        String lastName = user.getLastName();
+        String suffix = lastName != null ? " " + lastName : "";
+        return (user.getFirstName() + suffix).trim();
     }
 }

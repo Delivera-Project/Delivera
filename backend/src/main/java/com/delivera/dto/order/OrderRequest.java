@@ -2,6 +2,7 @@ package com.delivera.dto.order;
 
 import com.delivera.model.OrderPriority;
 import com.delivera.model.OrderType;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
@@ -21,4 +22,15 @@ public record OrderRequest(
         @DecimalMin(value = "-180.0") @DecimalMax(value = "180.0") BigDecimal recipientLongitude,
         @NotNull OrderType orderType,
         OrderPriority priority,
-        @Size(max = 1000) String notes) {}
+        @Size(max = 1000) String notes) {
+
+    @AssertTrue(message = "Latitude and longitude must both be provided or both be absent")
+    public boolean isCoordinatesConsistent() {
+        return (recipientLatitude == null) == (recipientLongitude == null);
+    }
+
+    @AssertTrue(message = "B2C orders require recipientEmail")
+    public boolean isB2cEmailPresent() {
+        return orderType != OrderType.B2C || (recipientEmail != null && !recipientEmail.isBlank());
+    }
+}

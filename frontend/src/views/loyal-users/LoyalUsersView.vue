@@ -5,8 +5,10 @@ import { useI18n } from 'vue-i18n'
 import { useFormatDate } from '@/composables/useFormatDate'
 import { useResourceList } from '@/composables/useResourceList'
 import { useApi } from '@/composables/useApi'
+import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
+const auth = useAuthStore()
 const { formatDate } = useFormatDate()
 const router = useRouter()
 const api = useApi()
@@ -56,7 +58,7 @@ async function addLoyalUser() {
   <div class="surface-card card-full">
     <div class="list-header">
       <h1>{{ t('loyalUsers.title') }}</h1>
-      <PButton :label="t('loyalUsers.new')" icon="pi pi-plus" @click="showAdd = !showAdd; addError = ''" />
+      <PButton v-if="auth.isCompanyAdmin" :label="t('loyalUsers.new')" icon="pi pi-plus" @click="showAdd = !showAdd; addError = ''" />
     </div>
 
     <PMessage v-if="addSuccess" severity="success" :closable="false" class="form-message">{{ t('loyalUsers.added') }}</PMessage>

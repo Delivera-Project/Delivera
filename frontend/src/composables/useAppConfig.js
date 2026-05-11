@@ -32,6 +32,14 @@ async function loadConfig() {
   }
 }
 
+function getNextStatuses(status) {
+  return _statuses.value.find(s => s.status === status)?.allowedTransitions ?? []
+}
+
+function getRoleCapabilities(role) {
+  return _roles.value[role] ?? {}
+}
+
 export function useAppConfig() {
   const statusSeverity = computed(() => {
     const map = {}
@@ -44,14 +52,6 @@ export function useAppConfig() {
     for (const p of _priorities.value) map[p.priority] = p.uiSeverity
     return map
   })
-
-  function getNextStatuses(status) {
-    return _statuses.value.find(s => s.status === status)?.allowedTransitions ?? []
-  }
-
-  function getRoleCapabilities(role) {
-    return _roles.value[role] ?? {}
-  }
 
   return {
     load: loadConfig,

@@ -6,6 +6,7 @@ import { useApi } from '@/composables/useApi'
 import { useFormatDate } from '@/composables/useFormatDate'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useGeolocation } from '@/composables/useGeolocation'
+import { useAuthStore } from '@/stores/auth'
 
 const { t } = useI18n()
 const { formatDate } = useFormatDate()
@@ -13,6 +14,7 @@ const route = useRoute()
 const router = useRouter()
 const api = useApi()
 const { load: loadConfig, statusSeverity } = useAppConfig()
+const auth = useAuthStore()
 
 const loyalUser = ref(null)
 const orders = ref([])
@@ -130,7 +132,7 @@ onMounted(async () => {
       <div class="addr-block">
         <div class="addr-header">
           <h3 class="section-title">{{ t('fields.address') }}</h3>
-          <PButton v-if="!editingAddress" type="button" severity="secondary" outlined size="small" icon="pi pi-pencil" :label="t('profile.edit')" @click="startEditAddress" />
+          <PButton v-if="!editingAddress && auth.isCompanyAdmin" type="button" severity="secondary" outlined size="small" icon="pi pi-pencil" :label="t('profile.edit')" @click="startEditAddress" />
         </div>
         <div v-if="!editingAddress">
           <div class="addr-value">{{ loyalUser?.address || t('fields.empty') }}</div>

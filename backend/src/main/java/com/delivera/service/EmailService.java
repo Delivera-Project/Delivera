@@ -13,14 +13,18 @@ public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
-    @Autowired(required = false)
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
+    private final boolean enabled;
+    private final String from;
 
-    @Value("${app.mail.enabled:false}")
-    private boolean enabled;
-
-    @Value("${app.mail.from:noreply@delivera.app}")
-    private String from;
+    public EmailService(
+            @Autowired(required = false) JavaMailSender mailSender,
+            @Value("${app.mail.enabled:false}") boolean enabled,
+            @Value("${app.mail.from:noreply@delivera.app}") String from) {
+        this.mailSender = mailSender;
+        this.enabled = enabled;
+        this.from = from;
+    }
 
     public void sendTrackingLink(String recipientEmail, String recipientName, String reference, String trackingUrl) {
         if (!enabled) {

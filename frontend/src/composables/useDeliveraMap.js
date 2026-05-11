@@ -39,8 +39,8 @@ export function routeColorFor(status) {
 // Devuelve { lat, lon } parseado a partir de los campos currentLat/currentLon del pedido,
 // o null si alguno es nulo. Centralizado para reutilizar en todas las vistas y testear.
 export function currentLocationOf(order) {
-  if (!order || order.currentLat == null || order.currentLon == null) return null
-  return { lat: parseFloat(order.currentLat), lon: parseFloat(order.currentLon) }
+  if (!order || order?.currentLat == null || order?.currentLon == null) return null
+  return { lat: Number.parseFloat(order.currentLat), lon: Number.parseFloat(order.currentLon) }
 }
 
 // True para pedidos en estado activo (PENDING o IN_TRANSIT).
@@ -248,7 +248,7 @@ export async function addRoute(map, {
 // Crea un marcador circular con el color del estado sobre la ruta. Aislado para poder
 // testearlo sin instanciar el Map completo.
 export function addCurrentLocationMarker(map, currentLocation, color, popupTitle, popupSubtitle) {
-  if (!map || !currentLocation || currentLocation.lat == null || currentLocation.lon == null) return null
+  if (!map || !currentLocation || currentLocation?.lat == null || currentLocation?.lon == null) return null
   const marker = L.circleMarker([currentLocation.lat, currentLocation.lon], {
     radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1,
   }).addTo(map)
@@ -270,15 +270,16 @@ function _isClustered(clusterGroup, marker) {
   return parent && parent !== marker
 }
 
-export function attachRouteVisibilityHandler(map, clusterGroup, routeEntriesRef) {
-  function applyVisibility(entry, visible) {
-    if (!entry?.layer) return
-    const opacity = visible ? (entry.solid ? 0.95 : 0.9) : 0
-    if (entry.layer.setStyle) entry.layer.setStyle({ opacity })
-    const el = entry.layer.getElement?.()
-    if (el) el.style.pointerEvents = visible ? '' : 'none'
-  }
+function applyVisibility(entry, visible) {
+  if (!entry?.layer) return
+  const solidOpacity = entry.solid ? 0.95 : 0.9
+  const opacity = visible ? solidOpacity : 0
+  if (entry.layer.setStyle) entry.layer.setStyle({ opacity })
+  const el = entry.layer.getElement?.()
+  if (el) el.style.pointerEvents = visible ? '' : 'none'
+}
 
+export function attachRouteVisibilityHandler(map, clusterGroup, routeEntriesRef) {
   function update() {
     for (const entry of routeEntriesRef()) {
       if (!entry?.layer) continue
@@ -307,7 +308,7 @@ export const attachRouteZoomHandler = attachRouteVisibilityHandler
 import { MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION } from '@/constants/map'
 
 export function fitBounds(map, coords, fallback = [MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION]) {
-  const filtered = coords.filter(c => c && c[0] != null && c[1] != null)
+  const filtered = coords.filter(c => c?.[0] != null && c?.[1] != null)
   if (filtered.length === 0) { map.setView(fallback[0], fallback[1]); return }
   if (filtered.length === 1) { map.setView(filtered[0], 13); return }
   map.fitBounds(filtered, { padding: [40, 40] })

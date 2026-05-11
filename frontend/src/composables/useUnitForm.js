@@ -4,6 +4,13 @@ import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useValidation } from '@/composables/useValidation'
 
+function parseCoord(val) {
+  const trimmed = String(val).trim()
+  if (!trimmed) return null
+  const n = Number.parseFloat(trimmed)
+  return Number.isFinite(n) ? n : Number.NaN
+}
+
 export function useUnitForm() {
   const { t } = useI18n()
   const router = useRouter()
@@ -20,13 +27,6 @@ export function useUnitForm() {
   const success = ref('')
   const loading = ref(false)
 
-  function parseCoord(val) {
-    const trimmed = String(val).trim()
-    if (!trimmed) return null
-    const n = parseFloat(trimmed)
-    return Number.isFinite(n) ? n : NaN
-  }
-
   async function submitUnit({ isEdit, unitId }) {
     if (loading.value) return
     error.value = ''
@@ -34,7 +34,7 @@ export function useUnitForm() {
 
     const fieldValid = validate({
       name: [required(name.value, 'unitName')],
-      unitType: [() => !unitType.value ? { message: '', type: 'required' } : null],
+      unitType: [() => unitType.value ? null : { message: '', type: 'required' }],
     })
 
     const lat = parseCoord(latitude.value)

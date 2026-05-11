@@ -32,12 +32,8 @@ public record PublicOrderResponse(
                 ? maskEmail(order.getRecipientEmail()) : null;
 
         var dest = order.getDestination();
-        Double destLat = dest != null && dest.getLatitude() != null
-                ? Double.valueOf(dest.getLatitude().doubleValue())
-                : (order.getRecipientLatitude() != null ? Double.valueOf(order.getRecipientLatitude().doubleValue()) : null);
-        Double destLon = dest != null && dest.getLongitude() != null
-                ? Double.valueOf(dest.getLongitude().doubleValue())
-                : (order.getRecipientLongitude() != null ? Double.valueOf(order.getRecipientLongitude().doubleValue()) : null);
+        Double destLat = resolveDestCoord(dest != null ? dest.getLatitude() : null, order.getRecipientLatitude());
+        Double destLon = resolveDestCoord(dest != null ? dest.getLongitude() : null, order.getRecipientLongitude());
 
         return new PublicOrderResponse(
                 order.getId(),
@@ -57,6 +53,11 @@ public record PublicOrderResponse(
                 order.getOrigin().getLongitude() != null ? order.getOrigin().getLongitude().doubleValue() : null,
                 destLat,
                 destLon);
+    }
+
+    private static Double resolveDestCoord(java.math.BigDecimal destCoord, java.math.BigDecimal recipientCoord) {
+        if (destCoord != null) return destCoord.doubleValue();
+        return recipientCoord != null ? recipientCoord.doubleValue() : null;
     }
 
     private static String maskEmail(String email) {

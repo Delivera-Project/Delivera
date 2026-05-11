@@ -60,8 +60,8 @@ function updateMapMarkers() {
   clusterGroup = L.markerClusterGroup(clusterOptions())
   const bounds = []
   items.forEach(u => {
-    const lat = parseFloat(u.latitude)
-    const lng = parseFloat(u.longitude)
+    const lat = Number.parseFloat(u.latitude)
+    const lng = Number.parseFloat(u.longitude)
     const marker = addMarker(map, {
       id: u.id,
       lat, lon: lng,

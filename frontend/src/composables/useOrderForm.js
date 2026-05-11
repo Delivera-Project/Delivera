@@ -58,11 +58,11 @@ export function useOrderForm() {
     if (orderType.value !== 'B2C') return
     if (!recipientEmail.value) { recipientName.value = ''; return }
     const match = loyalUserMatch.value
-    if (match && (match.address || match.latitude)) {
+    if (match?.address && match?.latitude && match?.longitude) {
       if (!recipientAddress.value || addressPrefilled.value) {
-        recipientAddress.value = match.address || ''
-        recipientLatitude.value = match.latitude ?? null
-        recipientLongitude.value = match.longitude ?? null
+        recipientAddress.value = match.address
+        recipientLatitude.value = match.latitude
+        recipientLongitude.value = match.longitude
         addressPrefilled.value = true
       }
     }
@@ -110,6 +110,11 @@ export function useOrderForm() {
       rules.b2bDestinationId = [required(b2bDestinationId.value, 'unitName')]
     }
     if (!validate(rules)) return
+
+    if (orderType.value === 'B2C' && recipientAddress.value && !recipientLatitude.value) {
+      error.value = t('validation.addressNeedsCoords')
+      return
+    }
 
     if (orderType.value === 'INTERNAL' && originId.value === destinationId.value) {
       error.value = t('orders.sameUnit')

@@ -16,6 +16,8 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
+    private static final String BEARER_AUTH = "bearerAuth";
+
     @Value("${app.contact-email:contact@delivera.com}")
     private String contactEmail;
 
@@ -32,10 +34,10 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("Delivera")
                                 .email(contactEmail)))
-                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH))
                 .components(new Components()
-                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
-                                .name("bearerAuth")
+                        .addSecuritySchemes(BEARER_AUTH, new SecurityScheme()
+                                .name(BEARER_AUTH)
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")

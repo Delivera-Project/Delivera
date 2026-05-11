@@ -7,6 +7,7 @@ import com.delivera.dto.order.OrderResponse;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.LoyalUserConflictException;
 import com.delivera.exception.OrderNotFoundException;
+import com.delivera.exception.UserNotFoundException;
 import com.delivera.model.LoyalUser;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.LoyalUserRepository;
@@ -86,10 +87,11 @@ public class LoyalUserService {
     public LoyalUserResponse updateAddress(UUID loyalUserId, LoyalUserRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         var lu = loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)
-                .orElseThrow(OrderNotFoundException::new);
-        lu.setAddress(request.address() != null && !request.address().isBlank() ? request.address() : null);
-        lu.setLatitude(request.latitude());
-        lu.setLongitude(request.longitude());
+                .orElseThrow(UserNotFoundException::new);
+        boolean hasAddress = request.address() != null && !request.address().isBlank();
+        lu.setAddress(hasAddress ? request.address() : null);
+        lu.setLatitude(hasAddress ? request.latitude() : null);
+        lu.setLongitude(hasAddress ? request.longitude() : null);
         return LoyalUserResponse.from(loyalUserRepository.save(lu),
                 orderRepository.countByLoyalUserId(lu.getId()));
     }
