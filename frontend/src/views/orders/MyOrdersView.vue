@@ -33,7 +33,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="surface-card card-wide">
     <h1>{{ t('myOrders.title') }}</h1>
 
     <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
@@ -64,6 +64,4 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
-h1 { margin: 0 0 20px; }
-</style>
+<style scoped src="./MyOrdersView.css"></style>

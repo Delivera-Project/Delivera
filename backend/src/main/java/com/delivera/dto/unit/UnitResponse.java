@@ -13,7 +13,8 @@ public record UnitResponse(
         String address,
         BigDecimal latitude,
         BigDecimal longitude,
-        Instant createdAt) {
+        Instant createdAt,
+        String defaultPriority) {
 
     public static UnitResponse from(OperationalUnit unit) {
         return new UnitResponse(
@@ -23,6 +24,7 @@ public record UnitResponse(
                 unit.getAddress(),
                 unit.getLatitude(),
                 unit.getLongitude(),
-                unit.getCreatedAt());
+                unit.getCreatedAt(),
+                unit.getDefaultPriority() != null ? unit.getDefaultPriority().name() : null);
     }
 }

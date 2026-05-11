@@ -5,6 +5,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useApi } from '@/composables/useApi'
 import { useAppConfig } from '@/composables/useAppConfig'
+import { WORKER_ROLES } from '@/constants/roles'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -21,15 +22,19 @@ const companySwitcherRef = ref(null)
 const switching = ref(false)
 
 const themeClass = computed(() =>
-  ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'].includes(auth.role) ? 'theme-company' : 'theme-personal'
+  WORKER_ROLES.includes(auth.role) ? 'theme-company' : 'theme-personal'
 )
 
 const navItems = [
-  { path: '/units', icon: 'pi-building', labelKey: 'nav.units', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
-  { path: '/orders', icon: 'pi-send', labelKey: 'nav.orders', roles: ['COMPANY_ADMIN', 'ANALYST', 'OPERATOR'] },
+  { path: '/home', icon: 'pi-home', labelKey: 'nav.home', roles: WORKER_ROLES },
+  { path: '/activity', icon: 'pi-chart-bar', labelKey: 'nav.activity', roles: ['COMPANY_ADMIN', 'ANALYST'] },
+  { path: '/units', icon: 'pi-building', labelKey: 'nav.units', roles: WORKER_ROLES },
+  { path: '/orders', icon: 'pi-send', labelKey: 'nav.orders', roles: WORKER_ROLES },
   { path: '/loyal-users', icon: 'pi-users', labelKey: 'nav.loyalUsers', roles: ['COMPANY_ADMIN', 'ANALYST'] },
+  { path: '/workers', icon: 'pi-id-card', labelKey: 'nav.workers', roles: WORKER_ROLES },
   { path: '/my-orders', icon: 'pi-inbox', labelKey: 'nav.myOrders', noRole: true },
   { path: '/settings', icon: 'pi-cog', labelKey: 'nav.settings', roles: ['COMPANY_ADMIN'] },
+  { path: '/admin', icon: 'pi-shield', labelKey: 'nav.admin', roles: ['GLOBAL_ADMIN'] },
 ]
 
 const visibleItems = computed(() =>
@@ -54,6 +59,10 @@ const initials = computed(() => {
 
 const otherCompanies = computed(() =>
   auth.companies.filter(c => c.id !== auth.companyId)
+)
+
+const currentCompanyLogo = computed(() =>
+  auth.companies.find(c => c.id === auth.companyId)?.logoData || null
 )
 
 function applyUserLocale(email) {
@@ -97,7 +106,7 @@ async function switchCompany(companyId) {
     if (res.ok) {
       const data = await res.json()
       auth.applyLoginData(data)
-      router.push('/units')
+      router.push('/home')
     }
   } catch {
     // silencioso
@@ -126,6 +135,13 @@ onMounted(async () => {
 
   if (auth.isWorker && auth.isCompanyAdmin) {
     auth.loadCompanies()
+    if (!auth.planCode) {
+      try {
+        const subRes = await api.get('/settings/subscription')
+        if (subRes.ok) { const sub = await subRes.json(); auth.setPlanCode(sub.planCode) }
+      // eslint-disable-next-line no-empty
+      } catch {}
+    }
   }
 })
 
@@ -143,7 +159,8 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
             <li class="company-dropdown-label">{{ t('settings.myCompanies') }}</li>
             <li v-for="c in otherCompanies" :key="c.id">
               <button class="company-dropdown-item" type="button" @click="switchCompany(c.id)">
-                <span class="company-dropdown-avatar">{{ c.name[0].toUpperCase() }}</span>
+                <img v-if="c.logoData" :src="c.logoData" class="company-dropdown-logo" alt="" />
+                <span v-else class="company-dropdown-avatar">{{ c.name[0].toUpperCase() }}</span>
                 <span>{{ c.name }}</span>
               </button>
             </li>
@@ -158,7 +175,8 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
           type="button"
           @click="toggleCompanySwitcher"
         >
-          <span class="sidebar-company-avatar">
+          <img v-if="currentCompanyLogo" :src="currentCompanyLogo" class="sidebar-company-logo" alt="" />
+          <span v-else class="sidebar-company-avatar">
             {{ auth.companyName?.[0]?.toUpperCase() ?? '?' }}
           </span>
           <div class="sidebar-brand-info">
@@ -218,10 +236,11 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
         </Transition>
 
         <button class="sidebar-profile" type="button" @click="toggleProfile">
-          <PAvatar :label="initials" shape="circle" class="sidebar-avatar" />
+          <img v-if="auth.user?.avatarData" :src="auth.user.avatarData" class="sidebar-avatar-img" alt="" />
+          <PAvatar v-else :label="initials" shape="circle" class="sidebar-avatar" />
           <div class="sidebar-profile-info">
             <span class="sidebar-profile-name">{{ displayName }}</span>
-            <span class="sidebar-plan-badge">FREE</span>
+            <span v-if="auth.planCode" :class="['sidebar-plan-badge', 'plan-badge--' + auth.planCode.toLowerCase()]">{{ auth.planCode }}</span>
           </div>
           <i :class="['pi', profileOpen ? 'pi-angle-up' : 'pi-angle-down', 'sidebar-profile-chevron']" />
         </button>
@@ -238,417 +257,4 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
   </div>
 </template>
 
-<style scoped>
-.app-layout {
-  display: flex;
-  height: 100vh;
-  background: #f8fafc;
-}
-
-.sidebar {
-  width: 220px;
-  height: 100vh;
-  background: #ffffff;
-  border-right: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.25s ease;
-  flex-shrink: 0;
-}
-
-.sidebar--collapsed { width: 64px; }
-
-/* Brand */
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 18px 12px;
-}
-
-.sidebar--collapsed .sidebar-brand {
-  justify-content: center;
-  padding: 16px 0 12px;
-  gap: 0;
-}
-
-.sidebar-logo {
-  font-size: 20px;
-  color: var(--p-primary-color, #7c3aed);
-  flex-shrink: 0;
-}
-
-.sidebar-brand-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: #94a3b8;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  overflow: hidden;
-  transition: opacity 0.2s, max-width 0.25s;
-  max-width: 140px;
-}
-
-.sidebar--collapsed .sidebar-brand-name {
-  opacity: 0;
-  max-width: 0;
-}
-
-/* Brand wrapper */
-.sidebar-brand-wrapper {
-  position: relative;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.sidebar-brand--company {
-  border: none;
-  cursor: default;
-  width: 100%;
-  text-align: left;
-}
-
-.sidebar-brand--clickable {
-  cursor: pointer;
-}
-
-.sidebar-brand--clickable:hover {
-  background: #f8fafc;
-}
-
-.sidebar-brand-info {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  transition: opacity 0.2s, max-width 0.25s;
-  max-width: 130px;
-}
-
-.sidebar--collapsed .sidebar-brand-info {
-  opacity: 0;
-  max-width: 0;
-  flex: 0;
-}
-
-.sidebar-brand-company {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-brand-org {
-  display: block;
-  font-size: 11px;
-  color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-brand-chevron {
-  font-size: 12px;
-  color: #94a3b8;
-  flex-shrink: 0;
-  transition: opacity 0.2s, max-width 0.25s;
-  max-width: 16px;
-}
-
-.sidebar--collapsed .sidebar-brand-chevron {
-  opacity: 0;
-  max-width: 0;
-}
-
-.sidebar-company-avatar {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 14%, white);
-  color: var(--p-primary-color, #7c3aed);
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* Company dropdown */
-.company-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 8px;
-  right: 8px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(12, 20, 69, 0.12);
-  list-style: none;
-  padding: 4px;
-  z-index: 200;
-}
-
-.sidebar--collapsed .company-dropdown {
-  left: calc(100% + 8px);
-  right: auto;
-  top: 8px;
-  min-width: 200px;
-}
-
-.company-dropdown-label {
-  font-size: 10px;
-  font-weight: 600;
-  color: #94a3b8;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 6px 12px 4px;
-}
-
-.company-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 10px;
-  border-radius: 7px;
-  font-size: 13px;
-  color: #374151;
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  transition: background 0.12s;
-}
-
-.company-dropdown-item:hover {
-  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 8%, white);
-  color: var(--p-primary-color, #7c3aed);
-}
-
-.company-dropdown-avatar {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 12%, white);
-  color: var(--p-primary-color, #7c3aed);
-  font-size: 12px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Nav */
-.sidebar-nav {
-  list-style: none;
-  padding: 12px 8px;
-  flex: 1;
-}
-
-.sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: #64748b;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background 0.15s, color 0.15s;
-  margin-bottom: 2px;
-  white-space: nowrap;
-}
-
-.sidebar--collapsed .sidebar-item {
-  justify-content: center;
-  padding: 10px 0;
-  gap: 0;
-}
-
-.sidebar-item:hover { background: #f1f5f9; color: #1e293b; }
-
-.sidebar-item.router-link-active,
-.sidebar-item--active {
-  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 8%, white);
-  color: var(--p-primary-color, #7c3aed);
-}
-
-.sidebar-item.router-link-active:hover,
-.sidebar-item--active:hover {
-  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 12%, white);
-  color: var(--p-primary-color, #7c3aed);
-}
-
-.sidebar-item-icon { font-size: 17px; flex-shrink: 0; width: 20px; text-align: center; }
-
-.sidebar-item-label {
-  overflow: hidden;
-  white-space: nowrap;
-  transition: opacity 0.2s, max-width 0.25s;
-  max-width: 140px;
-}
-
-.sidebar--collapsed .sidebar-item-label { opacity: 0; max-width: 0; }
-
-/* Toggle */
-.sidebar-toggle {
-  padding: 10px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  color: #94a3b8;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-top: 1px solid #e2e8f0;
-  transition: color 0.15s, background 0.15s;
-}
-
-.sidebar-toggle:hover { color: var(--p-primary-color, #7c3aed); background: #f8fafc; }
-
-/* Profile */
-.sidebar-profile-wrapper {
-  position: relative;
-  border-top: 1px solid #e2e8f0;
-  padding-bottom: 12px;
-}
-
-.profile-dropdown {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 8px;
-  right: 8px;
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(12, 20, 69, 0.12);
-  list-style: none;
-  padding: 4px;
-  z-index: 200;
-}
-
-.sidebar--collapsed .profile-dropdown {
-  left: calc(100% + 8px);
-  right: auto;
-  bottom: 12px;
-  min-width: 180px;
-}
-
-.profile-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border-radius: 7px;
-  font-size: 13px;
-  color: #374151;
-  text-decoration: none;
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  transition: background 0.12s;
-}
-
-.profile-dropdown-item:hover { background: #f1f5f9; }
-.profile-dropdown-logout { color: #ef4444; }
-.profile-dropdown-logout:hover { background: #fef2f2; color: #dc2626; }
-
-.sidebar-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  transition: background 0.15s;
-}
-
-.sidebar--collapsed .sidebar-profile { justify-content: center; padding: 12px 0; gap: 0; }
-.sidebar-profile:hover { background: #f8fafc; }
-
-.sidebar-avatar {
-  flex-shrink: 0;
-  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 10%, white) !important;
-  color: var(--p-primary-color, #7c3aed) !important;
-  font-weight: 700 !important;
-  font-size: 12px !important;
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px;
-}
-
-.sidebar-profile-info {
-  flex: 1;
-  min-width: 0;
-  text-align: left;
-  overflow: hidden;
-  transition: opacity 0.2s, max-width 0.25s;
-  max-width: 120px;
-}
-
-.sidebar--collapsed .sidebar-profile-info { opacity: 0; max-width: 0; flex: 0; }
-
-.sidebar-profile-name {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #1e293b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sidebar-plan-badge {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 1px 6px;
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 12%, white);
-  color: var(--p-primary-color, #7c3aed);
-  border: 1px solid color-mix(in srgb, var(--p-primary-color, #7c3aed) 22%, white);
-  white-space: nowrap;
-  line-height: 1.6;
-  margin-top: 2px;
-}
-
-.sidebar-profile-chevron {
-  font-size: 12px;
-  color: #94a3b8;
-  flex-shrink: 0;
-  transition: opacity 0.2s, max-width 0.25s;
-  max-width: 20px;
-}
-
-.sidebar--collapsed .sidebar-profile-chevron { opacity: 0; max-width: 0; }
-
-/* Main */
-.app-main {
-  flex: 1;
-  height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
-  background: #f8fafc;
-  padding: 32px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-/* Animations */
-.menu-slide-enter-active, .menu-slide-leave-active { transition: opacity 0.15s, transform 0.15s; }
-.menu-slide-enter-from, .menu-slide-leave-to { opacity: 0; transform: translateY(-6px); }
-.fade-enter-active, .fade-leave-active { transition: opacity 0.15s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-</style>
+<style scoped src="./AppLayout.css"></style>

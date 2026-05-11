@@ -1,0 +1,65 @@
+.invite-page {
+  width: 480px;
+  max-width: 100%;
+}
+
+/* .invite-card hereda apariencia de .surface-card (main.css) */
+
+.invite-title { margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #1e293b; }
+.invite-subtitle { margin: 0 0 28px; font-size: 13px; color: #94a3b8; }
+
+.success-icon {
+  font-size: 40px;
+  color: #22c55e;
+  margin-bottom: 12px;
+}
+
+.invite-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label { font-size: 13px; font-weight: 500; color: #374151; }
+
+.temp-password-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.temp-password-label { font-size: 12px; font-weight: 600; color: #64748b; }
+
+.temp-password-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.temp-password-value {
+  flex: 1;
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  letter-spacing: 0.5px;
+}
+
+.temp-password-hint { font-size: 11px; color: #f59e0b; }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

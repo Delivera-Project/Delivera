@@ -1,0 +1,199 @@
+/* Layout */
+.settings-page {
+  width: 960px;
+  max-width: 100%;
+}
+
+/* .settings-card hereda apariencia de .surface-card (main.css) */
+
+.settings-title { margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #1e293b; }
+.settings-subtitle { margin: 0 0 24px; font-size: 13px; color: #94a3b8; }
+
+.settings-section { padding: 20px 0 4px; }
+
+.info-panel, .settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 480px;
+}
+
+.company-edit-form { padding: 16px; background: #f8fafc; border-radius: 10px; }
+.edit-form-title { font-size: 13px; font-weight: 600; color: #374151; margin: 0 0 4px; }
+
+.info-row { display: flex; flex-direction: column; gap: 4px; }
+.info-label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.06em; }
+.info-value { font-size: 15px; color: #1e293b; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+
+.code-badge {
+  font-family: monospace;
+  font-size: 13px;
+  background: #f1f5f9;
+  padding: 3px 10px;
+  border-radius: 6px;
+  color: #475569;
+}
+
+.section-actions { padding-top: 6px; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.form-field { display: flex; flex-direction: column; gap: 6px; }
+.form-field label { font-size: 13px; font-weight: 500; color: #374151; }
+.field-hint { color: #94a3b8; font-size: 11px; }
+.field-error { color: #ef4444; font-size: 11px; }
+
+/* Filtros empresas */
+.company-filters { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+.company-search { position: relative; flex: 1; }
+.company-search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: #94a3b8; font-size: 13px; pointer-events: none;
+}
+.company-search-input {
+  width: 100%; padding: 8px 12px 8px 34px;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 13px; color: #1e293b; background: #f8fafc;
+  outline: none; box-sizing: border-box; transition: border-color 0.12s;
+}
+.company-search-input:focus { border-color: var(--p-primary-color, #7c3aed); background: #fff; }
+
+/* Logo upload en formulario de edición */
+.logo-upload-wrap { display: flex; align-items: center; gap: 14px; padding: 4px 0 8px; }
+.logo-upload-avatar {
+  position: relative; width: 64px; height: 64px; min-width: 64px; border-radius: 10px;
+  overflow: hidden; cursor: pointer; border: 2px solid #e2e8f0;
+  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 10%, white);
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-upload-img { width: 100%; height: 100%; object-fit: cover; }
+.logo-upload-placeholder { font-size: 24px; font-weight: 700; color: var(--p-primary-color, #7c3aed); }
+.logo-upload-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.15s; color: white; font-size: 18px;
+}
+.logo-upload-avatar:hover .logo-upload-overlay { opacity: 1; }
+.logo-upload-hint { display: flex; flex-direction: column; gap: 2px; }
+.logo-upload-label { font-size: 13px; font-weight: 500; color: #374151; }
+
+/* Paginación */
+.company-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 0; }
+.pagination-info { font-size: 13px; color: #64748b; min-width: 48px; text-align: center; }
+
+/* Modal crop (logo) */
+.avatar-modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,23,42,0.55);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+}
+.avatar-modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); }
+.avatar-modal-title { margin: 0 0 4px; font-size: 18px; font-weight: 700; color: #1e293b; }
+.avatar-modal-hint { margin: 0 0 16px; font-size: 13px; color: #64748b; }
+.crop-stage { position: relative; width: 280px; height: 280px; margin: 0 auto 8px; overflow: hidden; border: 3px solid var(--p-primary-color, #7c3aed); background: #0f172a; border-radius: 50%; }
+.crop-stage--square { border-radius: 12px; }
+.crop-canvas { display: block; width: 280px; height: 280px; cursor: grab; user-select: none; touch-action: none; }
+.crop-canvas.dragging { cursor: grabbing; }
+.crop-overlay { position: absolute; inset: 0; pointer-events: none; border-radius: 50%; box-shadow: 0 0 0 200px rgba(15,23,42,0.55); }
+.crop-overlay--square { border-radius: 12px; }
+.crop-hint { text-align: center; font-size: 11px; color: #94a3b8; margin: 0 0 16px; }
+.avatar-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Empresas */
+.company-list { display: flex; flex-direction: column; gap: 6px; }
+.company-item-wrapper { border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
+.company-item-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 14px; cursor: pointer; transition: background 0.12s;
+}
+.company-item-row:hover { background: #f8fafc; }
+.company-item-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.company-item-avatar {
+  width: 34px; height: 34px; min-width: 34px; border-radius: 8px; overflow: hidden;
+  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 12%, white);
+  color: var(--p-primary-color, #7c3aed); font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.company-item-name { display: block; font-size: 14px; font-weight: 600; color: #1e293b; }
+.company-item-type { display: block; font-size: 12px; color: #94a3b8; margin-top: 1px; }
+.company-item-badge {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px;
+  background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 10%, white);
+  color: var(--p-primary-color, #7c3aed);
+  border: 1px solid color-mix(in srgb, var(--p-primary-color, #7c3aed) 20%, white);
+  margin-left: 8px; vertical-align: middle;
+}
+.company-item-meta { display: flex; align-items: center; gap: 2px; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+.company-item-row:hover .company-item-meta { opacity: 1; }
+.delete-panel-enter-active, .delete-panel-leave-active { transition: opacity 0.15s, transform 0.15s; }
+.delete-panel-enter-from, .delete-panel-leave-to { opacity: 0; transform: translateY(-4px); }
+
+.add-company-trigger { padding-top: 12px; }
+.add-company-form {
+  margin-top: 4px; padding: 16px;
+  border: 1px dashed #e2e8f0; border-radius: 10px;
+  display: flex; flex-direction: column; gap: 14px;
+  max-width: 480px;
+}
+.slide-down-enter-active, .slide-down-leave-active { transition: opacity 0.2s, transform 0.2s; }
+.slide-down-enter-from, .slide-down-leave-to { opacity: 0; transform: translateY(-8px); }
+
+/* Plan badges */
+.plan-badge {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+  padding: 3px 10px; border-radius: 20px; border: 1px solid transparent;
+}
+.plan-badge--free  { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+.plan-badge--basic { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.plan-badge--pro   { background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 10%, white); color: var(--p-primary-color, #7c3aed); border-color: color-mix(in srgb, var(--p-primary-color, #7c3aed) 22%, white); }
+
+/* Planes */
+.plans-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 680px) { .plans-grid { grid-template-columns: 1fr; } }
+
+.plan-card {
+  border: 2px solid #e2e8f0; border-radius: 14px; padding: 18px;
+  display: flex; flex-direction: column; gap: 14px; transition: border-color 0.15s;
+}
+.plan-card--current.plan-card--free  { border-color: #94a3b8; }
+.plan-card--current.plan-card--basic { border-color: #2563eb; }
+.plan-card--current.plan-card--pro   { border-color: var(--p-primary-color, #7c3aed); }
+
+.plan-card-top { display: flex; align-items: center; justify-content: space-between; }
+.plan-current-label { font-size: 10px; color: #94a3b8; font-weight: 500; }
+.plan-card-price { font-size: 22px; font-weight: 800; color: #1e293b; }
+
+.plan-features {
+  list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; flex: 1;
+}
+.plan-features li { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.plan-features li .pi { font-size: 13px; width: 14px; flex-shrink: 0; }
+.plan-features li .pi-check-circle { color: #22c55e; }
+.plan-features li .pi-circle { color: #e2e8f0; }
+.plan-features li span { flex: 1; color: #64748b; }
+.plan-features li strong { font-weight: 700; color: #1e293b; }
+.plan-select-btn { width: 100%; }
+.plan-active-indicator { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 6px; justify-content: center; padding: 6px 0; }
+.plan-active-indicator .pi { color: #22c55e; }
+
+/* Confirmación inline dentro de la card */
+.plan-card--pending { border-color: #94a3b8; }
+.plan-confirm {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.plan-confirm-risks {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.plan-confirm-risks-title { font-size: 11px; font-weight: 600; color: #dc2626; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.04em; }
+.plan-confirm-risks ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 5px; }
+.plan-confirm-risks li { font-size: 12px; color: #7f1d1d; display: flex; align-items: center; gap: 6px; }
+.plan-confirm-risks li .pi { color: #ef4444; font-size: 11px; }
+.plan-confirm-actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: nowrap; }
+.plan-confirm-actions :deep(.p-button) { white-space: nowrap; flex-shrink: 0; }
+.plan-confirm-error { margin-bottom: 4px; font-size: 12px; }
+.plan-confirm-enter-active, .plan-confirm-leave-active { transition: opacity 0.15s, transform 0.15s; }
+.plan-confirm-enter-from, .plan-confirm-leave-to { opacity: 0; transform: translateY(-4px); }

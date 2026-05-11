@@ -1,44 +1,71 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { useApi } from '@/composables/useApi'
 import { useFormatDate } from '@/composables/useFormatDate'
+import { useResourceList } from '@/composables/useResourceList'
+import { useApi } from '@/composables/useApi'
 
 const { t } = useI18n()
 const { formatDate } = useFormatDate()
 const router = useRouter()
 const api = useApi()
+const { items: loyalUsers, loading, error } = useResourceList('/loyal-users')
 
-const loyalUsers = ref([])
-const loading = ref(false)
-const error = ref('')
+const showAdd = ref(false)
+const addEmail = ref('')
+const adding = ref(false)
+const addError = ref('')
+const addSuccess = ref(false)
 
-async function load() {
-  loading.value = true
+async function addLoyalUser() {
+  if (!addEmail.value.trim()) return
+  adding.value = true
+  addError.value = ''
+  addSuccess.value = false
   try {
-    const res = await api.get('/loyal-users')
-    if (res.ok) loyalUsers.value = await res.json()
-    else error.value = t('error.connection')
+    const res = await api.post('/loyal-users', { email: addEmail.value.trim() })
+    if (res.ok) {
+      const created = await res.json()
+      loyalUsers.value.unshift(created)
+      addEmail.value = ''
+      showAdd.value = false
+      addSuccess.value = true
+      setTimeout(() => { addSuccess.value = false }, 3000)
+    } else {
+      const data = await res.json()
+      addError.value = api.translateError(data, 'error.saveFailed')
+    }
   } catch {
-    error.value = t('error.connection')
+    addError.value = t('error.connection')
   } finally {
-    loading.value = false
+    adding.value = false
   }
 }
-
-onMounted(load)
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="surface-card card-full">
     <div class="list-header">
       <h1>{{ t('loyalUsers.title') }}</h1>
+      <PButton :label="t('loyalUsers.new')" icon="pi pi-plus" @click="showAdd = !showAdd; addError = ''" />
+    </div>
+
+    <PMessage v-if="addSuccess" severity="success" :closable="false" class="form-message">{{ t('loyalUsers.added') }}</PMessage>
+
+    <div v-if="showAdd" class="add-form">
+      <div class="form-row">
+        <InputText v-model="addEmail" type="email" :placeholder="t('fields.emailPersonalPlaceholder')" fluid />
+        <PButton :label="adding ? t('common.loading') : t('loyalUsers.new')" icon="pi pi-plus" :loading="adding" @click="addLoyalUser" />
+        <PButton :label="t('common.cancel')" severity="secondary" outlined icon="pi pi-times" @click="showAdd = false" />
+      </div>
+      <PMessage v-if="addError" severity="error" :closable="false" class="form-message">{{ addError }}</PMessage>
     </div>
 
     <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
 
-    <DataTable :value="loyalUsers" :loading="loading" striped-rows row-hover @row-click="e => router.push(`/loyal-users/${e.data.id}`)">
+    <div class="list-scroll">
+    <DataTable :value="loyalUsers" :loading="loading" paginator :rows="10" striped-rows row-hover @row-click="e => router.push(`/loyal-users/${e.data.id}`)">
       <template #empty>
         <EmptyState icon="pi-users" :message="t('loyalUsers.empty')" />
       </template>
@@ -62,6 +89,9 @@ onMounted(load)
         </template>
       </Column>
     </DataTable>
+    </div>
   </div>
 </template>
+
+<style scoped src="./LoyalUsersView.css"></style>
 

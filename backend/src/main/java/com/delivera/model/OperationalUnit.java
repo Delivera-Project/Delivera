@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -42,4 +44,14 @@ public class OperationalUnit {
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "default_priority", length = 10)
+    private OrderPriority defaultPriority;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "unit_workers",
+            joinColumns = @JoinColumn(name = "unit_id"),
+            inverseJoinColumns = @JoinColumn(name = "worker_id"))
+    private Set<Worker> workers = new HashSet<>();
 }

@@ -31,7 +31,7 @@ async function handleLogin() {
     if (res.ok) {
       const data = await res.json()
       auth.applyLoginData(data)
-      router.push(auth.isWorker ? '/units' : '/profile')
+      router.push(auth.isWorker ? '/home' : '/profile')
     } else {
       const data = await res.json()
       error.value = api.translateError(data, 'error.invalidCredentials')

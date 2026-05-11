@@ -1,5 +1,6 @@
 package com.delivera.dto.settings;
 
+import com.delivera.model.OrderPriority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -8,5 +9,9 @@ public record CompanyUpdateRequest(
         String name,
 
         @NotBlank @Size(max = 50)
-        String activityType
+        String activityType,
+
+        OrderPriority defaultPriority,
+
+        boolean defaultPriorityLocked
 ) {}

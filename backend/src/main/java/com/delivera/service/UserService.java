@@ -23,6 +23,9 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private AppConfigService appConfigService;
+
     @Transactional(readOnly = true)
     public ProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
@@ -44,8 +47,21 @@ public class UserService {
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setPhone(StringUtils.hasText(request.phone()) ? request.phone() : null);
+        user.setAddress(StringUtils.hasText(request.address()) ? request.address() : null);
+        user.setLatitude(request.latitude());
+        user.setLongitude(request.longitude());
         userRepository.save(user);
 
+        return ProfileResponse.from(user);
+    }
+
+    @Transactional
+    public ProfileResponse updateAvatar(String email, String avatarData) {
+        appConfigService.checkUploadSize(avatarData);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(UserNotFoundException::new);
+        user.setAvatarData(avatarData);
+        userRepository.save(user);
         return ProfileResponse.from(user);
     }
 

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useFormatDate } from '@/composables/useFormatDate'
 import { useAppConfig } from '@/composables/useAppConfig'
+import { useGeolocation } from '@/composables/useGeolocation'
 
 const { t } = useI18n()
 const { formatDate } = useFormatDate()
@@ -17,6 +18,55 @@ const loyalUser = ref(null)
 const orders = ref([])
 const loading = ref(false)
 const error = ref('')
+const success = ref('')
+const editingAddress = ref(false)
+const addrForm = ref({ address: '', latitude: null, longitude: null })
+const { locating, getPosition } = useGeolocation()
+const saving = ref(false)
+
+function startEditAddress() {
+  addrForm.value.address = loyalUser.value?.address || ''
+  addrForm.value.latitude = loyalUser.value?.latitude ?? null
+  addrForm.value.longitude = loyalUser.value?.longitude ?? null
+  editingAddress.value = true
+  error.value = ''
+  success.value = ''
+}
+
+async function captureLocation() {
+  try {
+    const { lat, lon } = await getPosition()
+    addrForm.value.latitude = lat
+    addrForm.value.longitude = lon
+  } catch {
+    error.value = t('profile.locationDenied')
+  }
+}
+
+async function saveAddress() {
+  saving.value = true
+  error.value = ''
+  try {
+    const res = await api.put(`/loyal-users/${route.params.id}/address`, {
+      email: loyalUser.value.email,
+      address: addrForm.value.address || null,
+      latitude: addrForm.value.latitude,
+      longitude: addrForm.value.longitude,
+    })
+    if (res.ok) {
+      loyalUser.value = await res.json()
+      editingAddress.value = false
+      success.value = t('profile.updated')
+    } else {
+      const data = await res.json().catch(() => ({}))
+      error.value = api.translateError(data, 'error.saveFailed')
+    }
+  } catch {
+    error.value = t('error.connection')
+  } finally {
+    saving.value = false
+  }
+}
 
 onMounted(async () => {
   loadConfig()
@@ -31,6 +81,10 @@ onMounted(async () => {
       const list = await luRes.json()
       loyalUser.value = list.find(l => l.id === route.params.id) || null
     }
+    // Si no encontramos el fidelizado mostrar error en lugar de la ficha vacía
+    if (!loyalUser.value) {
+      error.value = t('loyalUsers.notFound')
+    }
   } catch {
     error.value = t('error.connection')
   } finally {
@@ -40,7 +94,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="card card-wide">
+  <div class="surface-card card-wide">
     <PButton
       type="button"
       text
@@ -69,6 +123,30 @@ onMounted(async () => {
         </div>
       </div>
 
+      <PMessage v-if="success" severity="success" :closable="false" class="mb-3">{{ success }}</PMessage>
+
+      <div class="addr-block">
+        <div class="addr-header">
+          <h3 class="section-title">{{ t('fields.address') }}</h3>
+          <PButton v-if="!editingAddress" type="button" severity="secondary" outlined size="small" icon="pi pi-pencil" :label="t('profile.edit')" @click="startEditAddress" />
+        </div>
+        <div v-if="!editingAddress">
+          <div class="addr-value">{{ loyalUser?.address || t('fields.empty') }}</div>
+          <small v-if="loyalUser?.latitude" class="field-hint">{{ loyalUser.latitude }}, {{ loyalUser.longitude }}</small>
+        </div>
+        <div v-else class="addr-edit">
+          <InputText v-model="addrForm.address" :placeholder="t('fields.addressPlaceholder')" maxlength="500" fluid />
+          <div class="addr-actions">
+            <PButton type="button" :label="t('profile.useCurrentLocation')" icon="pi pi-map-marker" severity="secondary" outlined size="small" :loading="locating" @click="captureLocation" />
+            <small v-if="addrForm.latitude" class="field-hint">{{ addrForm.latitude }}, {{ addrForm.longitude }}</small>
+          </div>
+          <div class="addr-buttons">
+            <PButton type="button" :label="t('profile.save')" icon="pi pi-check" size="small" :loading="saving" @click="saveAddress" />
+            <PButton type="button" :label="t('profile.cancel')" icon="pi pi-times" severity="secondary" outlined size="small" @click="editingAddress = false" />
+          </div>
+        </div>
+      </div>
+
       <h3 class="section-title">{{ t('loyalUsers.orders') }}</h3>
 
       <DataTable :value="orders" striped-rows row-hover @row-click="e => router.push(`/orders/${e.data.id}`)">
@@ -91,9 +169,4 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped>
-.lu-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-.lu-avatar { width: 56px; height: 56px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #64748b; }
-.lu-header h1 { margin: 0 0 6px; }
-.section-title { font-size: 13px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin: 0 0 12px; }
-</style>
+<style scoped src="./LoyalUserDetailView.css"></style>

@@ -27,12 +27,12 @@ test('shows login form', { tag: '@auth' }, async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Iniciar sesión' })).toBeVisible()
 })
 
-test('valid credentials redirect to /units', { tag: '@auth' }, async ({ page }) => {
+test('valid credentials redirect to /home', { tag: '@auth' }, async ({ page }) => {
   await page.goto('/')
   await page.locator('#login-identifier').fill('admin@empresa.com')
   await page.locator('#login-password input').fill('Password1')
   await page.getByRole('button', { name: 'Iniciar sesión' }).click()
-  await expect(page).toHaveURL('/units')
+  await expect(page).toHaveURL('/home')
 })
 
 test('invalid credentials shows error message', { tag: '@auth' }, async ({ page }) => {

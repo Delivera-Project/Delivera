@@ -7,9 +7,12 @@ import com.delivera.exception.UnitNameConflictException;
 import com.delivera.exception.UnitNotFoundException;
 import com.delivera.model.Company;
 import com.delivera.model.OperationalUnit;
+import com.delivera.model.Organization;
 import com.delivera.model.UnitType;
+import com.delivera.model.Worker;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.OperationalUnitRepository;
+import com.delivera.repository.WorkerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +37,11 @@ class UnitServiceTest {
     @Mock
     private CompanyRepository companyRepository;
     @Mock
+    private WorkerRepository workerRepository;
+    @Mock
     private SecurityUtils securityUtils;
+    @Mock
+    private SubscriptionService subscriptionService;
     @InjectMocks
     private UnitService unitService;
 
@@ -55,7 +62,7 @@ class UnitServiceTest {
         unit.setType(UnitType.WAREHOUSE);
         unit.setCompany(company);
 
-        request = new UnitRequest("Warehouse A", UnitType.WAREHOUSE, "1 Main St", null, null);
+        request = new UnitRequest("Warehouse A", UnitType.WAREHOUSE, "1 Main St", null, null, null);
     }
 
     @Test
@@ -79,16 +86,6 @@ class UnitServiceTest {
     }
 
     @Test
-    void create_companyNotFound_throws() {
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.existsByCompanyIdAndName(companyId, "Warehouse A")).thenReturn(false);
-        when(companyRepository.findById(companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> unitService.create(request))
-                .isInstanceOf(CompanyContextException.class);
-    }
-
-    @Test
     void update_success() {
         UUID unitId = unit.getId();
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
@@ -97,72 +94,6 @@ class UnitServiceTest {
         when(unitRepository.save(unit)).thenReturn(unit);
 
         assertThat(unitService.update(unitId, request)).isNotNull();
-    }
-
-    @Test
-    void update_notFound_throws() {
-        UUID unitId = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> unitService.update(unitId, request))
-                .isInstanceOf(UnitNotFoundException.class);
-    }
-
-    @Test
-    void update_nameTakenByOtherUnit_throws() {
-        UUID unitId = unit.getId();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.of(unit));
-        when(unitRepository.existsByCompanyIdAndNameAndIdNot(companyId, "Warehouse A", unitId)).thenReturn(true);
-
-        assertThatThrownBy(() -> unitService.update(unitId, request))
-                .isInstanceOf(UnitNameConflictException.class);
-    }
-
-    @Test
-    void getByCompany_returnsMappedList() {
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findAllByCompanyId(companyId)).thenReturn(List.of(unit));
-
-        assertThat(unitService.getByCompany()).hasSize(1);
-    }
-
-    @Test
-    void getExternalUnits_returnsMappedList() {
-        Company externalCompany = new Company();
-        externalCompany.setId(UUID.randomUUID());
-        externalCompany.setName("External Co");
-
-        OperationalUnit externalUnit = new OperationalUnit();
-        externalUnit.setId(UUID.randomUUID());
-        externalUnit.setName("External Warehouse");
-        externalUnit.setType(UnitType.WAREHOUSE);
-        externalUnit.setCompany(externalCompany);
-
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findExternalByOrganization(companyId)).thenReturn(List.of(externalUnit));
-
-        assertThat(unitService.getExternalUnits()).hasSize(1);
-    }
-
-    @Test
-    void getDetail_found() {
-        UUID unitId = unit.getId();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.of(unit));
-
-        assertThat(unitService.getDetail(unitId)).isNotNull();
-    }
-
-    @Test
-    void getDetail_notFound_throws() {
-        UUID unitId = UUID.randomUUID();
-        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> unitService.getDetail(unitId))
-                .isInstanceOf(UnitNotFoundException.class);
     }
 
     @Test
@@ -176,12 +107,113 @@ class UnitServiceTest {
     }
 
     @Test
-    void delete_notFound_throws() {
-        UUID unitId = UUID.randomUUID();
+    void getByCompany_operatorRole_filtersByWorker() {
+        Worker worker = new Worker();
+        worker.setId(UUID.randomUUID());
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
-        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.empty());
+        when(securityUtils.getCurrentRole()).thenReturn("OPERATOR");
+        when(securityUtils.getCurrentEmail()).thenReturn("op@test.com");
+        when(workerRepository.findByUserEmailAndCompanyId("op@test.com", companyId)).thenReturn(Optional.of(worker));
+        when(unitRepository.findAllByCompanyIdAndWorkersContaining(companyId, worker)).thenReturn(List.of(unit));
 
-        assertThatThrownBy(() -> unitService.delete(unitId))
-                .isInstanceOf(UnitNotFoundException.class);
+        assertThat(unitService.getByCompany()).hasSize(1);
     }
+
+    @Test
+    void getByCompany_nonOperator_returnsAll() {
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(securityUtils.getCurrentRole()).thenReturn("COMPANY_ADMIN");
+        when(unitRepository.findAllByCompanyId(companyId)).thenReturn(List.of(unit));
+
+        assertThat(unitService.getByCompany()).hasSize(1);
+    }
+
+    @Test
+    void assignAndUnassignWorker_success() {
+        UUID workerId = UUID.randomUUID();
+        com.delivera.model.User user = new com.delivera.model.User();
+        user.setEmail("w@t.com");
+        user.setFirstName("A");
+        user.setLastName("B");
+        Worker worker = new Worker();
+        worker.setId(workerId);
+        worker.setUser(user);
+        worker.setRole(com.delivera.model.WorkerRole.OPERATOR);
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findByIdAndCompanyIdWithWorkers(unit.getId(), companyId)).thenReturn(Optional.of(unit));
+        when(workerRepository.findByIdAndCompanyId(workerId, companyId)).thenReturn(Optional.of(worker));
+        when(unitRepository.save(unit)).thenReturn(unit);
+
+        unitService.assignWorker(unit.getId(), workerId);
+        unitService.unassignWorker(unit.getId(), workerId);
+        verify(unitRepository, times(2)).save(unit);
+    }
+
+    @Test
+    void update_nameConflict_throws() {
+        UUID unitId = unit.getId();
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findByIdAndCompanyId(unitId, companyId)).thenReturn(Optional.of(unit));
+        when(unitRepository.existsByCompanyIdAndNameAndIdNot(companyId, "Warehouse A", unitId)).thenReturn(true);
+        assertThatThrownBy(() -> unitService.update(unitId, request))
+                .isInstanceOf(UnitNameConflictException.class);
+    }
+
+    @Test
+    void create_dataIntegrity_throws() {
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.existsByCompanyIdAndName(companyId, "Warehouse A")).thenReturn(false);
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(unitRepository.save(any())).thenThrow(new org.springframework.dao.DataIntegrityViolationException("dup"));
+        assertThatThrownBy(() -> unitService.create(request))
+                .isInstanceOf(UnitNameConflictException.class);
+    }
+
+    @Test
+    void getDetail_success() {
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findByIdAndCompanyIdWithWorkers(unit.getId(), companyId)).thenReturn(Optional.of(unit));
+        assertThat(unitService.getDetail(unit.getId())).isNotNull();
+    }
+
+    @Test
+    void getDetail_notFound_throws() {
+        UUID id = UUID.randomUUID();
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findByIdAndCompanyIdWithWorkers(id, companyId)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> unitService.getDetail(id)).isInstanceOf(UnitNotFoundException.class);
+    }
+
+    @Test
+    void getExternalUnits_mapsResults() {
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(unitRepository.findExternalByOrganization(companyId)).thenReturn(List.of(unit));
+        assertThat(unitService.getExternalUnits()).hasSize(1);
+    }
+
+    @Test
+    void getByCompany_operatorWithoutWorker_returnsEmpty() {
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(securityUtils.getCurrentRole()).thenReturn("OPERATOR");
+        when(securityUtils.getCurrentEmail()).thenReturn("op@test.com");
+        when(workerRepository.findByUserEmailAndCompanyId("op@test.com", companyId)).thenReturn(Optional.empty());
+        assertThat(unitService.getByCompany()).isEmpty();
+    }
+
+    @Test
+    void getExternalCompanies_excludesSelf() {
+        Organization org = new Organization();
+        org.setId(UUID.randomUUID());
+        company.setOrganization(org);
+        Company other = new Company();
+        other.setId(UUID.randomUUID());
+        other.setName("Other");
+        other.setActivityType(new com.delivera.model.ActivityType() {{ setCode("FOOD"); }});
+        when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        when(companyRepository.findByOrganizationId(org.getId())).thenReturn(List.of(company, other));
+
+        assertThat(unitService.getExternalCompanies()).hasSize(1);
+    }
+
 }

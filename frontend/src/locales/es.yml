@@ -1,6 +1,30 @@
 app:
   name: Delivera
 
+home:
+  welcome: "Bienvenido, {name}"
+  setupBanner: Completa la configuración para empezar a gestionar envíos
+  createFirstUnit: Crea tu primera unidad
+  inviteFirstWorker: Invita a tu primer trabajador
+  quickActions: Accesos rápidos
+  ordersChart: Pedidos por día
+  noOrdersChart: No hay pedidos en los últimos 14 días
+  unitsMap: Mapa de unidades
+  stats:
+    units: Unidades
+    workers: Trabajadores
+    orders: Pedidos activos
+    totalOrders: Pedidos
+    active: En curso
+    delivered: Entregados
+  quick:
+    newOrderDesc: Registra un nuevo envío
+    pendingOrders: Pedidos pendientes
+    pendingOrdersDesc: "{n} pedidos sin asignar"
+    newUnitDesc: Añade un almacén o tienda
+    team: Equipo
+    teamDesc: Gestiona los accesos de tu equipo
+
 auth:
   login: Iniciar sesión
   register: Registrarse
@@ -26,6 +50,19 @@ profile:
   passwordChanged: Contraseña actualizada correctamente
   memberSince: Miembro desde
   language: Idioma
+  uploadAvatar: Subir foto de perfil
+  avatarHint: "JPG o PNG, máx. 2 MB. Recomendado cuadrado 512×512 px"
+  avatarInvalidType: Formato no válido. Usa JPG o PNG
+  avatarTooLarge: La imagen supera el límite de 2 MB
+  avatarPreviewTitle: Vista previa de la foto de perfil
+  avatarPreviewHint: "Encuadra tu foto arrastrando y con la rueda del ratón para hacer zoom."
+  avatarCropHint: "Rueda del ratón: zoom · Arrastrar: mover"
+  avatarConfirm: Usar esta imagen
+  avatarCancel: Descartar
+  useCurrentLocation: Usar mi ubicación actual
+  locationCaptured: Ubicación capturada
+  locationDenied: No se pudo obtener la ubicación
+  addressHint: Necesaria para recibir pedidos B2C en tu domicilio
 
 fields:
   email: Correo
@@ -71,6 +108,14 @@ notFound:
   message: La página que buscas no existe
   goHome: Volver al inicio
 
+onboarding:
+  createUnit: Crea tu primera unidad
+  createUnitHint: Las unidades son los nodos operativos de tu empresa (almacenes, tiendas, fábricas...)
+  inviteWorker: Invita a tu primer trabajador
+  inviteWorkerHint: Los trabajadores podrán gestionar envíos desde tu empresa
+  skip: Omitir
+  finish: Finalizar configuración
+
 register:
   orgTitle: Crear organización
   companyTitle: Registrar empresa
@@ -90,23 +135,66 @@ activity:
   retail: Retail
   transport: Transporte
   other: Otro
+  panel:
+    title: Panel de actividad
+    subtitle: Analiza el rendimiento de tu empresa
+    period:
+      MONTH: Este mes
+      WEEK: Esta semana
+      TODAY: Hoy
+    metric:
+      totalOrders: Pedidos creados
+      completedOrders: Completados
+      cancelledOrders: Cancelados
+      activeOrders: En curso
+      newLoyalUsers: Nuevos fidelizados
+      deliveryRate: Tasa de entrega
+    chart:
+      title: Pedidos por día
+      orders: Pedidos
+      empty: No hay pedidos en este período
+    ranking:
+      title: Ranking de unidades
+      unit: Unidad
+      type: Tipo
+      orders: Pedidos
+      empty: No hay datos de unidades en este período
 
 units:
   title: Unidades operativas
   new: Nueva unidad
   edit: Editar unidad
   detail: Detalles de la unidad
+  notFound: Unidad no encontrada
+  defaultPriority: Prioridad por defecto (sobreescribe la de la empresa)
+  defaultPriorityHelp: Si se deja vacío se usa la prioridad por defecto de la empresa
+  priorityOverridden: Sobreescrita
+  priorityInheritedFromCompany: Heredada de la empresa
+  defaultPriorityLockedByCompany: Bloqueado por el administrador de la empresa
   created: Unidad creada correctamente
   updated: Unidad actualizada correctamente
   empty: No hay unidades operativas. Crea la primera para poder gestionar envíos.
   deleteConfirm: "¿Eliminar esta unidad?"
   deleteActiveOrders: No se puede eliminar la unidad porque tiene pedidos asociados.
+  locationLocked: Esta unidad tiene pedidos asociados. No se puede modificar su ubicación ni coordenadas.
   filterAll: Todos
+  searchPlaceholder: Buscar por nombre o correo
   noCoords: Sin coordenadas
+  workers: Trabajadores asignados
+  noWorkers: No hay trabajadores asignados a esta unidad.
+  assignWorkers: Asignar trabajadores
+  noAssignableWorkers: No hay trabajadores disponibles para asignar.
   WAREHOUSE: Almacén
   STORE: Tienda
   FACTORY: Fábrica
   LOGISTICS_CENTER: Centro logístico
+  mapTitle: Mapa de unidades
+  mapView: Ver mapa
+  listView: Ver lista
+  mapClickHint: Haz clic en el mapa para establecer la ubicación
+  geocoding: Obteniendo dirección...
+  geocodeSearch: Buscar en el mapa
+  geocodeNotFound: Dirección no encontrada, puedes establecer la ubicación haciendo clic en el mapa
 
 orders:
   listTitle: Pedidos
@@ -155,7 +243,15 @@ orders:
   statusNotePlaceholder: Motivo del cambio de estado...
   statusUpdated: Estado actualizado correctamente
   filterAll: Todos
+  searchPlaceholder: Buscar por nombre o correo
   deleteConfirm: "¿Eliminar este pedido?"
+  viewDetail: Ver detalle
+  noMapOrders: No hay pedidos pendientes con coordenadas
+  withoutCoordinates: Pedidos sin ubicación
+  routeUnavailable: No se ha podido calcular la ruta
+  chat: Chat
+  chatEmpty: No hay mensajes todavía.
+  chatPlaceholder: Escribe un mensaje...
   details: Detalles
   priority:
     label: Prioridad
@@ -197,6 +293,7 @@ tracking:
 loyalUsers:
   title: Usuarios fidelizados
   new: Añadir fidelizado
+  notFound: Usuario fidelizado no encontrado
   empty: No hay usuarios fidelizados con pedidos todavía.
   email: Email
   registered: Registrado
@@ -205,6 +302,48 @@ loyalUsers:
   orders: Pedidos recibidos
   since: Cliente desde
   ordersEmpty: Este fidelizado no tiene pedidos todavía.
+  detail: Ver fidelizado
+
+map:
+  legend:
+    ownUnit: Unidad propia
+    otherUnit: Unidad ajena
+    customer: Cliente
+    routeSolid: Ruta
+    routeDashed: Ruta estimada
+
+workers:
+  title: Equipo
+  subtitle: Gestiona los accesos de tu equipo
+  invite: Invitar trabajador
+  inviteTitle: Invitar a un trabajador
+  inviteSubtitle: Tendrá acceso a esta empresa
+  inviteHint: Si el email no está registrado, se creará una cuenta con contraseña temporal y se le notificará por correo
+  copyPassword: Copiar contraseña
+  passwordCopied: Contraseña copiada
+  email: Email
+  role: Rol
+  name: Nombre
+  since: Desde
+  empty: No hay trabajadores aún. Invita al primero.
+  invited: Trabajador invitado correctamente
+  invitedNewUser: "Se ha creado una cuenta para {email}. Copia la contraseña temporal y compártela:"
+  invitedExisting: "{email} ya tenía cuenta en Delivera. Se le ha añadido a la empresa."
+  roleChanged: Rol actualizado
+  removed: Trabajador eliminado
+  tempPasswordHint: "Contraseña temporal:"
+  tempPasswordChangeHint: Pide al trabajador que la cambie tras su primer inicio de sesión
+  filterAll: Todos
+  searchPlaceholder: Buscar por nombre o correo
+  changeRole: Cambiar rol
+  confirmRemove: "¿Eliminar este trabajador?"
+  confirmRemoveTitle: Confirmar eliminación
+  confirmRemoveDesc: "El trabajador perderá el acceso a la empresa."
+  removeWorker: Eliminar
+  roles:
+    COMPANY_ADMIN: Administrador
+    ANALYST: Analista
+    OPERATOR: Operador
 
 myOrders:
   title: Mis pedidos
@@ -215,12 +354,33 @@ nav:
   units: Unidades
   orders: Pedidos
   loyalUsers: Fidelizados
+  home: Inicio
   myOrders: Mis pedidos
   settings: Configuración
+  activity: Actividad
+  workers: Equipo
+  admin: Administración
+
+admin:
+  title: Panel de administración
+  organizations: Organizaciones
+  orgName: Nombre
+  orgHandle: Código
+  companies: Empresas
+  workers: Trabajadores
+  orders: Pedidos
+  createdAt: Creada
+  empty: No hay organizaciones registradas.
+  metric:
+    totalOrganizations: Organizaciones
+    totalCompanies: Empresas
+    totalOrdersThisMonth: Pedidos este mes
+    totalActiveUsers: Usuarios activos
 
 common:
   back: Volver
   next: Siguiente
+  previous: Anterior
   loading: Cargando...
   save: Guardar
   cancel: Cancelar
@@ -235,6 +395,7 @@ validation:
   maxLength: "{field} no puede superar {max} caracteres"
   passwordsDoNotMatch: Las contraseñas no coinciden
   passwordStrength: La contraseña debe incluir mayúscula, minúscula y número
+  phoneFormat: "Solo dígitos, espacios y los símbolos + - ( )"
   coordinatesIncomplete: La latitud y la longitud deben indicarse juntas
   coordinatesInvalid: Coordenadas fuera de rango (lat -90–90, lon -180–180)
   orgCodeRequired: Introduce un código de organización
@@ -254,6 +415,8 @@ error:
   CURRENT_PASSWORD_INVALID: La contraseña actual es incorrecta
   NEW_PASSWORD_SAME_AS_CURRENT: La nueva contraseña no puede ser igual a la actual
   VALIDATION_ERROR: Error de validación
+  INVALID_NUMBER_FORMAT: "Formato de número incorrecto. Usa el punto como separador decimal (ej. 40.4168)"
+  FILE_TOO_LARGE: La imagen supera el tamaño máximo permitido
   INTERNAL_ERROR: Error interno del servidor
   HANDLE_CONFLICT: Este código de organización ya está en uso
   handleInvalid: "Solo letras minúsculas, números y guiones (sin empezar ni terminar con guión)"
@@ -267,6 +430,15 @@ error:
   FORBIDDEN: Acceso no autorizado
   DATA_INTEGRITY_ERROR: Error de integridad de datos
   COMPANY_CONTEXT_MISSING: No hay contexto de empresa en la sesión
+  SUBSCRIPTION_LIMIT_UNITS: Tienes más unidades operativas de las que permite el plan destino
+  SUBSCRIPTION_LIMIT_WORKERS: Tienes más trabajadores de los que permite el plan destino
+  SUBSCRIPTION_LIMIT_ORDERS: Superaste el límite de pedidos mensuales del plan destino
+  SUBSCRIPTION_LIMIT_LOYAL_USERS: Tienes más usuarios fidelizados de los que permite el plan destino
+  SUBSCRIPTION_LIMIT_COMPANIES: Tienes más empresas de las que permite el plan destino
+  WORKER_ALREADY_EXISTS: Este trabajador ya pertenece a la empresa
+  LOYAL_USER_CANNOT_BE_WORKER: Este email pertenece a un usuario fidelizado y no puede ser invitado como trabajador
+  WORKER_NOT_FOUND: Trabajador no encontrado
+  LAST_ADMIN: No puedes cambiar el rol del único administrador de la empresa
 
 orgSelect:
   title: Selecciona tu organización
@@ -276,8 +448,25 @@ orgSelect:
 
 settings:
   title: Configuración
+  subtitle: Gestiona tu organización, empresa y plan de suscripción
   orgSection: Organización
   companySection: Empresa
+  subscriptionSection: Plan
+  apiKeysSection: API keys
+  defaultPriority: Prioridad por defecto
+  defaultPriorityHelp: Se aplica al crear pedidos cuando no se indica una prioridad
+  defaultPriorityLock: Bloquear esta configuración para todas las unidades
+  defaultPriorityLockHelp: Si está activado, las unidades no podrán sobreescribir esta prioridad
+  currentPlan: Plan actual
+  availablePlans: Planes disponibles
+  selectPlan: Cambiar a este plan
+  upgradeBanner: Estás cerca del límite de tu plan. Considera actualizar para evitar interrupciones.
+  resource:
+    units: Unidades operativas
+    workers: Trabajadores
+    ordersThisMonth: Pedidos este mes
+    loyalUsers: Usuarios fidelizados
+    companies: Empresas
   orgCode: Código de organización
   orgCodeHint: "Los trabajadores usan este código para identificar la organización al iniciar sesión"
   orgCodeCopied: Código copiado al portapapeles
@@ -294,3 +483,34 @@ settings:
   deleteConfirm: "¿Seguro que quieres eliminar esta empresa?"
   deleteActiveOrdersTitle: "Esta empresa tiene pedidos activos"
   deleteActiveOrdersHint: "Si la eliminas, sus pedidos y datos también serán eliminados. ¿Continuar de todas formas?"
+  uploadLogo: Subir logo
+  logoHint: "PNG, JPG o GIF — máx. 2 MB"
+  logoTooLarge: La imagen supera el límite de 2 MB
+  downgradeTitle: Confirmar cambio de plan
+  downgradeWarning: Estás a punto de cambiar a un plan inferior. Es posible que algunos recursos o funcionalidades queden desactivados.
+  downgradeRisksTitle: Los siguientes recursos serán eliminados
+  downgradeRiskDelete: "se eliminarán {count}"
+  confirmDowngrade: Confirmar cambio
+  downgradePlan: Cambiar a plan inferior
+  companyLimitReached: Has alcanzado el límite de empresas de tu plan actual
+  noCompaniesFound: No se encontraron empresas con ese criterio
+  searchByName: Buscar por nombre
+  filterAll: Todos
+
+apiKeys:
+  intro: Genera y gestiona claves para que sistemas externos accedan a la API de Delivera. La clave solo se muestra una vez al crearla.
+  create: Crear API key
+  name: Nombre
+  namePlaceholder: Ej. integración ERP
+  createdTitle: Tu nueva API key
+  createdWarning: Cópiala ahora. No volverá a mostrarse.
+  copy: Copiar
+  copied: Copiada
+  empty: Aún no has creado ninguna API key.
+  created: Creada
+  lastUsed: Último uso
+  neverUsed: Nunca usada
+  active: Activa
+  revoked: Revocada
+  revoke: Revocar
+  revokeConfirm: "¿Revocar esta API key? Las integraciones que la estén usando dejarán de funcionar."

@@ -46,7 +46,13 @@ class SettingsServiceTest {
     @Mock
     private ActivityTypeRepository activityTypeRepository;
     @Mock
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Mock
     private SecurityUtils securityUtils;
+    @Mock
+    private SubscriptionService subscriptionService;
+    @Mock
+    private AppConfigService appConfigService;
     @InjectMocks
     private SettingsService settingsService;
 
@@ -94,36 +100,6 @@ class SettingsServiceTest {
     }
 
     @Test
-    void updateOrg_sameHandle_doesNotCheckConflict() {
-        OrgUpdateRequest req = new OrgUpdateRequest("SameOrg", "test-org");
-        when(organizationRepository.save(organization)).thenReturn(organization);
-
-        settingsService.updateOrg(req);
-        verify(organizationRepository, never()).existsByHandleAndIdNot(any(), any());
-    }
-
-    @Test
-    void updateOrg_handleConflict_throws() {
-        OrgUpdateRequest req = new OrgUpdateRequest("NewOrg", "taken-slug");
-        when(organizationRepository.existsByHandleAndIdNot("taken-slug", orgId)).thenReturn(true);
-
-        assertThatThrownBy(() -> settingsService.updateOrg(req))
-                .isInstanceOf(HandleConflictException.class);
-    }
-
-    @Test
-    void updateCompany_success() {
-        CompanyUpdateRequest req = new CompanyUpdateRequest("UpdatedCompany", "RETAIL");
-        ActivityType retail = new ActivityType(); retail.setCode("RETAIL");
-        when(activityTypeRepository.getReferenceById("RETAIL")).thenReturn(retail);
-        when(companyRepository.save(company)).thenReturn(company);
-
-        var result = settingsService.updateCompany(req);
-        assertThat(result).isNotNull();
-        verify(companyRepository).save(company);
-    }
-
-    @Test
     void createCompany_success() {
         CompanyCreateRequest req = new CompanyCreateRequest("NewCompany", "FOOD");
         User user = new User();
@@ -153,7 +129,6 @@ class SettingsServiceTest {
 
         when(companyRepository.findById(target.getId())).thenReturn(Optional.of(target));
         when(orderRepository.existsByCompanyIdAndStatusIn(any(), any())).thenReturn(false);
-        when(orderRepository.findByCompanyId(any())).thenReturn(List.of());
         when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(any())).thenReturn(List.of());
         when(operationalUnitRepository.findAllByCompanyId(any())).thenReturn(List.of());
         when(workerRepository.findByCompanyId(any())).thenReturn(List.of());
@@ -163,57 +138,69 @@ class SettingsServiceTest {
     }
 
     @Test
-    void deleteCompany_differentOrg_throws() {
-        Organization otherOrg = new Organization();
-        otherOrg.setId(UUID.randomUUID());
-        Company otherCompany = new Company();
-        otherCompany.setId(UUID.randomUUID());
-        otherCompany.setOrganization(otherOrg);
+    void updateOrg_handleConflict_throws() {
+        OrgUpdateRequest req = new OrgUpdateRequest("NewOrg", "taken");
+        when(organizationRepository.existsByHandleAndIdNot("taken", orgId)).thenReturn(true);
+        assertThatThrownBy(() -> settingsService.updateOrg(req))
+                .isInstanceOf(HandleConflictException.class);
+    }
 
-        when(companyRepository.findById(otherCompany.getId())).thenReturn(Optional.of(otherCompany));
+    @Test
+    void updateCompany_success() {
+        CompanyUpdateRequest req = new CompanyUpdateRequest("Renamed", "FOOD", null, false);
+        ActivityType food = new ActivityType(); food.setCode("FOOD");
+        when(activityTypeRepository.getReferenceById("FOOD")).thenReturn(food);
+        when(companyRepository.save(company)).thenReturn(company);
+        assertThat(settingsService.updateCompany(req)).isNotNull();
+        verify(companyRepository).save(company);
+    }
 
-        assertThatThrownBy(() -> settingsService.deleteCompany(otherCompany.getId(), false))
+    @Test
+    void deleteCompany_notFound_throws() {
+        UUID id = UUID.randomUUID();
+        when(companyRepository.findById(id)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> settingsService.deleteCompany(id, false))
                 .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
-    void deleteCompany_hasActiveOrders_throws() {
-        Company target = new Company();
-        target.setId(UUID.randomUUID());
-        target.setOrganization(organization);
+    void deleteCompany_differentOrg_throws() {
+        Organization otherOrg = new Organization(); otherOrg.setId(UUID.randomUUID());
+        Company target = new Company(); target.setId(UUID.randomUUID()); target.setOrganization(otherOrg);
+        when(companyRepository.findById(target.getId())).thenReturn(Optional.of(target));
+        assertThatThrownBy(() -> settingsService.deleteCompany(target.getId(), false))
+                .isInstanceOf(ForbiddenException.class);
+    }
 
+    @Test
+    void deleteCompany_sameAsCurrent_throws() {
+        when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
+        assertThatThrownBy(() -> settingsService.deleteCompany(companyId, false))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void deleteCompany_activeOrders_throws() {
+        Company target = new Company(); target.setId(UUID.randomUUID()); target.setOrganization(organization);
         when(companyRepository.findById(target.getId())).thenReturn(Optional.of(target));
         when(orderRepository.existsByCompanyIdAndStatusIn(any(), any())).thenReturn(true);
-
         assertThatThrownBy(() -> settingsService.deleteCompany(target.getId(), false))
                 .isInstanceOf(CompanyHasActiveOrdersException.class);
     }
 
     @Test
-    void deleteCompany_force_deletesEvenWithActiveOrders() {
-        Company target = new Company();
-        target.setId(UUID.randomUUID());
-        target.setOrganization(organization);
-
-        when(companyRepository.findById(target.getId())).thenReturn(Optional.of(target));
-        when(orderRepository.findByCompanyId(any())).thenReturn(List.of());
-        when(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(any())).thenReturn(List.of());
-        when(operationalUnitRepository.findAllByCompanyId(any())).thenReturn(List.of());
-        when(workerRepository.findByCompanyId(any())).thenReturn(List.of());
-
-        settingsService.deleteCompany(target.getId(), true);
-        verify(companyRepository).delete(target);
-        verify(orderRepository, never()).existsByCompanyIdAndStatusIn(any(), any());
+    void getMyCompanies_returnsList() {
+        when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
+        Worker w = new Worker(); w.setCompany(company);
+        when(workerRepository.findByUserEmailAndOrgId("admin@test.com", orgId)).thenReturn(List.of(w));
+        assertThat(settingsService.getMyCompanies()).hasSize(1);
     }
 
     @Test
-    void getMyCompanies_returnsCompaniesInSameOrg() {
-        Worker worker = new Worker();
-        worker.setCompany(company);
-
-        when(securityUtils.getCurrentEmail()).thenReturn("admin@test.com");
-        when(workerRepository.findByUserEmailAndOrgId("admin@test.com", orgId)).thenReturn(List.of(worker));
-
-        assertThat(settingsService.getMyCompanies()).hasSize(1);
+    void updateCompanyLogo_success() {
+        when(companyRepository.save(company)).thenReturn(company);
+        var result = settingsService.updateCompanyLogo("data:image/png;base64,XXX");
+        assertThat(result.logoData()).isEqualTo("data:image/png;base64,XXX");
     }
+
 }

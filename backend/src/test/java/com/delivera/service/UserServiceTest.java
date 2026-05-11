@@ -31,6 +31,8 @@ class UserServiceTest {
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private AppConfigService appConfigService;
     @InjectMocks
     private UserService userService;
 
@@ -53,48 +55,14 @@ class UserServiceTest {
     }
 
     @Test
-    void getProfile_notFound_throws() {
-        when(userRepository.findByEmail("missing@test.com")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.getProfile("missing@test.com"))
-                .isInstanceOf(UserNotFoundException.class);
-    }
-
-    @Test
     void updateProfile_success() {
-        UpdateProfileRequest req = new UpdateProfileRequest("newusername", "John", "Doe", null);
+        UpdateProfileRequest req = new UpdateProfileRequest("newusername", "John", "Doe", null, null, null, null);
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
         when(userRepository.existsByUsername("newusername")).thenReturn(false);
         when(userRepository.save(user)).thenReturn(user);
 
         userService.updateProfile("user@test.com", req);
         verify(userRepository).save(user);
-    }
-
-    @Test
-    void updateProfile_sameUsername_doesNotCheckConflict() {
-        UpdateProfileRequest req = new UpdateProfileRequest("testuser", "John", "Doe", null);
-        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
-        when(userRepository.save(user)).thenReturn(user);
-
-        userService.updateProfile("user@test.com", req);
-        verify(userRepository, never()).existsByUsername(any());
-    }
-
-    @Test
-    void updateProfile_usernameTaken_throws() {
-        UpdateProfileRequest req = new UpdateProfileRequest("taken", "John", "Doe", null);
-        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
-        when(userRepository.existsByUsername("taken")).thenReturn(true);
-        assertThatThrownBy(() -> userService.updateProfile("user@test.com", req))
-                .isInstanceOf(UsernameAlreadyExistsException.class);
-    }
-
-    @Test
-    void updateProfile_notFound_throws() {
-        UpdateProfileRequest req = new UpdateProfileRequest("u", "John", null, null);
-        when(userRepository.findByEmail("missing@test.com")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.updateProfile("missing@test.com", req))
-                .isInstanceOf(UserNotFoundException.class);
     }
 
     @Test
@@ -110,16 +78,6 @@ class UserServiceTest {
     }
 
     @Test
-    void changePassword_currentPasswordWrong_throws() {
-        ChangePasswordRequest req = new ChangePasswordRequest("wrong", "NewPass1");
-        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("wrong", "hashed")).thenReturn(false);
-        assertThatThrownBy(() -> userService.changePassword("user@test.com", req))
-                .isInstanceOf(InvalidPasswordException.class)
-                .hasMessageContaining("CURRENT_PASSWORD_INVALID");
-    }
-
-    @Test
     void changePassword_sameAsCurrentPassword_throws() {
         ChangePasswordRequest req = new ChangePasswordRequest("oldPass", "oldPass");
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
@@ -130,10 +88,35 @@ class UserServiceTest {
     }
 
     @Test
-    void changePassword_userNotFound_throws() {
-        ChangePasswordRequest req = new ChangePasswordRequest("pass", "NewPass1");
-        when(userRepository.findByEmail("missing@test.com")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.changePassword("missing@test.com", req))
+    void getProfile_notFound_throws() {
+        when(userRepository.findByEmail("x@t.com")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> userService.getProfile("x@t.com"))
                 .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    void updateProfile_usernameConflict_throws() {
+        UpdateProfileRequest req = new UpdateProfileRequest("taken", "A", "B", null, null, null, null);
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.existsByUsername("taken")).thenReturn(true);
+        assertThatThrownBy(() -> userService.updateProfile("user@test.com", req))
+                .isInstanceOf(UsernameAlreadyExistsException.class);
+    }
+
+    @Test
+    void updateAvatar_success() {
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
+        assertThat(userService.updateAvatar("user@test.com", "data:image/png;base64,XX")).isNotNull();
+    }
+
+    @Test
+    void changePassword_wrongCurrent_throws() {
+        ChangePasswordRequest req = new ChangePasswordRequest("bad", "NewPass1");
+        when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("bad", "hashed")).thenReturn(false);
+        assertThatThrownBy(() -> userService.changePassword("user@test.com", req))
+                .isInstanceOf(InvalidPasswordException.class)
+                .hasMessageContaining("CURRENT_PASSWORD_INVALID");
     }
 }

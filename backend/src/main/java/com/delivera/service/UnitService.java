@@ -2,16 +2,21 @@ package com.delivera.service;
 
 import com.delivera.dto.settings.CompanySummary;
 import com.delivera.dto.unit.B2BUnitResponse;
+import com.delivera.dto.unit.UnitDetailResponse;
 import com.delivera.dto.unit.UnitRequest;
 import com.delivera.dto.unit.UnitResponse;
 import com.delivera.security.SecurityUtils;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.UnitNameConflictException;
 import com.delivera.exception.UnitNotFoundException;
+import com.delivera.exception.WorkerNotFoundException;
 import com.delivera.model.Company;
 import com.delivera.model.OperationalUnit;
+import com.delivera.model.Worker;
+import com.delivera.model.WorkerRole;
 import com.delivera.repository.CompanyRepository;
 import com.delivera.repository.OperationalUnitRepository;
+import com.delivera.repository.WorkerRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,19 +29,26 @@ public class UnitService {
 
     private final OperationalUnitRepository unitRepository;
     private final CompanyRepository companyRepository;
+    private final WorkerRepository workerRepository;
     private final SecurityUtils securityUtils;
+    private final SubscriptionService subscriptionService;
 
     public UnitService(OperationalUnitRepository unitRepository,
                        CompanyRepository companyRepository,
-                       SecurityUtils securityUtils) {
+                       WorkerRepository workerRepository,
+                       SecurityUtils securityUtils,
+                       SubscriptionService subscriptionService) {
         this.unitRepository = unitRepository;
         this.companyRepository = companyRepository;
+        this.workerRepository = workerRepository;
         this.securityUtils = securityUtils;
+        this.subscriptionService = subscriptionService;
     }
 
     @Transactional
     public UnitResponse create(UnitRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
+        subscriptionService.checkUnitLimit(companyId);
         if (unitRepository.existsByCompanyIdAndName(companyId, request.name())) {
             throw new UnitNameConflictException();
         }
@@ -44,11 +56,7 @@ public class UnitService {
                 .orElseThrow(CompanyContextException::new);
         var unit = new OperationalUnit();
         unit.setCompany(company);
-        unit.setName(request.name());
-        unit.setType(request.type());
-        unit.setAddress(request.address());
-        unit.setLatitude(request.latitude());
-        unit.setLongitude(request.longitude());
+        applyRequest(unit, request);
         try {
             return UnitResponse.from(unitRepository.save(unit));
         } catch (DataIntegrityViolationException e) {
@@ -64,11 +72,7 @@ public class UnitService {
         if (unitRepository.existsByCompanyIdAndNameAndIdNot(companyId, request.name(), unitId)) {
             throw new UnitNameConflictException();
         }
-        unit.setName(request.name());
-        unit.setType(request.type());
-        unit.setAddress(request.address());
-        unit.setLatitude(request.latitude());
-        unit.setLongitude(request.longitude());
+        applyRequest(unit, request);
         try {
             return UnitResponse.from(unitRepository.save(unit));
         } catch (DataIntegrityViolationException e) {
@@ -76,12 +80,22 @@ public class UnitService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<UnitResponse> getByCompany() {
-        return unitRepository.findAllByCompanyId(securityUtils.getCurrentCompanyId()).stream()
-                .map(UnitResponse::from)
-                .toList();
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        String role = securityUtils.getCurrentRole();
+        if (WorkerRole.OPERATOR.name().equals(role)) {
+            String email = securityUtils.getCurrentEmail();
+            Worker worker = workerRepository.findByUserEmailAndCompanyId(email, companyId).orElse(null);
+            if (worker == null) return List.of();
+            return unitRepository.findAllByCompanyIdAndWorkersContaining(companyId, worker).stream()
+                    .map(UnitResponse::from).toList();
+        }
+        return unitRepository.findAllByCompanyId(companyId).stream()
+                .map(UnitResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<B2BUnitResponse> getExternalUnits() {
         return unitRepository.findExternalByOrganization(securityUtils.getCurrentCompanyId()).stream()
                 .map(B2BUnitResponse::from)
@@ -95,14 +109,35 @@ public class UnitService {
         return companyRepository.findByOrganizationId(company.getOrganization().getId())
                 .stream()
                 .filter(c -> !c.getId().equals(companyId))
-                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode()))
+                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData()))
                 .toList();
     }
 
-    public UnitResponse getDetail(UUID id) {
+    @Transactional(readOnly = true)
+    public UnitDetailResponse getDetail(UUID id) {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        return UnitResponse.from(unitRepository.findByIdAndCompanyId(id, companyId)
+        return UnitDetailResponse.from(unitRepository.findByIdAndCompanyIdWithWorkers(id, companyId)
                 .orElseThrow(() -> new UnitNotFoundException(id)));
+    }
+
+    @Transactional
+    public UnitDetailResponse assignWorker(UUID unitId, UUID workerId) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        OperationalUnit unit = unitRepository.findByIdAndCompanyIdWithWorkers(unitId, companyId)
+                .orElseThrow(() -> new UnitNotFoundException(unitId));
+        Worker worker = workerRepository.findByIdAndCompanyId(workerId, companyId)
+                .orElseThrow(WorkerNotFoundException::new);
+        unit.getWorkers().add(worker);
+        return UnitDetailResponse.from(unitRepository.save(unit));
+    }
+
+    @Transactional
+    public UnitDetailResponse unassignWorker(UUID unitId, UUID workerId) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        OperationalUnit unit = unitRepository.findByIdAndCompanyIdWithWorkers(unitId, companyId)
+                .orElseThrow(() -> new UnitNotFoundException(unitId));
+        unit.getWorkers().removeIf(w -> w.getId().equals(workerId));
+        return UnitDetailResponse.from(unitRepository.save(unit));
     }
 
     @Transactional
@@ -111,5 +146,14 @@ public class UnitService {
         var unit = unitRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new UnitNotFoundException(id));
         unitRepository.delete(unit);
+    }
+
+    private void applyRequest(OperationalUnit unit, UnitRequest request) {
+        unit.setName(request.name());
+        unit.setType(request.type());
+        unit.setAddress(request.address());
+        unit.setLatitude(request.latitude());
+        unit.setLongitude(request.longitude());
+        unit.setDefaultPriority(request.defaultPriority());
     }
 }

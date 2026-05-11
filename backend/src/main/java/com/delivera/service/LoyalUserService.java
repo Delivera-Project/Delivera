@@ -26,30 +26,34 @@ public class LoyalUserService {
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final SecurityUtils securityUtils;
+    private final SubscriptionService subscriptionService;
 
     public LoyalUserService(LoyalUserRepository loyalUserRepository,
                             OrderRepository orderRepository,
                             CompanyRepository companyRepository,
                             UserRepository userRepository,
-                            SecurityUtils securityUtils) {
+                            SecurityUtils securityUtils,
+                            SubscriptionService subscriptionService) {
         this.loyalUserRepository = loyalUserRepository;
         this.orderRepository = orderRepository;
         this.companyRepository = companyRepository;
         this.userRepository = userRepository;
         this.securityUtils = securityUtils;
+        this.subscriptionService = subscriptionService;
     }
 
+    @Transactional(readOnly = true)
     public List<LoyalUserResponse> getByCompany() {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        return loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId).stream()
-                .map(lu -> LoyalUserResponse.from(lu, orderRepository.countByLoyalUserId(lu.getId())))
-                .filter(r -> r.orderCount() > 0)
+        return loyalUserRepository.findWithOrderCountByCompanyId(companyId).stream()
+                .map(row -> LoyalUserResponse.from((LoyalUser) row[0], (Long) row[1]))
                 .toList();
     }
 
     @Transactional
     public LoyalUserResponse add(LoyalUserRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
+        subscriptionService.checkLoyalUserLimit(companyId);
         String email = request.email().toLowerCase().trim();
 
         if (loyalUserRepository.findByCompaniesIdAndEmail(companyId, email).isPresent()) {
@@ -67,10 +71,28 @@ public class LoyalUserService {
                     return newLu;
                 });
         lu.getCompanies().add(company);
+        if (request.address() != null && !request.address().isBlank()) {
+            lu.setAddress(request.address());
+            lu.setLatitude(request.latitude());
+            lu.setLongitude(request.longitude());
+        }
 
         return LoyalUserResponse.from(loyalUserRepository.save(lu));
     }
 
+    @Transactional
+    public LoyalUserResponse updateAddress(UUID loyalUserId, LoyalUserRequest request) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        var lu = loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)
+                .orElseThrow(OrderNotFoundException::new);
+        lu.setAddress(request.address() != null && !request.address().isBlank() ? request.address() : null);
+        lu.setLatitude(request.latitude());
+        lu.setLongitude(request.longitude());
+        return LoyalUserResponse.from(loyalUserRepository.save(lu),
+                orderRepository.countByLoyalUserId(lu.getId()));
+    }
+
+    @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersForLoyalUser(UUID loyalUserId) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)
@@ -79,6 +101,7 @@ public class LoyalUserService {
                 .stream().map(OrderResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getMyOrders() {
         String email = securityUtils.getCurrentEmail();
         return orderRepository.findByRecipientEmailOrderByCreatedAtDesc(email)

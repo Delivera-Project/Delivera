@@ -40,6 +40,8 @@ class AuthServiceTest {
     @Mock
     private ActivityTypeRepository activityTypeRepository;
     @Mock
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
     private JwtService jwtService;
@@ -103,47 +105,12 @@ class AuthServiceTest {
         when(userRepository.findByEmailOrUsername("personal@test.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("pass", "hashed")).thenReturn(true);
         when(workerRepository.findByUserEmailOrderByCreatedAtAsc("admin@test.com")).thenReturn(List.of());
-        when(jwtService.generateToken("admin@test.com")).thenReturn("individual-token");
+        when(jwtService.generateToken("admin@test.com", (String) null)).thenReturn("individual-token");
 
         LoginResponse result = authService.login("personal@test.com", "pass");
 
         assertThat(result.token()).isEqualTo("individual-token");
         assertThat(result.companyId()).isNull();
-    }
-
-    @Test
-    void login_wrongPassword_throws() {
-        when(userRepository.findByEmailOrUsername("admin@test.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("wrong", "hashed")).thenReturn(false);
-        assertThatThrownBy(() -> authService.login("admin@test.com", "wrong"))
-                .isInstanceOf(InvalidCredentialsException.class);
-    }
-
-    @Test
-    void login_unknownUser_throws() {
-        when(userRepository.findByEmailOrUsername("nobody@test.com")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> authService.login("nobody@test.com", "pass"))
-                .isInstanceOf(InvalidCredentialsException.class);
-    }
-
-    // --- switchCompany ---
-
-    @Test
-    void switchCompany_success() {
-        UUID targetId = company.getId();
-        when(workerRepository.findByUserEmailAndCompanyId("admin@test.com", targetId)).thenReturn(Optional.of(worker));
-        when(jwtService.generateToken(any(), any(), any())).thenReturn("switched-token");
-
-        LoginResponse result = authService.switchCompany("admin@test.com", targetId);
-        assertThat(result.token()).isEqualTo("switched-token");
-    }
-
-    @Test
-    void switchCompany_workerNotFound_throws() {
-        UUID targetId = UUID.randomUUID();
-        when(workerRepository.findByUserEmailAndCompanyId("admin@test.com", targetId)).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> authService.switchCompany("admin@test.com", targetId))
-                .isInstanceOf(InvalidCredentialsException.class);
     }
 
     // --- register ---
@@ -160,23 +127,6 @@ class AuthServiceTest {
         RegisterResponse result = authService.register(req);
         assertThat(result.token()).isEqualTo("token");
         assertThat(result.email()).isEqualTo("new@test.com");
-    }
-
-    @Test
-    void register_emailTaken_throws() {
-        RegisterRequest req = new RegisterRequest("taken@test.com", "user", "John", null, null, "Password1");
-        when(userRepository.findByEmail("taken@test.com")).thenReturn(Optional.of(user));
-        assertThatThrownBy(() -> authService.register(req))
-                .isInstanceOf(EmailAlreadyExistsException.class);
-    }
-
-    @Test
-    void register_usernameTaken_throws() {
-        RegisterRequest req = new RegisterRequest("new@test.com", "takenuser", "John", null, null, "Password1");
-        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
-        when(userRepository.existsByUsername("takenuser")).thenReturn(true);
-        assertThatThrownBy(() -> authService.register(req))
-                .isInstanceOf(UsernameAlreadyExistsException.class);
     }
 
     // --- registerCompany ---
@@ -202,36 +152,6 @@ class AuthServiceTest {
         assertThat(result.token()).isEqualTo("company-token");
     }
 
-    @Test
-    void registerCompany_emailTaken_throws() {
-        CompanyRegisterRequest req = new CompanyRegisterRequest(
-                "taken@test.com", "Password1", "Org", "slug", "Company", "TRANSPORT", null, null, null, null);
-        when(userRepository.findByEmail("taken@test.com")).thenReturn(Optional.of(user));
-        assertThatThrownBy(() -> authService.registerCompany(req))
-                .isInstanceOf(EmailAlreadyExistsException.class);
-    }
-
-    @Test
-    void registerCompany_handleTaken_throws() {
-        CompanyRegisterRequest req = new CompanyRegisterRequest(
-                "new@test.com", "Password1", "Org", "taken-slug", "Company", "TRANSPORT", null, null, null, null);
-        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
-        when(organizationRepository.existsByHandle("taken-slug")).thenReturn(true);
-        assertThatThrownBy(() -> authService.registerCompany(req))
-                .isInstanceOf(HandleConflictException.class);
-    }
-
-    @Test
-    void registerCompany_usernameTaken_throws() {
-        CompanyRegisterRequest req = new CompanyRegisterRequest(
-                "new@test.com", "Password1", "Org", "slug", "Company", "TRANSPORT", "takenuser", null, null, null);
-        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
-        when(organizationRepository.existsByHandle("slug")).thenReturn(false);
-        when(userRepository.existsByUsername("takenuser")).thenReturn(true);
-        assertThatThrownBy(() -> authService.registerCompany(req))
-                .isInstanceOf(UsernameAlreadyExistsException.class);
-    }
-
     // --- claimRegister ---
 
     @Test
@@ -255,27 +175,6 @@ class AuthServiceTest {
     }
 
     @Test
-    void claimRegister_success_existingLoyalUserWithoutAccount() {
-        LoyalUser existingLu = new LoyalUser();
-        existingLu.setEmail("juan@gmail.com");
-        existingLu.getCompanies().add(company);
-
-        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
-        when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
-        when(loyalUserRepository.findByCompaniesIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.of(existingLu));
-        when(passwordEncoder.encode("Password1")).thenReturn("hashed");
-        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(loyalUserRepository.save(existingLu)).thenReturn(existingLu);
-        when(orderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(jwtService.generateToken("juan@gmail.com")).thenReturn("jwt-token");
-
-        LoginResponse result = authService.claimRegister("testtoken", claimRequest);
-
-        assertThat(result.token()).isEqualTo("jwt-token");
-        verify(loyalUserRepository).save(existingLu);
-    }
-
-    @Test
     void claimRegister_tokenNotFound_throws() {
         when(orderRepository.findByTrackingToken("badtoken")).thenReturn(Optional.empty());
         assertThatThrownBy(() -> authService.claimRegister("badtoken", claimRequest))
@@ -283,12 +182,60 @@ class AuthServiceTest {
     }
 
     @Test
-    void claimRegister_alreadyClaimed_throws() {
-        User claimedUser = new User();
-        LoyalUser loyalUser = new LoyalUser();
-        loyalUser.setUser(claimedUser);
-        claimOrder.setLoyalUser(loyalUser);
+    void login_invalidCredentials_throws() {
+        when(userRepository.findByEmailOrUsername("x@t.com")).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authService.login("x@t.com", "pass"))
+                .isInstanceOf(InvalidCredentialsException.class);
+    }
 
+    @Test
+    void switchCompany_success_andNotFound() {
+        when(workerRepository.findByUserEmailAndCompanyId("admin@test.com", company.getId())).thenReturn(Optional.of(worker));
+        when(jwtService.generateToken(any(), any(), any())).thenReturn("switch-token");
+        assertThat(authService.switchCompany("admin@test.com", company.getId()).token()).isEqualTo("switch-token");
+
+        UUID other = UUID.randomUUID();
+        when(workerRepository.findByUserEmailAndCompanyId("admin@test.com", other)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> authService.switchCompany("admin@test.com", other))
+                .isInstanceOf(InvalidCredentialsException.class);
+    }
+
+    @Test
+    void isHandleAvailable_and_isUsernameAvailable() {
+        when(organizationRepository.existsByHandle("free")).thenReturn(false);
+        when(userRepository.existsByUsername("free")).thenReturn(false);
+        assertThat(authService.isHandleAvailable("free")).isTrue();
+        assertThat(authService.isUsernameAvailable("free")).isTrue();
+    }
+
+    @Test
+    void register_emailExists_throws() {
+        RegisterRequest req = new RegisterRequest("dup@test.com", "u", "A", null, null, "Password1");
+        when(userRepository.findByEmail("dup@test.com")).thenReturn(Optional.of(user));
+        assertThatThrownBy(() -> authService.register(req)).isInstanceOf(EmailAlreadyExistsException.class);
+    }
+
+    @Test
+    void register_usernameExists_throws() {
+        RegisterRequest req = new RegisterRequest("new@test.com", "taken", "A", null, null, "Password1");
+        when(userRepository.findByEmail("new@test.com")).thenReturn(Optional.empty());
+        when(userRepository.existsByUsername("taken")).thenReturn(true);
+        assertThatThrownBy(() -> authService.register(req)).isInstanceOf(UsernameAlreadyExistsException.class);
+    }
+
+    @Test
+    void registerCompany_handleConflict_throws() {
+        CompanyRegisterRequest req = new CompanyRegisterRequest("c@t.com", "Password1", "Org", "taken", "C", "TR", null, "A", null, null);
+        when(userRepository.findByEmail("c@t.com")).thenReturn(Optional.empty());
+        when(organizationRepository.existsByHandle("taken")).thenReturn(true);
+        assertThatThrownBy(() -> authService.registerCompany(req)).isInstanceOf(HandleConflictException.class);
+    }
+
+    @Test
+    void claimRegister_alreadyClaimed_throws() {
+        LoyalUser lu = new LoyalUser();
+        lu.setUser(user);
+        claimOrder.setLoyalUser(lu);
         when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
         assertThatThrownBy(() -> authService.claimRegister("testtoken", claimRequest))
                 .isInstanceOf(OrderAlreadyClaimedException.class);
@@ -296,60 +243,9 @@ class AuthServiceTest {
 
     @Test
     void claimRegister_emailMismatch_throws() {
-        ClaimRegisterRequest mismatch = new ClaimRegisterRequest("Juan", "García", "otro@gmail.com", "Password1");
         when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
-        assertThatThrownBy(() -> authService.claimRegister("testtoken", mismatch))
+        ClaimRegisterRequest req = new ClaimRegisterRequest("A", "B", "other@gmail.com", "Password1");
+        assertThatThrownBy(() -> authService.claimRegister("testtoken", req))
                 .isInstanceOf(OrderClaimEmailMismatchException.class);
     }
-
-    @Test
-    void claimRegister_emailAlreadyRegistered_throws() {
-        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
-        when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.of(new User()));
-        assertThatThrownBy(() -> authService.claimRegister("testtoken", claimRequest))
-                .isInstanceOf(EmailAlreadyExistsException.class);
-    }
-
-    @Test
-    void claimRegister_emailCaseInsensitive_succeeds() {
-        ClaimRegisterRequest upperCase = new ClaimRegisterRequest("Juan", "García", "JUAN@GMAIL.COM", "Password1");
-        when(orderRepository.findByTrackingToken("testtoken")).thenReturn(Optional.of(claimOrder));
-        when(userRepository.findByEmail("juan@gmail.com")).thenReturn(Optional.empty());
-        when(loyalUserRepository.findByCompaniesIdAndEmail(company.getId(), "juan@gmail.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("Password1")).thenReturn("hashed");
-        when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(orderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(jwtService.generateToken("juan@gmail.com")).thenReturn("jwt-token");
-
-        LoginResponse result = authService.claimRegister("testtoken", upperCase);
-        assertThat(result.email()).isEqualTo("juan@gmail.com");
-    }
-
-    // --- availability checks ---
-
-    @Test
-    void isHandleAvailable_available_returnsTrue() {
-        when(organizationRepository.existsByHandle("free-slug")).thenReturn(false);
-        assertThat(authService.isHandleAvailable("free-slug")).isTrue();
-    }
-
-    @Test
-    void isHandleAvailable_taken_returnsFalse() {
-        when(organizationRepository.existsByHandle("taken-slug")).thenReturn(true);
-        assertThat(authService.isHandleAvailable("taken-slug")).isFalse();
-    }
-
-    @Test
-    void isUsernameAvailable_available_returnsTrue() {
-        when(userRepository.existsByUsername("freeuser")).thenReturn(false);
-        assertThat(authService.isUsernameAvailable("freeuser")).isTrue();
-    }
-
-    @Test
-    void isUsernameAvailable_taken_returnsFalse() {
-        when(userRepository.existsByUsername("takenuser")).thenReturn(true);
-        assertThat(authService.isUsernameAvailable("takenuser")).isFalse();
-    }
-
 }

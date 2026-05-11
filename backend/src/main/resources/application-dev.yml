@@ -7,7 +7,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
 
 management:
   endpoint:
@@ -16,7 +16,19 @@ management:
 
 app:
   jwt:
-    secret: delivera-jwt-secret-key-para-desarrollo # TODO: Esto se puede mejorar
+    secret: ${JWT_SECRET:delivera-jwt-secret-key-para-desarrollo}
     expiration: 86400
   cors:
     allowed-origins: http://localhost:3000
+  mail:
+    enabled: false
+    from: noreply@delivera.app
+  frontend-url: http://localhost:3000
+  tracking-url-base: http://localhost:3000/track/
+  contact-email: contact@delivera.com
+  file:
+    max-upload-bytes: 2097152
+  auth:
+    rate-limit:
+      max-attempts: 5
+      window-ms: 60000

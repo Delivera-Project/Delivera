@@ -206,37 +206,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-.claim-panel {
-  margin-top: 24px;
-  padding: 20px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  border-radius: 12px;
-}
-.claim-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
-.claim-header .pi { font-size: 20px; color: #16a34a; margin-top: 2px; }
-.claim-title { font-weight: 700; font-size: 15px; color: #15803d; }
-.claim-desc { font-size: 13px; color: #166534; margin-top: 2px; }
-.claim-hint { font-size: 13px; color: #475569; margin: 0 0 14px; }
-.claim-form { display: flex; flex-direction: column; gap: 10px; }
-.claim-row { display: flex; gap: 10px; }
-.claim-row .claim-field { flex: 1; }
-.claim-field { display: flex; flex-direction: column; gap: 4px; }
-.claim-field label { font-size: 12px; font-weight: 600; color: #475569; }
-.claim-msg { margin: 0; }
-.claimed-notice {
-  margin-top: 24px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 16px 20px;
-  background: #fafafa;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-}
-.claimed-notice .pi { font-size: 18px; color: #94a3b8; margin-top: 2px; }
-.claimed-notice-title { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 4px; }
-.claimed-notice-link { font-size: 13px; color: #3b82f6; text-decoration: none; }
-.claimed-notice-link:hover { text-decoration: underline; }
-</style>
+<style scoped src="./TrackingView.css"></style>

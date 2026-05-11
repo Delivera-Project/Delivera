@@ -39,17 +39,24 @@ public class SettingsService {
     @Autowired
     private ActivityTypeRepository activityTypeRepository;
     @Autowired
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+    @Autowired
     private SecurityUtils securityUtils;
+    @Autowired
+    private SubscriptionService subscriptionService;
+    @Autowired
+    private AppConfigService appConfigService;
 
     private Company currentCompany() {
         return companyRepository.findById(securityUtils.getCurrentCompanyId())
                 .orElseThrow(CompanyContextException::new);
     }
 
+    @Transactional(readOnly = true)
     public SettingsResponse getSettings() {
         Company c = currentCompany();
         Organization o = c.getOrganization();
-        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType().getCode());
+        return new SettingsResponse(o.getId(), o.getName(), o.getHandle(), c.getId(), c.getName(), c.getActivityType().getCode(), c.getDefaultPriority(), c.isDefaultPriorityLocked());
     }
 
     @Transactional
@@ -70,6 +77,8 @@ public class SettingsService {
         Company c = currentCompany();
         c.setName(req.name());
         c.setActivityType(activityTypeRepository.getReferenceById(req.activityType()));
+        c.setDefaultPriority(req.defaultPriority());
+        c.setDefaultPriorityLocked(req.defaultPriorityLocked());
         companyRepository.save(c);
         return getSettings();
     }
@@ -77,12 +86,14 @@ public class SettingsService {
     @Transactional
     public CompanySummary createCompany(CompanyCreateRequest req) {
         Company current = currentCompany();
+        subscriptionService.checkCompanyLimit(current.getId());
         Organization org = current.getOrganization();
 
         Company newCompany = new Company();
         newCompany.setOrganization(org);
         newCompany.setName(req.name());
         newCompany.setActivityType(activityTypeRepository.getReferenceById(req.activityType()));
+        newCompany.setPlan(subscriptionPlanRepository.getReferenceById("FREE"));
         companyRepository.save(newCompany);
 
         String email = securityUtils.getCurrentEmail();
@@ -93,7 +104,7 @@ public class SettingsService {
         worker.setRole(WorkerRole.COMPANY_ADMIN);
         workerRepository.save(worker);
 
-        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType().getCode());
+        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType().getCode(), null);
     }
 
     @Transactional
@@ -111,18 +122,29 @@ public class SettingsService {
             throw new CompanyHasActiveOrdersException(companyId);
         }
 
-        orderRepository.deleteAll(orderRepository.findByCompanyId(companyId));
+        orderRepository.deleteEventsByCompanyId(companyId);
+        orderRepository.deleteByCompanyId(companyId);
         loyalUserRepository.deleteAll(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId));
         operationalUnitRepository.deleteAll(operationalUnitRepository.findAllByCompanyId(companyId));
         workerRepository.deleteAll(workerRepository.findByCompanyId(companyId));
         companyRepository.delete(target);
     }
 
+    @Transactional(readOnly = true)
     public List<CompanySummary> getMyCompanies() {
         String email = securityUtils.getCurrentEmail();
         UUID orgId = currentCompany().getOrganization().getId();
         return workerRepository.findByUserEmailAndOrgId(email, orgId).stream()
-                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType().getCode()))
+                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType().getCode(), w.getCompany().getLogoData()))
                 .toList();
+    }
+
+    @Transactional
+    public CompanySummary updateCompanyLogo(String logoData) {
+        appConfigService.checkUploadSize(logoData);
+        Company c = currentCompany();
+        c.setLogoData(logoData);
+        companyRepository.save(c);
+        return new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData());
     }
 }

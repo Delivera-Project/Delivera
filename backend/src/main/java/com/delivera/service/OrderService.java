@@ -5,6 +5,7 @@ import com.delivera.dto.order.*;
 import com.delivera.exception.*;
 import com.delivera.model.*;
 import com.delivera.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,21 +23,31 @@ public class OrderService {
     private final LoyalUserRepository loyalUserRepository;
     private final SecurityUtils securityUtils;
     private final AppConfigService appConfigService;
+    private final SubscriptionService subscriptionService;
+    private final EmailService emailService;
+    private final String trackingUrlBase;
 
     public OrderService(OrderRepository orderRepository,
                         OperationalUnitRepository unitRepository,
                         CompanyRepository companyRepository,
                         LoyalUserRepository loyalUserRepository,
                         SecurityUtils securityUtils,
-                        AppConfigService appConfigService) {
+                        AppConfigService appConfigService,
+                        SubscriptionService subscriptionService,
+                        EmailService emailService,
+                        @Value("${app.tracking-url-base:https://delivera.app/track/}") String trackingUrlBase) {
         this.orderRepository = orderRepository;
         this.unitRepository = unitRepository;
         this.companyRepository = companyRepository;
         this.loyalUserRepository = loyalUserRepository;
         this.securityUtils = securityUtils;
         this.appConfigService = appConfigService;
+        this.subscriptionService = subscriptionService;
+        this.emailService = emailService;
+        this.trackingUrlBase = trackingUrlBase;
     }
 
+    @Transactional(readOnly = true)
     public List<OrderResponse> getByCompany() {
         UUID companyId = securityUtils.getCurrentCompanyId();
         return orderRepository.findSentOrReceivedByCompanyId(companyId)
@@ -45,7 +56,7 @@ public class OrderService {
                 .toList();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public OrderDetailResponse getDetail(UUID id) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         Order order = orderRepository.findByIdForCompany(id, companyId)
@@ -56,8 +67,12 @@ public class OrderService {
     @Transactional
     public OrderResponse create(OrderRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
+        subscriptionService.checkOrderLimit(companyId);
 
         OrderType orderType = request.orderType();
+
+        var company = companyRepository.findById(companyId)
+                .orElseThrow(CompanyContextException::new);
 
         var origin = unitRepository.findByIdAndCompanyId(request.originId(), companyId)
                 .orElseThrow(InvalidOrderUnitsException::new);
@@ -70,12 +85,13 @@ public class OrderService {
                 throw new InvalidOrderUnitsException();
             }
         } else if (orderType == OrderType.B2B) {
-            destination = unitRepository.findById(request.destinationId())
+            UUID orgId = company.getOrganization().getId();
+            destination = unitRepository.findByIdAndOrganizationId(request.destinationId(), orgId)
                     .orElseThrow(InvalidOrderUnitsException::new);
+            if (destination.getCompany().getId().equals(companyId)) {
+                throw new InvalidOrderUnitsException();
+            }
         }
-
-        var company = companyRepository.findById(companyId)
-                .orElseThrow(CompanyContextException::new);
 
         var order = new Order();
         order.setCompany(company);
@@ -84,16 +100,32 @@ public class OrderService {
         order.setOrigin(origin);
         order.setDestination(destination);
         order.setStatus(OrderStatus.PENDING);
-        order.setPriority(request.priority() != null ? request.priority() : OrderPriority.NORMAL);
+        order.setPriority(resolveDefaultPriority(request.priority(), origin, company));
         order.setNotes(request.notes() != null ? request.notes().trim() : null);
 
         if (orderType == OrderType.B2C && request.recipientEmail() != null) {
             String recipientEmail = request.recipientEmail().toLowerCase().trim();
+            String recipientName = request.recipientName() != null ? request.recipientName().trim() : null;
+            String token = UUID.randomUUID().toString().replace("-", "");
             order.setRecipientEmail(recipientEmail);
-            order.setRecipientName(request.recipientName() != null ? request.recipientName().trim() : null);
-            order.setTrackingToken(UUID.randomUUID().toString().replace("-", ""));
-            loyalUserRepository.findByCompaniesIdAndEmail(companyId, recipientEmail)
-                    .ifPresent(order::setLoyalUser);
+            order.setRecipientName(recipientName);
+            order.setTrackingToken(token);
+            var matchedLu = loyalUserRepository.findByCompaniesIdAndEmail(companyId, recipientEmail);
+            matchedLu.ifPresent(order::setLoyalUser);
+
+            resolveRecipientAddress(order, request, matchedLu.orElse(null));
+            // DSI-09.5: send tracking link after save (inline lambda to avoid eager flush)
+            final String savedToken = token;
+            final String savedRecipient = recipientEmail;
+            final String savedName = recipientName;
+            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+                new org.springframework.transaction.support.TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        String url = trackingUrlBase + savedToken;
+                        emailService.sendTrackingLink(savedRecipient, savedName, order.getReference(), url);
+                    }
+                });
         }
 
         var initialEvent = new OrderEvent();
@@ -128,6 +160,17 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderDetailResponse updateLocation(UUID id, OrderLocationRequest request) {
+        UUID companyId = securityUtils.getCurrentCompanyId();
+        Order order = orderRepository.findByIdAndCompanyId(id, companyId)
+                .orElseThrow(OrderNotFoundException::new);
+        order.setCurrentLat(request.lat());
+        order.setCurrentLon(request.lon());
+        order.setCurrentLocationAt(java.time.Instant.now());
+        return OrderDetailResponse.from(orderRepository.save(order));
+    }
+
+    @Transactional
     public void delete(UUID id) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         Order order = orderRepository.findByIdAndCompanyId(id, companyId)
@@ -135,12 +178,14 @@ public class OrderService {
         orderRepository.delete(order);
     }
 
+    @Transactional(readOnly = true)
     public PublicOrderResponse getPublicByToken(String token) {
         Order order = orderRepository.findByTrackingToken(token)
                 .orElseThrow(OrderNotFoundException::new);
         return PublicOrderResponse.from(order);
     }
 
+    @Transactional(readOnly = true)
     public PublicOrderResponse getPublicByReference(String reference) {
         Order order = orderRepository.findByReference(reference.toUpperCase().trim())
                 .orElseThrow(OrderNotFoundException::new);
@@ -149,6 +194,48 @@ public class OrderService {
 
     private void validateTransition(OrderStatus current, OrderStatus next) {
         appConfigService.validateTransition(current.name(), next.name());
+    }
+
+    /**
+     * Resuelve la dirección del destinatario: prioriza la del request; si falta,
+     * la del fidelizado o la del usuario registrado. Lanza MissingRecipientAddressException
+     * si faltan coordenadas cuando hay dirección o si no hay ninguna dirección disponible.
+     */
+    private void resolveRecipientAddress(Order order, OrderRequest request, LoyalUser matchedLu) {
+        String addr = request.recipientAddress() != null && !request.recipientAddress().isBlank()
+                ? request.recipientAddress().trim() : null;
+        java.math.BigDecimal lat = request.recipientLatitude();
+        java.math.BigDecimal lon = request.recipientLongitude();
+        if (addr != null && (lat == null || lon == null)) {
+            throw new MissingRecipientAddressException();
+        }
+        if (addr == null && matchedLu != null) {
+            addr = matchedLu.getAddress();
+            lat = matchedLu.getLatitude();
+            lon = matchedLu.getLongitude();
+            if ((addr == null || lat == null) && matchedLu.getUser() != null) {
+                if (addr == null) addr = matchedLu.getUser().getAddress();
+                if (lat == null) lat = matchedLu.getUser().getLatitude();
+                if (lon == null) lon = matchedLu.getUser().getLongitude();
+            }
+        }
+        if (addr == null) throw new MissingRecipientAddressException();
+        order.setRecipientAddress(addr);
+        order.setRecipientLatitude(lat);
+        order.setRecipientLongitude(lon);
+    }
+
+    // Resuelve la prioridad efectiva: petición > unidad origen > empresa > NORMAL.
+    // Cadena de herencia con sobreescritura por unidad (DSI-23.1, DSI-23.2).
+    // Si la empresa bloquea la configuración, ignora la sobreescritura de la unidad (DSI-23.3).
+    static OrderPriority resolveDefaultPriority(OrderPriority requested,
+                                                com.delivera.model.OperationalUnit originUnit,
+                                                com.delivera.model.Company company) {
+        if (requested != null) return requested;
+        boolean locked = company != null && company.isDefaultPriorityLocked();
+        if (!locked && originUnit != null && originUnit.getDefaultPriority() != null) return originUnit.getDefaultPriority();
+        if (company != null && company.getDefaultPriority() != null) return company.getDefaultPriority();
+        return OrderPriority.NORMAL;
     }
 
     private String generateReference() {

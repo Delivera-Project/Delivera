@@ -1,5 +1,7 @@
 package com.delivera.dto.settings;
 
+import com.delivera.model.OrderPriority;
+
 import java.util.UUID;
 
 public record SettingsResponse(
@@ -8,5 +10,7 @@ public record SettingsResponse(
         String orgHandle,
         UUID companyId,
         String companyName,
-        String activityType
+        String activityType,
+        OrderPriority defaultPriority,
+        boolean defaultPriorityLocked
 ) {}

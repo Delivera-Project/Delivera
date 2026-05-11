@@ -128,13 +128,14 @@ Tags E2E disponibles: `@auth` · `@navigation` · `@register` · `@profile` · `
 
 | Workflow | Cuándo se ejecuta |
 |---|---|
-| `ci.yml` | Push/PR a `main` o `develop` — build+test backend, lint+build frontend |
-| `playwright.yml` | PR + `workflow_dispatch` — 44 tests E2E en Chromium |
-| `sonar.yml` | PR a `main`/`develop` — SonarCloud quality gate |
+| `ci.yml` | Push/PR a `main` o `develop` — build+test backend y frontend, Trivy IaC scan, SonarCloud + Quality Gate |
+| `playwright.yml` | PR + `workflow_dispatch` — tests E2E en Chromium |
 | `pr-title.yml` | PR — valida formato `tipo/descripcion` en el título |
 | `pr-branch.yml` | PR — valida nombre de rama `tipo/descripcion` |
 | `pr-commits.yml` | PR — valida mensajes de commit (Conventional Commits) |
 | `release.yml` | `workflow_dispatch` manual — crea tag git + GitHub Release con changelog |
+
+Dependabot revisa dependencias Maven, npm y GitHub Actions semanalmente y abre PRs automáticas.
 
 ## Producción
 

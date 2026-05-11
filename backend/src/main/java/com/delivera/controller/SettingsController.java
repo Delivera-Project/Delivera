@@ -2,6 +2,8 @@ package com.delivera.controller;
 
 import com.delivera.dto.settings.*;
 import com.delivera.service.SettingsService;
+import com.delivera.service.SubscriptionService;
+import com.delivera.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,6 +21,10 @@ public class SettingsController {
 
     @Autowired
     private SettingsService settingsService;
+    @Autowired
+    private SubscriptionService subscriptionService;
+    @Autowired
+    private SecurityUtils securityUtils;
 
     @Operation(summary = "Obtener configuración de organización y empresa")
     @GetMapping
@@ -48,6 +54,24 @@ public class SettingsController {
     @PostMapping("/companies")
     public ResponseEntity<CompanySummary> createCompany(@Valid @RequestBody CompanyCreateRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(settingsService.createCompany(req));
+    }
+
+    @Operation(summary = "Obtener uso del plan de suscripción")
+    @GetMapping("/subscription")
+    public ResponseEntity<SubscriptionUsageResponse> getSubscription() {
+        return ResponseEntity.ok(subscriptionService.getUsage(securityUtils.getCurrentCompanyId()));
+    }
+
+    @Operation(summary = "Cambiar plan de suscripción")
+    @PatchMapping("/subscription/plan")
+    public ResponseEntity<SubscriptionUsageResponse> changePlan(@Valid @RequestBody ChangePlanRequest req) {
+        return ResponseEntity.ok(subscriptionService.changePlan(securityUtils.getCurrentCompanyId(), req.planCode(), req.force()));
+    }
+
+    @Operation(summary = "Actualizar logo de empresa")
+    @PutMapping("/company/logo")
+    public ResponseEntity<CompanySummary> updateCompanyLogo(@RequestBody java.util.Map<String, String> body) {
+        return ResponseEntity.ok(settingsService.updateCompanyLogo(body.get("data")));
     }
 
     @Operation(summary = "Eliminar empresa de la organización")

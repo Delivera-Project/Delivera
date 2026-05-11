@@ -27,10 +27,10 @@ test('unauthenticated /settings redirects to /', { tag: '@navigation' }, async (
   await expect(page).toHaveURL('/')
 })
 
-test('authenticated worker accessing / redirects to /units', { tag: '@navigation' }, async ({ page }) => {
+test('authenticated worker accessing / redirects to /home', { tag: '@navigation' }, async ({ page }) => {
   await setupAuth(page)
   await page.goto('/')
-  await expect(page).toHaveURL('/units')
+  await expect(page).toHaveURL('/home')
 })
 
 test('authenticated non-worker accessing / redirects to /my-orders', { tag: '@navigation' }, async ({ page }) => {

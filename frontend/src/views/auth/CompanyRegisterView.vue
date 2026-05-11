@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import { useCompanyRegistration } from '@/composables/useCompanyRegistration'
 import { useActivityTypes } from '@/composables/useActivityTypes'
 import BaseLayout from '@/components/BaseLayout.vue'
+import AvailabilityBadge from '@/components/AvailabilityBadge.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -22,7 +23,7 @@ const {
   step,
   orgName, orgHandle, handleChecking, handleAvailable, isHandleFormat,
   activityType, companyName,
-  email, username, fullName, phone, usernameChecking, usernameAvailable, isUsernameFormat,
+  email, username, firstName, lastName, phone, usernameChecking, usernameAvailable, isUsernameFormat,
   password,
   error, errors, invalids, loading,
   goToStep2, goToStep3, submitRegistration,
@@ -52,7 +53,7 @@ const usernameState = computed(() => {
       <!-- Indicador de pasos -->
       <div class="steps">
         <div v-for="(label, i) in [t('register.stepOrg'), t('register.stepCompany'), t('register.stepAccount')]"
-             :key="i" class="step-item" :class="{ done: step > i + 1, active: step === i + 1 }">
+             :key="label" class="step-item" :class="{ done: step > i + 1, active: step === i + 1 }">
           <div class="step-dot" :class="{ active: step === i + 1, done: step > i + 1 }">
             <svg v-if="step > i + 1" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -93,15 +94,7 @@ const usernameState = computed(() => {
               maxlength="100"
               fluid
             />
-            <span v-if="handleState === 'checking'" class="check-badge check-checking">
-              <i class="pi pi-spin pi-spinner" />
-            </span>
-            <span v-else-if="handleState === 'available'" class="check-badge check-ok">
-              <i class="pi pi-check" />
-            </span>
-            <span v-else-if="handleState === 'taken'" class="check-badge check-taken">
-              <i class="pi pi-times" />
-            </span>
+            <AvailabilityBadge :state="handleState" />
           </div>
           <small class="field-hint">{{ t('fields.orgCodeHint') }}</small>
           <small v-if="handleState === 'taken'" class="field-error">{{ t('validation.orgCodeTaken') }}</small>
@@ -136,7 +129,7 @@ const usernameState = computed(() => {
           <label>{{ t('fields.type') }}</label>
           <div class="activity-grid">
             <button
-              v-for="at in activityTypes.value"
+              v-for="at in activityTypes"
               :key="at.value"
               type="button"
               class="activity-option"
@@ -160,32 +153,38 @@ const usernameState = computed(() => {
 
         <div class="form-field">
           <label for="company-email">{{ t('fields.email') }}</label>
-          <InputText id="company-email" v-model="email" type="email" :placeholder="t('fields.emailPlaceholder')" :invalid="!!invalids.email" fluid />
+          <InputText id="company-email" v-model="email" type="email" :placeholder="t('fields.emailPlaceholder')" maxlength="255" :invalid="!!invalids.email" fluid />
           <small v-if="errors.email" class="field-error">{{ errors.email }}</small>
         </div>
 
         <div class="form-field">
           <label for="company-username">{{ t('fields.username') }}</label>
           <div class="check-field">
-            <InputText id="company-username" v-model="username" type="text" :placeholder="t('fields.usernamePlaceholder')" :invalid="!!invalids.username || usernameState === 'taken'" autocomplete="username" fluid />
-            <span v-if="usernameState === 'checking'" class="check-badge check-checking"><i class="pi pi-spin pi-spinner" /></span>
-            <span v-else-if="usernameState === 'available'" class="check-badge check-ok"><i class="pi pi-check" /></span>
-            <span v-else-if="usernameState === 'taken'" class="check-badge check-taken"><i class="pi pi-times" /></span>
+            <InputText id="company-username" v-model="username" type="text" :placeholder="t('fields.usernamePlaceholder')" maxlength="50" :invalid="!!invalids.username || usernameState === 'taken'" autocomplete="username" fluid />
+            <AvailabilityBadge :state="usernameState" />
           </div>
           <small v-if="errors.username" class="field-error">{{ errors.username }}</small>
           <small v-else-if="usernameState === 'taken'" class="field-error">{{ t('error.USERNAME_ALREADY_EXISTS') }}</small>
           <small v-else class="field-hint">{{ t('fields.usernameHint') }}</small>
         </div>
 
-        <div class="form-field">
-          <label for="company-fullname">{{ t('fields.fullName') }}</label>
-          <InputText id="company-fullname" v-model="fullName" type="text" :placeholder="t('fields.fullNamePlaceholder')" :invalid="!!invalids.fullName" fluid />
-          <small v-if="errors.fullName" class="field-error">{{ errors.fullName }}</small>
+        <div class="form-row">
+          <div class="form-field">
+            <label for="company-first-name">{{ t('fields.firstName') }}</label>
+            <InputText id="company-first-name" v-model="firstName" type="text" :placeholder="t('fields.firstName')" maxlength="100" :invalid="!!invalids.firstName" fluid />
+            <small v-if="errors.firstName" class="field-error">{{ errors.firstName }}</small>
+          </div>
+          <div class="form-field">
+            <label for="company-last-name">{{ t('fields.lastName') }}</label>
+            <InputText id="company-last-name" v-model="lastName" type="text" :placeholder="t('fields.lastName')" maxlength="100" :invalid="!!invalids.lastName" fluid />
+            <small v-if="errors.lastName" class="field-error">{{ errors.lastName }}</small>
+          </div>
         </div>
 
         <div class="form-field">
           <label for="company-phone">{{ t('fields.phone') }}</label>
-          <InputText id="company-phone" v-model="phone" type="tel" :placeholder="t('fields.phonePlaceholder')" maxlength="20" fluid />
+          <InputText id="company-phone" v-model="phone" type="tel" :placeholder="t('fields.phonePlaceholder')" maxlength="20" :invalid="!!invalids.phone" fluid />
+          <small v-if="errors.phone" class="field-error">{{ errors.phone }}</small>
         </div>
 
         <div class="form-field">
@@ -202,11 +201,4 @@ const usernameState = computed(() => {
   </BaseLayout>
 </template>
 
-<style scoped>
-.field-hint {
-  color: #94a3b8;
-  font-size: 11px;
-  margin-top: 4px;
-  display: block;
-}
-</style>
+<style scoped src="./CompanyRegisterView.css"></style>

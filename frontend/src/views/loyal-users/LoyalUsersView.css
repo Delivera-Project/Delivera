@@ -1,0 +1,6 @@
+.list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.list-header h1 { margin: 0; }
+.add-form { border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+.form-row { display: flex; gap: 10px; align-items: center; }
+.form-row .p-inputtext { flex: 1; }
+.list-scroll { max-height: calc(100vh - 260px); overflow-y: auto; overflow-x: hidden; }

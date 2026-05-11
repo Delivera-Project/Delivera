@@ -1,0 +1,9 @@
+.card { text-align: left; }
+.back-btn { margin-bottom: 16px; }
+.form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.form-field label { font-size: 13px; font-weight: 600; color: #374151; }
+.field-error { color: #ef4444; font-size: 12px; }
+.field-hint { color: #16a34a; font-size: 12px; display: flex; align-items: center; gap: 4px; }
+.form-message { margin-bottom: 12px; }
+.submit-btn { margin-top: 8px; }
+.addr-geo { display: flex; align-items: center; gap: 8px; margin-top: 4px; }

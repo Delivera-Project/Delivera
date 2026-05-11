@@ -1,12 +1,12 @@
 package com.delivera.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -21,62 +21,105 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private static final String ROLE_COMPANY_ADMIN = "COMPANY_ADMIN";
+    private static final String ADMIN    = "COMPANY_ADMIN";
+    private static final String ANALYST  = "ANALYST";
+    private static final String OPERATOR = "OPERATOR";
+    private static final String UNITS_ALL = "/units/**";
+
+    // Paths de documentación y endpoints públicos sin prefijo de API
+    private static final String[] SWAGGER_PATHS = {
+        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**"
+    };
 
     @Value("${app.api-prefix}")
-    private String apiPrefix;
+    private String api;
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigins;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   JwtAuthenticationFilter jwtAuthenticationFilter,
+                                                   ApiKeyAuthenticationFilter apiKeyAuthenticationFilter) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**").permitAll()
-                        .requestMatchers(apiPrefix + "/auth/**").permitAll()
-                        .requestMatchers(apiPrefix + "/organizations/**").permitAll()
-                        .requestMatchers(apiPrefix + "/activity-types/**").permitAll()
-                        .requestMatchers(apiPrefix + "/app-config/**").permitAll()
-                        .requestMatchers(apiPrefix + "/orders/public/**").permitAll()
-                        .requestMatchers(apiPrefix + "/admin/**").hasRole("GLOBAL_ADMIN")
-                        .requestMatchers(apiPrefix + "/settings/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.GET, apiPrefix + "/units/external").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
-                        .requestMatchers(HttpMethod.GET, apiPrefix + "/units/external-companies").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
-                        .requestMatchers(HttpMethod.POST, apiPrefix + "/units").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.PUT, apiPrefix + "/units/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.DELETE, apiPrefix + "/units/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.POST, apiPrefix + "/orders").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST")
-                        .requestMatchers(HttpMethod.PATCH, apiPrefix + "/orders/*/status").hasAnyRole(ROLE_COMPANY_ADMIN, "ANALYST", "OPERATOR")
-                        .requestMatchers(HttpMethod.DELETE, apiPrefix + "/orders/**").hasRole(ROLE_COMPANY_ADMIN)
-                        .requestMatchers(HttpMethod.POST, apiPrefix + "/loyal-users").hasRole(ROLE_COMPANY_ADMIN)
-                        .anyRequest().authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> {
+                // Documentación y acceso público
+                auth.requestMatchers(SWAGGER_PATHS).permitAll();
+                auth.requestMatchers(api + "/auth/**").permitAll();
+                auth.requestMatchers(HttpMethod.GET, api + "/organizations/**").permitAll();
+                auth.requestMatchers(HttpMethod.GET, api + "/activity-types", api + "/activity-types/**").permitAll();
+                auth.requestMatchers(HttpMethod.GET, api + "/app-config/**").permitAll();
+                auth.requestMatchers(api + "/orders/public/**").permitAll();
+
+                // API externa autenticada con API key
+                auth.requestMatchers(api + "/external/**").hasRole("API_KEY");
+
+                // Administración global
+                auth.requestMatchers(api + "/admin/**").hasRole("GLOBAL_ADMIN");
+
+                // Configuración de empresa — solo admins
+                auth.requestMatchers(api + "/settings/**").hasRole(ADMIN);
+
+                // Unidades operativas
+                auth.requestMatchers(HttpMethod.GET, api + "/units/external").hasAnyRole(ADMIN, ANALYST);
+                auth.requestMatchers(HttpMethod.GET, api + "/units/external-companies").hasAnyRole(ADMIN, ANALYST);
+                auth.requestMatchers(HttpMethod.POST, api + "/units").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.POST, api + "/units/*/workers/*").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.PUT, api + UNITS_ALL).hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.DELETE, api + "/units/*/workers/*").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.DELETE, api + UNITS_ALL).hasRole(ADMIN);
+
+                // Pedidos
+                auth.requestMatchers(HttpMethod.POST, api + "/orders").hasAnyRole(ADMIN, ANALYST);
+                auth.requestMatchers(HttpMethod.PATCH, api + "/orders/*/status").hasAnyRole(ADMIN, ANALYST, OPERATOR);
+                auth.requestMatchers(HttpMethod.DELETE, api + "/orders/**").hasRole(ADMIN);
+
+                // Usuarios fidelizados
+                auth.requestMatchers(HttpMethod.POST, api + "/loyal-users").hasRole(ADMIN);
+
+                // Trabajadores
+                auth.requestMatchers(HttpMethod.POST, api + "/workers/invite").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.PATCH, api + "/workers/*/role").hasRole(ADMIN);
+                auth.requestMatchers(HttpMethod.DELETE, api + "/workers/**").hasRole(ADMIN);
+
+                // Chat de pedido: trabajadores de empresa y usuarios fidelizados
+                auth.requestMatchers(api + "/orders/*/messages/**").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
+                auth.requestMatchers(HttpMethod.POST, api + "/orders/*/messages").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
+
+                // Endpoints autenticados: cualquier trabajador activo
+                auth.requestMatchers(api + "/workers/**").authenticated();
+                auth.requestMatchers(api + UNITS_ALL).authenticated();
+                auth.requestMatchers(api + "/orders/**").authenticated();
+                auth.requestMatchers(api + "/loyal-users/**").authenticated();
+                auth.requestMatchers(api + "/user/**").authenticated();
+                auth.requestMatchers(api + "/activity/**").hasAnyRole(ADMIN, ANALYST);
+
+                auth.anyRequest().denyAll();
+            })
+            .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
+        var config = new CorsConfiguration();
+        config.setAllowedOrigins(
             Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .toList()
         );
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true);
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }

@@ -2,10 +2,13 @@ package com.delivera.dto.order;
 
 import com.delivera.model.OrderPriority;
 import com.delivera.model.OrderType;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record OrderRequest(
@@ -13,6 +16,9 @@ public record OrderRequest(
         UUID destinationId,
         @Email @Size(max = 255) String recipientEmail,
         @Size(max = 255) String recipientName,
-        OrderType orderType,
+        @Size(max = 500) String recipientAddress,
+        @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0") BigDecimal recipientLatitude,
+        @DecimalMin(value = "-180.0") @DecimalMax(value = "180.0") BigDecimal recipientLongitude,
+        @NotNull OrderType orderType,
         OrderPriority priority,
         @Size(max = 1000) String notes) {}

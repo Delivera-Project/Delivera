@@ -1,0 +1,11 @@
+.lu-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+.lu-avatar { width: 56px; height: 56px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #64748b; }
+.lu-header h1 { margin: 0 0 6px; }
+.section-title { font-size: 13px; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin: 0 0 12px; }
+.addr-block { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+.addr-header { display: flex; justify-content: space-between; align-items: center; }
+.addr-value { font-size: 14px; color: #1e293b; }
+.addr-edit { display: flex; flex-direction: column; gap: 8px; }
+.addr-actions { display: flex; align-items: center; gap: 8px; }
+.addr-buttons { display: flex; gap: 8px; justify-content: flex-end; }
+.field-hint { color: #94a3b8; font-size: 11px; }

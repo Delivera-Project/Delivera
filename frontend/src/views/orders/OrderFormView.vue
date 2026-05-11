@@ -10,6 +10,7 @@ const {
   units, loyalUserMatch, loadError,
   orderType, originId, destinationId, b2bCompanyId, b2bDestinationId,
   recipientEmail, recipientName,
+  recipientAddress, recipientLatitude, recipientLongitude, locating, captureLocation,
   priority, notes, loading, error, errors, invalids,
   destinationOptions, b2bCompanies, b2bUnitOptions, handleSubmit,
 } = useOrderForm()
@@ -28,7 +29,7 @@ const priorityOptions = computed(() => [
 </script>
 
 <template>
-  <form class="card card-wide" @submit.prevent="handleSubmit">
+  <form class="surface-card card-wide" @submit.prevent="handleSubmit">
     <PButton
       type="button"
       text
@@ -108,6 +109,22 @@ const priorityOptions = computed(() => [
             fluid
           />
         </div>
+        <div class="form-field">
+          <label for="order-address">{{ t('fields.address') }}</label>
+          <PInputText
+            id="order-address"
+            v-model="recipientAddress"
+            :placeholder="t('fields.addressPlaceholder')"
+            :invalid="!!invalids.recipientAddress"
+            maxlength="500"
+            fluid
+          />
+          <small v-if="errors.recipientAddress" class="field-error">{{ errors.recipientAddress }}</small>
+          <div class="addr-geo">
+            <PButton type="button" :label="t('profile.useCurrentLocation')" icon="pi pi-map-marker" severity="secondary" outlined size="small" :loading="locating" @click="captureLocation" />
+            <small v-if="recipientLatitude" class="field-hint">{{ recipientLatitude }}, {{ recipientLongitude }}</small>
+          </div>
+        </div>
       </template>
 
       <!-- B2B: empresa destino + unidad destino -->
@@ -179,13 +196,4 @@ const priorityOptions = computed(() => [
   </form>
 </template>
 
-<style scoped>
-.card { text-align: left; }
-.back-btn { margin-bottom: 16px; }
-.form-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.form-field label { font-size: 13px; font-weight: 600; color: #374151; }
-.field-error { color: #ef4444; font-size: 12px; }
-.field-hint { color: #16a34a; font-size: 12px; display: flex; align-items: center; gap: 4px; }
-.form-message { margin-bottom: 12px; }
-.submit-btn { margin-top: 8px; }
-</style>
+<style scoped src="./OrderFormView.css"></style>

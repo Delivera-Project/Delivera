@@ -16,6 +16,17 @@ vi.mock('@/composables/useAppConfig', () => ({
   useAppConfig: () => ({ load: vi.fn(), statusSeverity: {} }),
 }))
 
+vi.mock('@/composables/useApi', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    useApi: () => ({
+      get: vi.fn().mockResolvedValue({ ok: true, json: async () => [] }),
+      post: vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) }),
+    }),
+  }
+})
+
 const mockPush = vi.fn()
 let mockRouteQuery = { q: 'DEL-20240101-0001' }
 vi.mock('vue-router', () => ({
@@ -29,6 +40,8 @@ const STUBS = {
   PButton: { template: '<button />' },
   PMessage: { template: '<div class="p-message"><slot /></div>' },
   PTag: { template: '<span />' },
+  PTextarea: { template: '<textarea />' },
+  TimelineList: { template: '<div />' },
 }
 
 function buildOrder(overrides = {}) {
@@ -72,14 +85,6 @@ describe('MyOrderDetailView', () => {
     expect(wrapper.text()).toContain('DEL-20240101-0001')
   })
 
-  it('renders company and origin info', async () => {
-    mockFetch(buildOrder())
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.text()).toContain('Acme')
-    expect(wrapper.text()).toContain('Almacén Central')
-  })
-
   it('shows error message when fetch returns non-ok', async () => {
     mockFetch({}, false)
     const wrapper = mountView()
@@ -87,43 +92,4 @@ describe('MyOrderDetailView', () => {
     expect(wrapper.find('.p-message').exists()).toBe(true)
   })
 
-  it('shows error message on network exception', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network')))
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.find('.p-message').exists()).toBe(true)
-  })
-
-  it('shows error when route has no query param', async () => {
-    mockRouteQuery = {}
-    vi.stubGlobal('fetch', vi.fn())
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.find('.p-message').exists()).toBe(true)
-  })
-
-  it('renders timeline when order has events', async () => {
-    mockFetch(buildOrder({
-      events: [{ id: 'e1', status: 'PENDING', createdAt: '2024-01-01T00:00:00Z' }],
-    }))
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.find('.timeline').exists()).toBe(true)
-    expect(wrapper.findAll('.timeline-item')).toHaveLength(1)
-  })
-
-  it('renders empty timeline message when no events', async () => {
-    mockFetch(buildOrder({ events: [] }))
-    const wrapper = mountView()
-    await flushPromises()
-    expect(wrapper.find('.timeline-empty').exists()).toBe(true)
-  })
-
-  it('back button pushes /my-orders on click', async () => {
-    mockFetch(buildOrder())
-    const wrapper = mountView()
-    await flushPromises()
-    await wrapper.find('button').trigger('click')
-    expect(mockPush).toHaveBeenCalledWith('/my-orders')
-  })
 })

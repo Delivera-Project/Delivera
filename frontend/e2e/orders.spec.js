@@ -10,6 +10,8 @@ const mockOrder = {
   destinationName: 'Oficina Madrid',
   recipientName: null,
   recipientEmail: null,
+  originLat: 40.4168,
+  originLon: -3.7038,
   createdAt: '2024-01-01T10:00:00Z',
 }
 

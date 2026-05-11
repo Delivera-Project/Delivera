@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -37,8 +38,23 @@ public class User {
     @Column(length = 20)
     private String phone;
 
+    @Column(length = 500)
+    private String address;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal latitude;
+
+    @Column(precision = 9, scale = 6)
+    private BigDecimal longitude;
+
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(nullable = false)
+    private boolean invited = false;
+
+    @Column(name = "avatar_data", columnDefinition = "TEXT")
+    private String avatarData;
 
     @Column(name = "updated_at", insertable = false)
     private Instant updatedAt;

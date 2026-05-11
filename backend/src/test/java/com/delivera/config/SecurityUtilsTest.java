@@ -6,6 +6,7 @@ import com.delivera.exception.CompanyContextException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
@@ -24,30 +25,8 @@ class SecurityUtilsTest {
     }
 
     @Test
-    void getCurrentCompanyId_withValidAuth_returnsCompanyId() {
-        UUID companyId = UUID.randomUUID();
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken("user@test.com", null, List.of());
-        auth.setDetails(companyId);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
-        assertThat(securityUtils.getCurrentCompanyId()).isEqualTo(companyId);
-    }
-
-    @Test
     void getCurrentCompanyId_nullAuth_throws() {
         SecurityContextHolder.clearContext();
-        assertThatThrownBy(() -> securityUtils.getCurrentCompanyId())
-                .isInstanceOf(CompanyContextException.class);
-    }
-
-    @Test
-    void getCurrentCompanyId_detailsNotUUID_throws() {
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken("user@test.com", null, List.of());
-        auth.setDetails("not-a-uuid");
-        SecurityContextHolder.getContext().setAuthentication(auth);
-
         assertThatThrownBy(() -> securityUtils.getCurrentCompanyId())
                 .isInstanceOf(CompanyContextException.class);
     }
@@ -62,8 +41,21 @@ class SecurityUtilsTest {
     }
 
     @Test
-    void getCurrentEmail_nullAuth_returnsNull() {
-        SecurityContextHolder.clearContext();
+    void getCurrentRole_returnsStrippedAuthority_andCompanyId() {
+        UUID companyId = UUID.randomUUID();
+        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                "u@t.com", null, List.of(new SimpleGrantedAuthority("ROLE_COMPANY_ADMIN")));
+        auth.setDetails(companyId);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
+        assertThat(securityUtils.getCurrentRole()).isEqualTo("COMPANY_ADMIN");
+        assertThat(securityUtils.getCurrentCompanyId()).isEqualTo(companyId);
+    }
+
+    @Test
+    void getCurrentRole_nullAuth_returnsNull() {
+        assertThat(securityUtils.getCurrentRole()).isNull();
         assertThat(securityUtils.getCurrentEmail()).isNull();
     }
+
 }

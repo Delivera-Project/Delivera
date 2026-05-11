@@ -1,5 +1,6 @@
 package com.delivera.dto.unit;
 
+import com.delivera.model.OrderPriority;
 import com.delivera.model.UnitType;
 import jakarta.validation.constraints.*;
 
@@ -22,7 +23,9 @@ public record UnitRequest(
 
         @DecimalMin(value = "-180.0")
         @DecimalMax(value = "180.0")
-        BigDecimal longitude
+        BigDecimal longitude,
+
+        OrderPriority defaultPriority
 ) {
     @AssertTrue(message = "Latitude and longitude must both be provided or both be absent")
     public boolean isCoordinatesConsistent() {

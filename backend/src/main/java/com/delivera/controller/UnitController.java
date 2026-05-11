@@ -2,6 +2,7 @@ package com.delivera.controller;
 
 import com.delivera.dto.settings.CompanySummary;
 import com.delivera.dto.unit.B2BUnitResponse;
+import com.delivera.dto.unit.UnitDetailResponse;
 import com.delivera.dto.unit.UnitRequest;
 import com.delivera.dto.unit.UnitResponse;
 import com.delivera.service.UnitService;
@@ -50,8 +51,20 @@ public class UnitController {
 
     @Operation(summary = "Detalle de una unidad operativa")
     @GetMapping("/{id}")
-    public ResponseEntity<UnitResponse> detail(@PathVariable UUID id) {
+    public ResponseEntity<UnitDetailResponse> detail(@PathVariable UUID id) {
         return ResponseEntity.ok(unitService.getDetail(id));
+    }
+
+    @Operation(summary = "Asignar trabajador a una unidad")
+    @PostMapping("/{id}/workers/{workerId}")
+    public ResponseEntity<UnitDetailResponse> assignWorker(@PathVariable UUID id, @PathVariable UUID workerId) {
+        return ResponseEntity.ok(unitService.assignWorker(id, workerId));
+    }
+
+    @Operation(summary = "Desasignar trabajador de una unidad")
+    @DeleteMapping("/{id}/workers/{workerId}")
+    public ResponseEntity<UnitDetailResponse> unassignWorker(@PathVariable UUID id, @PathVariable UUID workerId) {
+        return ResponseEntity.ok(unitService.unassignWorker(id, workerId));
     }
 
     @Operation(summary = "Editar unidad operativa")
