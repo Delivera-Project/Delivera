@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -32,7 +31,11 @@ public class Worker {
     @Column(nullable = false)
     private WorkerRole role;
 
-    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
+
+    @PrePersist
+    void onPrePersist() {
+        if (createdAt == null) createdAt = Instant.now();
+    }
 }
