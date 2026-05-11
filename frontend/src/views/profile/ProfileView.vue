@@ -219,7 +219,7 @@ async function captureLocation() {
     form.value.longitude = lon
     const display = await reverseGeocode(lat, lon)
     if (display) form.value.address = display
-    success.value = t('profile.locationCaptured')
+    success.value = 'profile.locationCaptured'
   } catch {
     error.value = t('profile.locationDenied')
   }
@@ -252,7 +252,7 @@ async function saveProfile() {
       profile.value = await response.json()
       auth.setUser(profile.value)
       editing.value = false
-      success.value = t('profile.updated')
+      success.value = 'profile.updated'
     } else {
       const data = await response.json()
       error.value = api.translateError(data, 'error.saveFailed')
@@ -278,7 +278,7 @@ async function savePassword() {
   if (!valid) { error.value = firstError(); return }
   try {
     const response = await api.put('/user/password', { currentPassword: passwordForm.value.currentPassword, newPassword: passwordForm.value.newPassword })
-    if (response.ok) { changingPassword.value = false; success.value = t('profile.passwordChanged') }
+    if (response.ok) { changingPassword.value = false; success.value = 'profile.passwordChanged' }
     else { const data = await response.json(); error.value = api.translateError(data, 'error.passwordChangeFailed') }
   } catch {
     error.value = t('error.connection')
@@ -401,7 +401,7 @@ onMounted(() => { fetchProfile(); loadAppConfig() })
         />
       </div>
 
-      <PMessage v-if="success" severity="success" :closable="false" class="form-message">{{ success }}</PMessage>
+      <PMessage v-if="success" severity="success" :closable="false" class="form-message">{{ t(success) }}</PMessage>
       <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
 
       <!-- Modo vista -->

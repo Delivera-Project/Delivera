@@ -389,7 +389,7 @@ async function submitStatusUpdate() {
         <div v-if="hasMap" ref="mapEl" class="order-map-el" />
         <div v-else class="map-no-coords">
           <i class="pi pi-map-marker" style="font-size:28px;color:#cbd5e1;margin-bottom:8px" />
-          <p>{{ t('orders.noMapOrders') }}</p>
+          <p>{{ t('orders.noMapCoords') }}</p>
         </div>
         <div v-if="routeFailed" class="route-failed-msg">
           <i class="pi pi-exclamation-triangle" />

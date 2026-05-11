@@ -9,6 +9,8 @@ import java.util.UUID;
 public record LoyalUserResponse(
         UUID id,
         String email,
+        String name,
+        String phone,
         boolean registered,
         long orderCount,
         String address,
@@ -24,13 +26,18 @@ public record LoyalUserResponse(
         BigDecimal addrLat = lu.getLatitude();
         BigDecimal addrLon = lu.getLongitude();
         String addr = lu.getAddress();
-        // Si no tiene dirección propia pero el usuario registrado sí, exponerla
+        String name = lu.getName();
+        String phone = lu.getPhone();
         if (lu.getUser() != null) {
             if (addr == null) addr = lu.getUser().getAddress();
             if (addrLat == null) addrLat = lu.getUser().getLatitude();
             if (addrLon == null) addrLon = lu.getUser().getLongitude();
+            if (name == null) name = lu.getUser().getFirstName() != null
+                    ? (lu.getUser().getFirstName() + (lu.getUser().getLastName() != null ? " " + lu.getUser().getLastName() : "")).trim()
+                    : null;
+            if (phone == null) phone = lu.getUser().getPhone();
         }
-        return new LoyalUserResponse(lu.getId(), lu.getEmail(), lu.getUser() != null, orderCount,
-                addr, addrLat, addrLon, lu.getCreatedAt());
+        return new LoyalUserResponse(lu.getId(), lu.getEmail(), name, phone,
+                lu.getUser() != null, orderCount, addr, addrLat, addrLon, lu.getCreatedAt());
     }
 }

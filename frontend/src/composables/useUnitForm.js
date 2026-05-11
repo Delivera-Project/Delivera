@@ -73,7 +73,7 @@ export function useUnitForm() {
 
       if (res.ok) {
         if (isEdit) {
-          success.value = t('units.updated')
+          success.value = 'units.updated'
         } else {
           router.push('/units')
         }

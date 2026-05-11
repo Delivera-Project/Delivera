@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -33,6 +34,12 @@ public class LoyalUser {
     @Column(nullable = false, unique = true, length = 255)
     private String email;
 
+    @Column(length = 255)
+    private String name;
+
+    @Column(length = 20)
+    private String phone;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
@@ -46,6 +53,7 @@ public class LoyalUser {
     @Column(precision = 9, scale = 6)
     private BigDecimal longitude;
 
-    @Column(name = "created_at", insertable = false, updatable = false)
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 }

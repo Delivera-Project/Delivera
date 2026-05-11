@@ -71,6 +71,8 @@ public class LoyalUserService {
                     return newLu;
                 });
         lu.getCompanies().add(company);
+        if (request.name() != null && !request.name().isBlank()) lu.setName(request.name().trim());
+        if (request.phone() != null && !request.phone().isBlank()) lu.setPhone(request.phone().trim());
         if (request.address() != null && !request.address().isBlank()) {
             lu.setAddress(request.address());
             lu.setLatitude(request.latitude());

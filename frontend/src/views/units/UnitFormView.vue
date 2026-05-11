@@ -311,7 +311,7 @@ function handleSubmit() {
         </div>
 
         <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
-        <PMessage v-if="success" severity="success" :closable="false" class="form-message">{{ success }}</PMessage>
+        <PMessage v-if="success" severity="success" :closable="false" class="form-message">{{ t(success) }}</PMessage>
 
         <PButton
           type="submit"

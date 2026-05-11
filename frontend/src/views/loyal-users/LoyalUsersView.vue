@@ -14,6 +14,8 @@ const { items: loyalUsers, loading, error } = useResourceList('/loyal-users')
 
 const showAdd = ref(false)
 const addEmail = ref('')
+const addName = ref('')
+const addPhone = ref('')
 const adding = ref(false)
 const addError = ref('')
 const addSuccess = ref(false)
@@ -24,11 +26,17 @@ async function addLoyalUser() {
   addError.value = ''
   addSuccess.value = false
   try {
-    const res = await api.post('/loyal-users', { email: addEmail.value.trim() })
+    const res = await api.post('/loyal-users', {
+      email: addEmail.value.trim(),
+      name: addName.value.trim() || null,
+      phone: addPhone.value.trim() || null,
+    })
     if (res.ok) {
       const created = await res.json()
       loyalUsers.value.unshift(created)
       addEmail.value = ''
+      addName.value = ''
+      addPhone.value = ''
       showAdd.value = false
       addSuccess.value = true
       setTimeout(() => { addSuccess.value = false }, 3000)
@@ -56,6 +64,10 @@ async function addLoyalUser() {
     <div v-if="showAdd" class="add-form">
       <div class="form-row">
         <InputText v-model="addEmail" type="email" :placeholder="t('fields.emailPersonalPlaceholder')" fluid />
+        <InputText v-model="addName" :placeholder="t('loyalUsers.name')" fluid />
+        <InputText v-model="addPhone" :placeholder="t('loyalUsers.phone')" fluid />
+      </div>
+      <div class="form-row">
         <PButton :label="adding ? t('common.loading') : t('loyalUsers.new')" icon="pi pi-plus" :loading="adding" @click="addLoyalUser" />
         <PButton :label="t('common.cancel')" severity="secondary" outlined icon="pi pi-times" @click="showAdd = false" />
       </div>
@@ -70,6 +82,9 @@ async function addLoyalUser() {
         <EmptyState icon="pi-users" :message="t('loyalUsers.empty')" />
       </template>
       <Column field="email" :header="t('loyalUsers.email')" />
+      <Column :header="t('loyalUsers.name')" style="width:180px">
+        <template #body="{ data }">{{ data.name || '—' }}</template>
+      </Column>
       <Column :header="t('loyalUsers.orders')" style="width:130px">
         <template #body="{ data }">
           <PTag :value="String(data.orderCount)" severity="info" />

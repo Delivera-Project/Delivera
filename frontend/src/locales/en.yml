@@ -88,7 +88,7 @@ fields:
   orgName: Organization name
   orgNamePlaceholder: "E.g: Acme Group"
   orgCode: Organization code
-  orgCodePlaceholder: "acme-group"
+  orgCodePlaceholder: "my-company"
   orgCodeHint: "Workers will use this code to identify the organization when signing in"
   companyName: Company name
   organization: Organization
@@ -247,6 +247,7 @@ orders:
   deleteConfirm: Delete this order?
   viewDetail: View detail
   noMapOrders: No pending orders with coordinates
+  noMapCoords: No location data available
   withoutCoordinates: Orders without location
   routeUnavailable: Route could not be calculated
   chat: Chat
@@ -296,6 +297,8 @@ loyalUsers:
   notFound: Loyal user not found
   empty: No loyal users with orders yet.
   email: Email
+  name: Name
+  phone: Phone
   registered: Registered
   notRegistered: Not registered
   added: Loyal user added successfully

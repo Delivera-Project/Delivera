@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 
 public record LoyalUserRequest(
         @NotBlank @Email @Size(max = 255) String email,
+        @Size(max = 255) String name,
+        @Size(max = 20) String phone,
         @Size(max = 500) String address,
         @DecimalMin(value = "-90.0") @DecimalMax(value = "90.0") BigDecimal latitude,
         @DecimalMin(value = "-180.0") @DecimalMax(value = "180.0") BigDecimal longitude) {}
