@@ -16,7 +16,7 @@ export function useValidation() {
         const result = check()
         if (result) {
           invalids.value[field] = true
-          if (result.type !== 'required') errors.value[field] = result.message
+          errors.value[field] = result.message
           valid = false
           break
         }

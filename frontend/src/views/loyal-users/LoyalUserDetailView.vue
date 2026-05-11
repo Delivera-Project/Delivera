@@ -56,7 +56,7 @@ async function saveAddress() {
     if (res.ok) {
       loyalUser.value = await res.json()
       editingAddress.value = false
-      success.value = t('profile.updated')
+      success.value = 'profile.updated'
     } else {
       const data = await res.json().catch(() => ({}))
       error.value = api.translateError(data, 'error.saveFailed')
@@ -114,7 +114,9 @@ onMounted(async () => {
       <div class="lu-header">
         <div class="lu-avatar"><i class="pi pi-user" /></div>
         <div>
-          <h1>{{ loyalUser?.email }}</h1>
+          <h1>{{ loyalUser?.name || loyalUser?.email }}</h1>
+          <div v-if="loyalUser?.name" class="lu-email">{{ loyalUser.email }}</div>
+          <div v-if="loyalUser?.phone" class="lu-phone"><i class="pi pi-phone" /> {{ loyalUser.phone }}</div>
           <PTag
             v-if="loyalUser"
             :value="loyalUser.registered ? t('loyalUsers.registered') : t('loyalUsers.notRegistered')"
@@ -123,7 +125,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <PMessage v-if="success" severity="success" :closable="false" class="mb-3">{{ success }}</PMessage>
+      <PMessage v-if="success" severity="success" :closable="false" class="mb-3">{{ t(success) }}</PMessage>
 
       <div class="addr-block">
         <div class="addr-header">

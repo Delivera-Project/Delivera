@@ -88,7 +88,7 @@ fields:
   orgName: Nombre de la organización
   orgNamePlaceholder: "Ej: Grupo Acme"
   orgCode: Código de organización
-  orgCodePlaceholder: "grupo-acme"
+  orgCodePlaceholder: "mi-empresa"
   orgCodeHint: "Lo usarán tus trabajadores para identificar la organización al iniciar sesión"
   companyName: Nombre de la empresa
   companyNamePlaceholder: "Ej: Acme Logística"
@@ -247,6 +247,7 @@ orders:
   deleteConfirm: "¿Eliminar este pedido?"
   viewDetail: Ver detalle
   noMapOrders: No hay pedidos pendientes con coordenadas
+  noMapCoords: Sin datos de ubicación disponibles
   withoutCoordinates: Pedidos sin ubicación
   routeUnavailable: No se ha podido calcular la ruta
   chat: Chat
@@ -256,7 +257,7 @@ orders:
   priority:
     label: Prioridad
     HIGH: ALTA
-    NORMAL: NORMAL
+    NORMAL: Normal
     LOW: BAJA
   status:
     PENDING: Pendiente
@@ -296,6 +297,8 @@ loyalUsers:
   notFound: Usuario fidelizado no encontrado
   empty: No hay usuarios fidelizados con pedidos todavía.
   email: Email
+  name: Nombre
+  phone: Teléfono
   registered: Registrado
   notRegistered: No registrado
   added: Usuario fidelizado añadido correctamente

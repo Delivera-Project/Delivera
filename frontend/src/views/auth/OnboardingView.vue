@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
@@ -18,7 +18,7 @@ const unitSaving = ref(false)
 const unitError = ref('')
 
 const UNIT_TYPES = ['WAREHOUSE', 'STORE', 'FACTORY', 'LOGISTICS_CENTER']
-const unitTypeOptions = UNIT_TYPES.map(t => ({ label: t, value: t }))
+const unitTypeOptions = computed(() => UNIT_TYPES.map(type => ({ label: t(`units.${type}`), value: type })))
 
 // Step 2: trabajador
 const workerEmail = ref('')
