@@ -68,7 +68,7 @@ class LoyalUserServiceTest {
 
     @Test
     void add_success_noRegisteredUser() {
-        LoyalUserRequest req = new LoyalUserRequest("new@test.com", null, null, null);
+        LoyalUserRequest req = new LoyalUserRequest("new@test.com", null, null, null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
         when(companyRepository.findById(companyId)).thenReturn(Optional.of(company));
@@ -91,7 +91,7 @@ class LoyalUserServiceTest {
 
     @Test
     void updateAddress_success() {
-        LoyalUserRequest req = new LoyalUserRequest("loyal@test.com", "New Addr", new java.math.BigDecimal("1.0"), new java.math.BigDecimal("2.0"));
+        LoyalUserRequest req = new LoyalUserRequest("loyal@test.com", null, null, "New Addr", new java.math.BigDecimal("1.0"), new java.math.BigDecimal("2.0"));
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(loyalUserRepository.findByIdAndCompaniesId(loyalUser.getId(), companyId)).thenReturn(Optional.of(loyalUser));
         when(loyalUserRepository.save(loyalUser)).thenReturn(loyalUser);
@@ -111,7 +111,7 @@ class LoyalUserServiceTest {
 
     @Test
     void add_alreadyExists_throws() {
-        LoyalUserRequest req = new LoyalUserRequest("dup@test.com", null, null, null);
+        LoyalUserRequest req = new LoyalUserRequest("dup@test.com", null, null, null, null, null);
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "dup@test.com")).thenReturn(Optional.of(loyalUser));
         assertThatThrownBy(() -> loyalUserService.add(req)).isInstanceOf(LoyalUserConflictException.class);
@@ -119,7 +119,7 @@ class LoyalUserServiceTest {
 
     @Test
     void add_withAddress_setsCoordinates() {
-        LoyalUserRequest req = new LoyalUserRequest("new@test.com", "St 1",
+        LoyalUserRequest req = new LoyalUserRequest("new@test.com", null, null, "St 1",
                 new java.math.BigDecimal("5.0"), new java.math.BigDecimal("6.0"));
         when(securityUtils.getCurrentCompanyId()).thenReturn(companyId);
         when(loyalUserRepository.findByCompaniesIdAndEmail(companyId, "new@test.com")).thenReturn(Optional.empty());
