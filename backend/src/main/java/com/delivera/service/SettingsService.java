@@ -104,7 +104,7 @@ public class SettingsService {
         worker.setRole(WorkerRole.COMPANY_ADMIN);
         workerRepository.save(worker);
 
-        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType().getCode(), null);
+        return new CompanySummary(newCompany.getId(), newCompany.getName(), newCompany.getActivityType().getCode(), null, null, false);
     }
 
     @Transactional
@@ -135,7 +135,7 @@ public class SettingsService {
         String email = securityUtils.getCurrentEmail();
         UUID orgId = currentCompany().getOrganization().getId();
         return workerRepository.findByUserEmailAndOrgId(email, orgId).stream()
-                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType().getCode(), w.getCompany().getLogoData()))
+                .map(w -> new CompanySummary(w.getCompany().getId(), w.getCompany().getName(), w.getCompany().getActivityType().getCode(), w.getCompany().getLogoData(), w.getCompany().getDefaultPriority(), w.getCompany().isDefaultPriorityLocked()))
                 .toList();
     }
 
@@ -145,6 +145,6 @@ public class SettingsService {
         Company c = currentCompany();
         c.setLogoData(logoData);
         companyRepository.save(c);
-        return new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData());
+        return new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData(), c.getDefaultPriority(), c.isDefaultPriorityLocked());
     }
 }
