@@ -11,11 +11,16 @@ Plataforma SaaS multi-tenant de gestión logística que centraliza pedidos y ope
 | Capa | Tecnologías |
 |---|---|
 | Backend | Java 21, Spring Boot 3.2, Tomcat 10.1 (embedded), Lombok |
-| ORM / Migraciones | Hibernate/JPA, Flyway (V32) |
+| ORM / Migraciones | Hibernate/JPA, Flyway |
 | Base de datos | PostgreSQL 16 |
 | Autenticación | Argon2 (Bouncy Castle), JWT HS256 (jjwt 0.12) |
-| Frontend | Vue 3, Vite 7, Vue Router 4, Pinia, Vue i18n |
-| Linting | ESLint, Oxlint |
+| API docs | SpringDoc OpenAPI (Swagger UI en `/swagger-ui/index.html`) |
+| Email | Spring Mail |
+| Frontend | Vue 3, Vite 7, Vue Router 4, Pinia, Vue i18n, PrimeVue 4 |
+| Mapas | Leaflet 1.9, Leaflet.MarkerCluster, OSRM (cálculo de rutas) |
+| Linting / Formato | ESLint, Oxlint, Prettier |
+| Tests | JaCoCo (backend), Vitest + Playwright (frontend) |
+| Calidad | SonarCloud (Quality Gate en CI) |
 | Infraestructura | Docker, docker-compose |
 | Gestores de dependencias | Maven (backend), npm (frontend) |
 
@@ -108,18 +113,26 @@ ADMIN_EMAIL=otro@email.com ADMIN_PASSWORD=MiPass1 ./scripts/seed-init.sh
 
 `seed-demo.sh` crea una organización con 3 empresas, 8 unidades operativas, 8 fidelizados y 9 pedidos en distintos estados.
 
+La contraseña usada por `DemoDataSeeder` (Java) se puede cambiar sin tocar el código con la propiedad `app.demo.seed-password` (o la variable de entorno `APP_DEMO_SEED_PASSWORD`). El valor por defecto es `demo1234`.
+
 ## Tests
 
 ```bash
 # Backend (H2 in-memory, no requiere PostgreSQL)
 cd backend && mvn test
 
-# Frontend — unitarios
+# Backend — con informe de cobertura JaCoCo
+cd backend && mvn verify
+
+# Frontend — unitarios (Vitest)
 cd frontend && npm run test:unit
 
-# Frontend — E2E Playwright (no requiere backend)
-cd frontend && npx playwright test
-cd frontend && npx playwright test --grep @auth    # por tag
+# Frontend — cobertura (lcov)
+cd frontend && npm run test:coverage
+
+# Frontend — E2E Playwright (requiere backend y PostgreSQL arrancados)
+cd frontend && npm run test:e2e
+cd frontend && npm run test:e2e -- --grep @auth    # por tag
 ```
 
 Tags E2E disponibles: `@auth` · `@navigation` · `@register` · `@profile` · `@units` · `@orders` · `@tracking`
@@ -148,15 +161,3 @@ Activa el perfil `prod` con `SPRING_PROFILES_ACTIVE=prod`. Variables de entorno 
 | `DATABASE_PASSWORD` | Contraseña de la base de datos |
 | `JWT_SECRET` | Secret para firmar los tokens JWT |
 
-## Migraciones
-
-Flyway gestiona el esquema desde `backend/src/main/resources/db/migration/`. Versión actual: **V32**. Para añadir una nueva migración, crea un archivo `V{n}__descripcion.sql`.
-
-| Rango | Contenido |
-|---|---|
-| V1–V6 | Infraestructura base de usuarios |
-| V7–V18 | Multi-tenant, unidades operativas, pedidos y fidelizados |
-| V19–V23 | Configuración extensible de estados, prioridades y roles de trabajador |
-| V24–V26 | Renombrado `slug` → `handle`, relaxación de trigger de pedido, eliminación de enums |
-| V27–V29 | FK de tipo de actividad a empresas, fidelizados many-to-many con empresas |
-| V30–V32 | Tipo de pedido en órdenes, unicidad worker por empresa, limpieza `worker_role_config` |
