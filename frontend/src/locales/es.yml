@@ -430,6 +430,7 @@ error:
   INVALID_ORDER_UNITS: Las unidades seleccionadas no son válidas para este pedido
   ORDER_NOT_FOUND: Pedido no encontrado
   INVALID_STATUS_TRANSITION: Transición de estado no permitida
+  LOYAL_USER_NOT_FOUND: Usuario fidelizado no encontrado
   LOYAL_USER_ALREADY_EXISTS: Este email ya está registrado como fidelizado en tu empresa
   COMPANY_HAS_ACTIVE_ORDERS: No se puede eliminar la empresa porque tiene pedidos activos
   FORBIDDEN: Acceso no autorizado

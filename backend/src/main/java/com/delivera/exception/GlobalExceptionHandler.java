@@ -40,6 +40,7 @@ public class GlobalExceptionHandler {
         Map.entry(UnitNotFoundException.class,            new Mapping(NOT_FOUND,            "UNIT_NOT_FOUND")),
         Map.entry(OrderNotFoundException.class,           new Mapping(NOT_FOUND,            "ORDER_NOT_FOUND")),
         Map.entry(InvalidStatusTransitionException.class, new Mapping(UNPROCESSABLE_ENTITY, "INVALID_STATUS_TRANSITION")),
+        Map.entry(LoyalUserNotFoundException.class,        new Mapping(NOT_FOUND,            "LOYAL_USER_NOT_FOUND")),
         Map.entry(LoyalUserConflictException.class,       new Mapping(CONFLICT,             "LOYAL_USER_ALREADY_EXISTS")),
         Map.entry(CompanyHasActiveOrdersException.class,  new Mapping(CONFLICT,             "COMPANY_HAS_ACTIVE_ORDERS")),
         Map.entry(HandleConflictException.class,          new Mapping(CONFLICT,             "HANDLE_CONFLICT")),

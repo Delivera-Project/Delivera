@@ -429,6 +429,7 @@ error:
   UNIT_NOT_FOUND: Unit not found
   ORDER_NOT_FOUND: Order not found
   INVALID_STATUS_TRANSITION: Status transition not allowed
+  LOYAL_USER_NOT_FOUND: Loyal user not found
   LOYAL_USER_ALREADY_EXISTS: This email is already registered as a loyal user in your company
   INVALID_ORDER_UNITS: Selected units are not valid for this order
   COMPANY_HAS_ACTIVE_ORDERS: Cannot delete company because it has active orders
