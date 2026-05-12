@@ -188,7 +188,7 @@ public class AuthService {
         order.setLoyalUser(loyalUser);
         orderRepository.save(order);
 
-        String jwtToken = jwtService.generateToken(user.getEmail());
+        String jwtToken = jwtService.generateToken(user.getEmail(), LOYAL_USER_ROLE);
         return new LoginResponse(jwtToken, user.getEmail(), null, LOYAL_USER_ROLE, null, null, null);
     }
 

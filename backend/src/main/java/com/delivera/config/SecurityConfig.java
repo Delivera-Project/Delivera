@@ -80,7 +80,7 @@ public class SecurityConfig {
                 // Usuarios fidelizados
                 auth.requestMatchers(HttpMethod.POST, api + "/loyal-users").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.PUT, api + "/loyal-users/**").hasRole(ADMIN);
-                auth.requestMatchers(HttpMethod.GET, api + "/loyal-users/me/orders").authenticated();
+                auth.requestMatchers(HttpMethod.GET, api + "/loyal-users/me/orders").hasRole("LOYAL_USER");
 
                 // Trabajadores
                 auth.requestMatchers(HttpMethod.POST, api + "/workers/invite").hasRole(ADMIN);
