@@ -56,20 +56,6 @@ export function useCompanyRegistration() {
       validate: isHandleFormat
     })
 
-  const { checking: usernameChecking, available: usernameAvailable } =
-    useAvailabilityCheck(username, {
-      endpoint: '/auth/check-username',
-      paramName: 'username',
-      validate: isUsernameFormat
-    })
-
-  const { checking: handleChecking, available: handleAvailable } =
-    useAvailabilityCheck(orgHandle, {
-      endpoint: '/organizations/check-handle',
-      paramName: 'handle',
-      validate: isHandleFormat
-    })
-
   // Auto-sugerir handle desde orgName
   watch(orgName, (val) => {
     if (step.value === 1) {

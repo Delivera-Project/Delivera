@@ -22,9 +22,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AppConfigService appConfigService;
 
-    @Autowired
-    private AppConfigService appConfigService;
-
     @Transactional(readOnly = true)
     public ProfileResponse getProfile(String email) {
         User user = userRepository.findByEmail(email)
