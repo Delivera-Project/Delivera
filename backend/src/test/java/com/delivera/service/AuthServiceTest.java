@@ -165,7 +165,7 @@ class AuthServiceTest {
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(orderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(jwtService.generateToken("juan@gmail.com")).thenReturn("jwt-token");
+        when(jwtService.generateToken("juan@gmail.com", "LOYAL_USER")).thenReturn("jwt-token");
 
         LoginResponse result = authService.claimRegister("testtoken", claimRequest);
 
