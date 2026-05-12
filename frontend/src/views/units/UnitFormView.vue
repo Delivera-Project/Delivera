@@ -214,7 +214,7 @@ function handleSubmit() {
         <PMessage v-if="locationLocked" severity="warn" :closable="false" class="form-message">{{ t('units.locationLocked') }}</PMessage>
 
         <div class="form-field">
-          <label>{{ t('fields.type') }}</label>
+          <span class="form-field-label">{{ t('fields.type') }}</span>
           <div :class="{ 'selector-invalid': invalids.unitType }">
             <SelectButton
               v-model="unitType"

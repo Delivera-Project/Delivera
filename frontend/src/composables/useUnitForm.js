@@ -11,6 +11,17 @@ function parseCoord(val) {
   return Number.isFinite(n) ? n : Number.NaN
 }
 
+function validateCoords(latVal, lonVal) {
+  const lat = parseCoord(latVal)
+  const lon = parseCoord(lonVal)
+  const hasLat = String(latVal).trim() !== ''
+  const hasLon = String(lonVal).trim() !== ''
+  if (hasLat !== hasLon) return { lat, lon, err: 'validation.coordinatesIncomplete' }
+  if (hasLat && hasLon && (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180))
+    return { lat, lon, err: 'validation.coordinatesInvalid' }
+  return { lat, lon, err: null }
+}
+
 export function useUnitForm() {
   const { t } = useI18n()
   const router = useRouter()
@@ -37,20 +48,9 @@ export function useUnitForm() {
       unitType: [() => unitType.value ? null : { message: '', type: 'required' }],
     })
 
-    const lat = parseCoord(latitude.value)
-    const lon = parseCoord(longitude.value)
-    const hasLat = latitude.value.toString().trim() !== ''
-    const hasLon = longitude.value.toString().trim() !== ''
-    let coordValid = true
-    if (hasLat !== hasLon) {
-      error.value = t('validation.coordinatesIncomplete')
-      coordValid = false
-    } else if (hasLat && hasLon && (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180)) {
-      error.value = t('validation.coordinatesInvalid')
-      coordValid = false
-    }
-
-    if (!fieldValid || !coordValid) return
+    const { lat, lon, err: coordErr } = validateCoords(latitude.value, longitude.value)
+    if (coordErr) { error.value = t(coordErr); return }
+    if (!fieldValid) return
 
     if (isEdit && !unitId) {
       error.value = t('error.saveFailed')

@@ -510,13 +510,13 @@ async function copyHandle() {
               <div v-else class="settings-form">
                 <p class="edit-form-title">{{ t('settings.editOrg') }}</p>
                 <div class="form-field">
-                  <label>{{ t('fields.orgName') }}</label>
-                  <InputText v-model="orgName" :placeholder="t('fields.orgNamePlaceholder')" maxlength="255" :invalid="!!invalids.orgName" fluid />
+                  <label for="settings-org-name">{{ t('fields.orgName') }}</label>
+                  <InputText id="settings-org-name" v-model="orgName" :placeholder="t('fields.orgNamePlaceholder')" maxlength="255" :invalid="!!invalids.orgName" fluid />
                   <small v-if="vErrors.orgName" class="field-error">{{ vErrors.orgName }}</small>
                 </div>
                 <div class="form-field">
-                  <label>{{ t('settings.orgCode') }}</label>
-                  <InputText v-model="orgHandle" :placeholder="t('fields.orgCodePlaceholder')" maxlength="100" fluid />
+                  <label for="settings-org-handle">{{ t('settings.orgCode') }}</label>
+                  <InputText id="settings-org-handle" v-model="orgHandle" :placeholder="t('fields.orgCodePlaceholder')" maxlength="100" fluid />
                   <small class="field-hint">{{ t('fields.orgCodeHint') }}</small>
                 </div>
                 <PMessage v-if="orgError" severity="error" :closable="false" class="form-message">{{ orgError }}</PMessage>
@@ -568,22 +568,22 @@ async function copyHandle() {
                         <input ref="logoFileInput" type="file" accept="image/jpeg,image/png" style="display:none" @change="handleLogoFileChange" />
                       </div>
                       <div class="form-field">
-                        <label>{{ t('fields.companyName') }}</label>
-                        <InputText v-model="companyName" :placeholder="t('fields.companyNamePlaceholder')" maxlength="255" :invalid="!!invalids.companyName" fluid />
+                        <label for="settings-company-name">{{ t('fields.companyName') }}</label>
+                        <InputText id="settings-company-name" v-model="companyName" :placeholder="t('fields.companyNamePlaceholder')" maxlength="255" :invalid="!!invalids.companyName" fluid />
                         <small v-if="vErrors.companyName" class="field-error">{{ vErrors.companyName }}</small>
                       </div>
                       <div class="form-field">
-                        <label>{{ t('fields.type') }}</label>
-                        <PSelect v-model="activityType" :options="activityOptions" option-label="label" option-value="value" fluid />
+                        <label for="settings-activity-type">{{ t('fields.type') }}</label>
+                        <PSelect input-id="settings-activity-type" v-model="activityType" :options="activityOptions" option-label="label" option-value="value" fluid />
                       </div>
                       <div class="form-field">
-                        <label>{{ t('settings.defaultPriority') }}</label>
-                        <PSelect v-model="defaultPriority" :options="defaultPriorityOptions" option-label="label" option-value="value" fluid show-clear />
+                        <label for="settings-default-priority">{{ t('settings.defaultPriority') }}</label>
+                        <PSelect input-id="settings-default-priority" v-model="defaultPriority" :options="defaultPriorityOptions" option-label="label" option-value="value" fluid show-clear />
                         <small class="field-help">{{ t('settings.defaultPriorityHelp') }}</small>
                       </div>
                       <div class="form-field">
-                        <label class="lock-checkbox">
-                          <PCheckbox v-model="defaultPriorityLocked" :binary="true" />
+                        <label for="settings-priority-lock" class="lock-checkbox">
+                          <PCheckbox input-id="settings-priority-lock" v-model="defaultPriorityLocked" :binary="true" />
                           {{ t('settings.defaultPriorityLock') }}
                         </label>
                         <small class="field-help">{{ t('settings.defaultPriorityLockHelp') }}</small>
@@ -648,12 +648,12 @@ async function copyHandle() {
               <Transition name="slide-down">
                 <div v-if="addingCompany" class="add-company-form">
                   <div class="form-field">
-                    <label>{{ t('fields.companyName') }}</label>
-                    <InputText v-model="newCompanyName" :placeholder="t('fields.companyNamePlaceholder')" maxlength="255" fluid />
+                    <label for="settings-new-company-name">{{ t('fields.companyName') }}</label>
+                    <InputText id="settings-new-company-name" v-model="newCompanyName" :placeholder="t('fields.companyNamePlaceholder')" maxlength="255" fluid />
                   </div>
                   <div class="form-field">
-                    <label>{{ t('fields.type') }}</label>
-                    <PSelect v-model="newActivityType" :options="activityOptions" option-label="label" option-value="value" fluid />
+                    <label for="settings-new-activity-type">{{ t('fields.type') }}</label>
+                    <PSelect input-id="settings-new-activity-type" v-model="newActivityType" :options="activityOptions" option-label="label" option-value="value" fluid />
                   </div>
                   <PMessage v-if="addError" severity="error" :closable="false" class="form-message">{{ addError }}</PMessage>
                   <div class="form-actions">

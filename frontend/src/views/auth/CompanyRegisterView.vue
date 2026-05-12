@@ -126,7 +126,7 @@ const usernameState = computed(() => {
         </div>
 
         <div class="form-field">
-          <label id="activity-type-label">{{ t('fields.type') }}</label>
+          <span id="activity-type-label" class="form-field-label">{{ t('fields.type') }}</span>
           <fieldset class="activity-grid" aria-labelledby="activity-type-label">
             <button
               v-for="at in activityTypes"

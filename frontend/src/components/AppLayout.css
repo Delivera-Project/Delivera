@@ -341,7 +341,7 @@
 }
 
 .profile-dropdown-item:hover { background: #f1f5f9; }
-.profile-dropdown-logout { color: #ef4444; }
+.profile-dropdown-logout { color: #b91c1c; }
 .profile-dropdown-logout:hover { background: #fef2f2; color: #dc2626; }
 
 .sidebar-profile {
@@ -414,7 +414,7 @@
   margin-top: 2px;
   border: 1px solid transparent;
 }
-.plan-badge--free { background: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+.plan-badge--free { background: #f1f5f9; color: #475569; border-color: #e2e8f0; }
 .plan-badge--basic { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
 .plan-badge--pro { background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 12%, white); color: var(--p-primary-color, #7c3aed); border-color: color-mix(in srgb, var(--p-primary-color, #7c3aed) 22%, white); }
 

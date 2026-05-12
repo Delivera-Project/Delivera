@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,8 +31,10 @@ import java.util.*;
 public class DemoDataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
-    private static final String PASSWORD = "demo1234";
     private static final SecureRandom RNG = new SecureRandom();
+
+    @Value("${app.demo.seed-password:demo1234}")
+    private String seedPassword;
 
     private final UserRepository users;
     private final OrganizationRepository organizations;
@@ -266,6 +269,7 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     // ----- helpers -----
 
+    @SuppressWarnings("java:S107")
     private User createUser(String email, String username, String first, String last, String phone,
                             String address, Double lat, Double lon) {
         User u = new User();
@@ -277,7 +281,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         if (address != null) u.setAddress(address);
         if (lat != null) u.setLatitude(BigDecimal.valueOf(lat));
         if (lon != null) u.setLongitude(BigDecimal.valueOf(lon));
-        u.setPasswordHash(passwordEncoder.encode(PASSWORD));
+        u.setPasswordHash(passwordEncoder.encode(seedPassword));
         return users.save(u);
     }
 
@@ -378,6 +382,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         addEvents(o, status, author);
     }
 
+    @SuppressWarnings("java:S107")
     private void createB2CUnregistered(Company c, OperationalUnit origin, String email, String name,
                                        String address, double lat, double lon,
                                        OrderStatus status, OrderPriority priority, int daysAgo, User author) {

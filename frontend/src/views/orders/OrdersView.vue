@@ -124,6 +124,14 @@ function clearRoutes() {
   routeEntries = []
 }
 
+function addOrGetMarker(mapInstance, group, markerByKey, key, opts) {
+  if (markerByKey.has(key)) return markerByKey.get(key)
+  const mk = addMarker(mapInstance, opts)
+  markerByKey.set(key, mk)
+  group.addLayer(mk)
+  return mk
+}
+
 async function updateMapOrders() {
   if (!map) return
   const token = ++mapToken
@@ -137,21 +145,13 @@ async function updateMapOrders() {
   const bounds = []
   const markerByKey = new Map()
 
-  function markerFor(key, opts) {
-    if (markerByKey.has(key)) return markerByKey.get(key)
-    const mk = addMarker(map, opts)
-    markerByKey.set(key, mk)
-    clusterGroup.addLayer(mk)
-    return mk
-  }
-
   items.forEach(o => {
     const oLat = Number.parseFloat(o.originLat)
     const oLon = Number.parseFloat(o.originLon)
 
     const oKind = originKind(o)
     const oNav = originNavigateTo(o)
-    markerFor('u:' + o.originId, {
+    addOrGetMarker(map, clusterGroup, markerByKey, 'u:' + o.originId, {
       id: o.originId, lat: oLat, lon: oLon, kind: oKind,
       title: o.originName, subtitle: t('units.detail'),
       actionLabel: oNav ? t('units.detail') : null,
@@ -167,7 +167,7 @@ async function updateMapOrders() {
       const key = o.destinationId ? 'u:' + o.destinationId : destSuffix
       const loyalLabel = (kind === 'CUSTOMER' && o.loyalUserId) ? t('loyalUsers.detail') : null
       const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : loyalLabel
-      markerFor(key, {
+      addOrGetMarker(map, clusterGroup, markerByKey, key, {
         id: key, lat: dLat, lon: dLon, kind,
         title: destinationTitle(o),
         subtitle: kind === 'CUSTOMER' ? t('orders.recipientName') : t('units.detail'),
@@ -268,8 +268,9 @@ watch(orders, async () => {
           <span class="filters-label">{{ t('common.filters') }}</span>
           <div class="filters-box">
             <div class="filter-row">
-              <label class="filter-group-label">{{ t('orders.reference') }}</label>
+              <label for="orders-filter-ref" class="filter-group-label">{{ t('orders.reference') }}</label>
               <input
+                id="orders-filter-ref"
                 v-model="filterText"
                 :placeholder="t('orders.reference') + '...'"
                 class="filter-search"
@@ -277,16 +278,18 @@ watch(orders, async () => {
               />
             </div>
             <div class="filter-row">
-              <label class="filter-group-label">{{ t('orders.statusLabel') }}</label>
+              <label for="orders-filter-status" class="filter-group-label">{{ t('orders.statusLabel') }}</label>
               <PSelect
+                input-id="orders-filter-status"
                 v-model="filterStatus"
                 :options="statusOptions"
                 option-label="label"
                 option-value="value"
                 class="filter-select"
               />
-              <label class="filter-group-label">{{ t('orders.priority.label') }}</label>
+              <label for="orders-filter-priority" class="filter-group-label">{{ t('orders.priority.label') }}</label>
               <PSelect
+                input-id="orders-filter-priority"
                 v-model="filterPriority"
                 :options="priorityOptions"
                 option-label="label"

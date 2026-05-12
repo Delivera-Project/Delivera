@@ -198,34 +198,37 @@ public class OrderService {
         appConfigService.validateTransition(current.name(), next.name());
     }
 
-    /**
-     * Resuelve la dirección del destinatario: prioriza la del request; si falta,
-     * la del fidelizado o la del usuario registrado. Lanza MissingRecipientAddressException
-     * si faltan coordenadas cuando hay dirección o si no hay ninguna dirección disponible.
-     */
+    private record RecipientCoords(String addr, BigDecimal lat, BigDecimal lon) {}
+
     private void resolveRecipientAddress(Order order, OrderRequest request, LoyalUser matchedLu) {
         String addr = request.recipientAddress() != null && !request.recipientAddress().isBlank()
                 ? request.recipientAddress().trim() : null;
         BigDecimal lat = request.recipientLatitude();
         BigDecimal lon = request.recipientLongitude();
-        if (addr != null && (lat == null || lon == null)) {
-            throw new MissingRecipientAddressException();
-        }
+        if (addr != null && (lat == null || lon == null)) throw new MissingRecipientAddressException();
         if (addr == null && matchedLu != null) {
-            addr = matchedLu.getAddress();
-            lat = matchedLu.getLatitude();
-            lon = matchedLu.getLongitude();
-            if ((addr == null || lat == null) && matchedLu.getUser() != null) {
-                if (addr == null) addr = matchedLu.getUser().getAddress();
-                if (lat == null) lat = matchedLu.getUser().getLatitude();
-                if (lon == null) lon = matchedLu.getUser().getLongitude();
-            }
-            if (lat == null || lon == null) { lat = null; lon = null; }
+            RecipientCoords c = resolveFromLoyalUser(matchedLu);
+            addr = c.addr();
+            lat = c.lat();
+            lon = c.lon();
         }
         if (addr == null || lat == null) throw new MissingRecipientAddressException();
         order.setRecipientAddress(addr);
         order.setRecipientLatitude(lat);
         order.setRecipientLongitude(lon);
+    }
+
+    private RecipientCoords resolveFromLoyalUser(LoyalUser lu) {
+        String addr = lu.getAddress();
+        BigDecimal lat = lu.getLatitude();
+        BigDecimal lon = lu.getLongitude();
+        if ((addr == null || lat == null) && lu.getUser() != null) {
+            if (addr == null) addr = lu.getUser().getAddress();
+            if (lat == null) lat = lu.getUser().getLatitude();
+            if (lon == null) lon = lu.getUser().getLongitude();
+        }
+        if (lat == null || lon == null) return new RecipientCoords(null, null, null);
+        return new RecipientCoords(addr, lat, lon);
     }
 
     static OrderPriority resolveDefaultPriority(OrderPriority requested,

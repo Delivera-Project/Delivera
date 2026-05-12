@@ -75,17 +75,21 @@ public record OrderDetailResponse(
                 lu != null ? lu.getId() : null,
                 order.getCreatedAt(),
                 events,
-                origin.getLatitude() != null ? origin.getLatitude().doubleValue() : null,
-                origin.getLongitude() != null ? origin.getLongitude().doubleValue() : null,
+                toDouble(origin.getLatitude()),
+                toDouble(origin.getLongitude()),
                 destLat,
                 destLon,
-                order.getCurrentLat() != null ? order.getCurrentLat().doubleValue() : null,
-                order.getCurrentLon() != null ? order.getCurrentLon().doubleValue() : null,
+                toDouble(order.getCurrentLat()),
+                toDouble(order.getCurrentLon()),
                 order.getCurrentLocationAt());
     }
 
     private static Double resolveDestCoord(BigDecimal destCoord, BigDecimal recipientCoord) {
         if (destCoord != null) return destCoord.doubleValue();
         return recipientCoord != null ? recipientCoord.doubleValue() : null;
+    }
+
+    private static Double toDouble(BigDecimal v) {
+        return v != null ? v.doubleValue() : null;
     }
 }
