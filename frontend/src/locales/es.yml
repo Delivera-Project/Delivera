@@ -234,6 +234,7 @@ orders:
   loyalUserExists: Usuario fidelizado conocido
   notes: Notas
   notesPlaceholder: Instrucciones adicionales (opcional)
+  noDestinationOptions: No hay unidades disponibles como destino
   noUnits: No hay suficientes unidades. Crea al menos dos unidades operativas primero.
   sameUnit: El origen y el destino deben ser unidades diferentes
   timeline: Historial de estados

@@ -234,6 +234,7 @@ orders:
   loyalUserExists: Known loyal user
   notes: Notes
   notesPlaceholder: Additional instructions (optional)
+  noDestinationOptions: No units available as destination
   noUnits: Not enough units. Create at least two operational units first.
   sameUnit: Origin and destination must be different units
   timeline: Status history

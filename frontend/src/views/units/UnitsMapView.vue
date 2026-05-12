@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import L from 'leaflet'
@@ -61,6 +61,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+})
+
+onBeforeRouteLeave(() => {
+  if (map) { map.remove(); map = null }
 })
 
 onUnmounted(() => {

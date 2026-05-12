@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
@@ -66,6 +66,8 @@ onMounted(async () => {
   await nextTick()
   initMap()
 })
+
+onBeforeRouteLeave(() => { if (map) { map.remove(); map = null } })
 
 onUnmounted(() => { if (map) { map.remove(); map = null } })
 </script>

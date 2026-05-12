@@ -104,7 +104,6 @@ export function useOrderForm() {
       rules.destinationId = [required(destinationId.value, 'unitName')]
     } else if (orderType.value === 'B2C') {
       rules.recipientEmail = [required(recipientEmail.value, 'email'), emailRule(recipientEmail.value)]
-      rules.recipientAddress = [required(recipientAddress.value, 'address')]
     } else if (orderType.value === 'B2B') {
       rules.b2bCompanyId = [required(b2bCompanyId.value, 'company')]
       rules.b2bDestinationId = [required(b2bDestinationId.value, 'unitName')]

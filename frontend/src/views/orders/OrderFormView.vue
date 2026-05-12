@@ -77,6 +77,7 @@ const priorityOptions = computed(() => [
             option-label="name"
             option-value="id"
             :placeholder="t('orders.destinationPlaceholder')"
+            :empty-message="t('orders.noDestinationOptions')"
             :invalid="!!invalids.destinationId"
             fluid
           />

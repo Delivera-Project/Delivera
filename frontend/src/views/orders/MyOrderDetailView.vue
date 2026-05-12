@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { fetchPublicOrder, useApi } from '@/composables/useApi'
@@ -91,6 +91,11 @@ async function fetchOrder() {
   }
   if (order.value) initMap()
 }
+
+onBeforeRouteLeave(() => {
+  clearTimeout(mapInvalidateTimer)
+  if (map) { map.remove(); map = null }
+})
 
 onUnmounted(() => {
   clearTimeout(mapInvalidateTimer)
