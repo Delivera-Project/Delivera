@@ -147,13 +147,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMalformedJson(HttpMessageNotReadableException ex) {
         Throwable cause = ex.getMostSpecificCause();
-        log.warn("Malformed request body: {}", cause.getMessage());
-        if (cause instanceof InvalidFormatException ife
-                && ife.getTargetType() != null
-                && Number.class.isAssignableFrom(ife.getTargetType())) {
+        log.warn("Malformed request body: {}", cause.getClass().getSimpleName());
+        if (cause instanceof InvalidFormatException ife && isNumericType(ife.getTargetType())) {
             return ResponseEntity.badRequest().body(new ErrorResponse("INVALID_NUMBER_FORMAT"));
         }
         return ResponseEntity.badRequest().body(new ErrorResponse("MALFORMED_REQUEST"));
+    }
+
+    private static boolean isNumericType(Class<?> t) {
+        return t != null && (Number.class.isAssignableFrom(t)
+                || t == int.class || t == long.class || t == double.class || t == float.class);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
