@@ -6,7 +6,7 @@ import com.delivera.dto.loyaluser.LoyalUserResponse;
 import com.delivera.dto.order.OrderResponse;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.LoyalUserConflictException;
-import com.delivera.exception.OrderNotFoundException;
+import com.delivera.exception.LoyalUserNotFoundException;
 import com.delivera.exception.UserNotFoundException;
 import com.delivera.model.Company;
 import com.delivera.model.LoyalUser;
@@ -101,7 +101,7 @@ public class LoyalUserService {
     public List<OrderResponse> getOrdersForLoyalUser(UUID loyalUserId) {
         UUID companyId = securityUtils.getCurrentCompanyId();
         loyalUserRepository.findByIdAndCompaniesId(loyalUserId, companyId)
-                .orElseThrow(OrderNotFoundException::new);
+                .orElseThrow(LoyalUserNotFoundException::new);
         return orderRepository.findByLoyalUserIdOrderByCreatedAtDesc(loyalUserId)
                 .stream().map(OrderResponse::from).toList();
     }
