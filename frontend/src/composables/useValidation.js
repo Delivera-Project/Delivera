@@ -37,7 +37,7 @@ export function useValidation() {
 
   function email(value) {
     return () => {
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      const regex = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/
       if (value && !regex.test(value)) {
         return { message: t('validation.email'), type: 'format' }
       }
