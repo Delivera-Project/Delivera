@@ -49,12 +49,12 @@ test('admin dashboard shows metrics and organizations', { tag: '@admin' }, async
 
   await page.goto('/admin')
 
-  // Metrics cards
-  const metricsGrid = page.locator('.metrics-grid')
-  await expect(metricsGrid.getByText('3')).toBeVisible()
-  await expect(metricsGrid.getByText('7')).toBeVisible()
-  await expect(metricsGrid.getByText('42')).toBeVisible()
-  await expect(metricsGrid.getByText('15')).toBeVisible()
+  // Metrics chips
+  const statsInline = page.locator('.stats-inline')
+  await expect(statsInline.getByText('3')).toBeVisible()
+  await expect(statsInline.getByText('7')).toBeVisible()
+  await expect(statsInline.getByText('42')).toBeVisible()
+  await expect(statsInline.getByText('15')).toBeVisible()
 
   // Organizations table
   await expect(page.getByText('Org Alpha')).toBeVisible()
