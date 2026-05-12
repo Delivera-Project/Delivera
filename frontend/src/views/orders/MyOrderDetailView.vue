@@ -39,10 +39,10 @@ async function initMap() {
   if (map) { map.remove(); map = null }
 
   const o = order.value
-  const originLat = parseFloat(o.originLat)
-  const originLon = parseFloat(o.originLon)
-  const destLat = parseFloat(o.destinationLat)
-  const destLon = parseFloat(o.destinationLon)
+  const originLat = Number.parseFloat(o.originLat)
+  const originLon = Number.parseFloat(o.originLon)
+  const destLat = Number.parseFloat(o.destinationLat)
+  const destLon = Number.parseFloat(o.destinationLon)
 
   map = createMap(mapEl.value)
   fitBounds(map, [[originLat, originLon], [destLat, destLon]])

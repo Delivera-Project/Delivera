@@ -73,7 +73,7 @@ async function handleLogin() {
           toggle-mask
           :placeholder="t('fields.password')"
           :invalid="!!invalids.password"
-          autocomplete="current-password"
+          :pt="{ pcinput: { root: { autocomplete: 'current-password' } } }"
           fluid
         />
         <small v-if="errors.password" class="field-error">{{ errors.password }}</small>

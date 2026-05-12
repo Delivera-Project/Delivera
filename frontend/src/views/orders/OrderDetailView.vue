@@ -57,13 +57,45 @@ function destNav(o) {
   return null
 }
 
+async function addDestinationToMap(mapInstance, o, bounds, originLat, originLon) {
+  const destLat = Number.parseFloat(o.destinationLat)
+  const destLon = Number.parseFloat(o.destinationLon)
+  const kind = destKind(o)
+  const navTo = destNav(o)
+  const navLabel = navTo ? t('loyalUsers.detail') : null
+  const destActionLabel = kind === 'OWN_UNIT' ? t('units.detail') : navLabel
+  addMarker(mapInstance, {
+    id: o.destinationId || o.loyalUserId || 'customer',
+    lat: destLat, lon: destLon, kind,
+    title: o.destinationName || o.recipientName || o.recipientEmail || '',
+    subtitle: o.destinationCompanyName || (kind === 'CUSTOMER' ? t('orders.recipientName') : ''),
+    actionLabel: destActionLabel,
+    navigateTo: navTo,
+    router,
+  }).addTo(mapInstance)
+  bounds.push([destLat, destLon])
+  const entry = await addRoute(mapInstance, {
+    orderId: o.id,
+    origin: { lat: originLat, lon: originLon },
+    dest:   { lat: destLat, lon: destLon },
+    popupTitle: o.reference,
+    popupSubtitle: `${o.originName} → ${o.destinationName || o.recipientName || o.recipientEmail || ''}`,
+    actionLabel: t('orders.viewDetail'),
+    router,
+    status: o.status,
+    currentLocation: currentLocationOf(o),
+  })
+  if (entry && !entry.solid) routeFailed.value = true
+  try { entry?.layer?.bringToFront?.() } catch { /* layer aún sin parentNode si el panel no tiene tamaño todavía */ }
+}
+
 async function initOrderMap() {
   if (!mapEl.value || !order.value?.originLat) return
   if (map) { map.remove(); map = null }
 
   const o = order.value
-  const originLat = parseFloat(o.originLat)
-  const originLon = parseFloat(o.originLon)
+  const originLat = Number.parseFloat(o.originLat)
+  const originLon = Number.parseFloat(o.originLon)
 
   map = createMap(mapEl.value)
   // Forzar a Leaflet a recalcular el tamaño antes de añadir capas: el panel
@@ -83,35 +115,7 @@ async function initOrderMap() {
   }).addTo(map)
 
   if (o.destinationLat != null && o.destinationLon != null) {
-    const destLat = parseFloat(o.destinationLat)
-    const destLon = parseFloat(o.destinationLon)
-    const kind = destKind(o)
-    const navTo = destNav(o)
-    addMarker(map, {
-      id: o.destinationId || o.loyalUserId || 'customer',
-      lat: destLat, lon: destLon, kind,
-      title: o.destinationName || o.recipientName || o.recipientEmail || '',
-      subtitle: o.destinationCompanyName || (kind === 'CUSTOMER' ? t('orders.recipientName') : ''),
-      actionLabel: kind === 'OWN_UNIT' ? t('units.detail') : (navTo ? t('loyalUsers.detail') : null),
-      navigateTo: navTo,
-      router,
-    }).addTo(map)
-
-    bounds.push([destLat, destLon])
-
-    const entry = await addRoute(map, {
-      orderId: o.id,
-      origin: { lat: originLat, lon: originLon },
-      dest:   { lat: destLat, lon: destLon },
-      popupTitle: o.reference,
-      popupSubtitle: `${o.originName} → ${o.destinationName || o.recipientName || o.recipientEmail || ''}`,
-      actionLabel: t('orders.viewDetail'),
-      router,
-      status: o.status,
-      currentLocation: currentLocationOf(o),
-    })
-    if (entry && !entry.solid) routeFailed.value = true
-    try { entry?.layer?.bringToFront?.() } catch { /* layer aún sin parentNode si el panel no tiene tamaño todavía */ }
+    await addDestinationToMap(map, o, bounds, originLat, originLon)
   }
 
   fitBounds(map, bounds)
@@ -311,8 +315,9 @@ async function submitStatusUpdate() {
                 <p class="status-section-title">{{ t('orders.updateStatus') }}</p>
                 <div class="status-form">
                   <div class="status-field">
-                    <label class="info-label">{{ t('orders.newStatus') }}</label>
+                    <label for="order-new-status" class="info-label">{{ t('orders.newStatus') }}</label>
                     <PSelect
+                      input-id="order-new-status"
                       v-model="newStatus"
                       :options="availableNextStatuses.map(s => ({ label: t(`orders.status.${s}`), value: s }))"
                       option-label="label"
@@ -322,8 +327,9 @@ async function submitStatusUpdate() {
                     />
                   </div>
                   <div class="status-field">
-                    <label class="info-label">{{ t('orders.statusNote') }}</label>
+                    <label for="order-status-note" class="info-label">{{ t('orders.statusNote') }}</label>
                     <PTextarea
+                      id="order-status-note"
                       v-model="statusNote"
                       :placeholder="t('orders.statusNotePlaceholder')"
                       rows="2"

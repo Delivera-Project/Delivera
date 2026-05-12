@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,8 +31,10 @@ import java.util.*;
 public class DemoDataSeeder implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DemoDataSeeder.class);
-    private static final String PASSWORD = "demo1234";
     private static final SecureRandom RNG = new SecureRandom();
+
+    @Value("${app.demo.seed-password:demo1234}")
+    private String seedPassword;
 
     private final UserRepository users;
     private final OrganizationRepository organizations;
@@ -41,7 +44,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final LoyalUserRepository loyalUsers;
     private final OrderRepository orders;
     private final OrderEventRepository orderEvents;
-    private final OrderMessageRepository orderMessages;
     private final ActivityTypeRepository activityTypes;
     private final SubscriptionPlanRepository plans;
     private final PasswordEncoder passwordEncoder;
@@ -57,7 +59,6 @@ public class DemoDataSeeder implements CommandLineRunner {
                           LoyalUserRepository loyalUsers,
                           OrderRepository orders,
                           OrderEventRepository orderEvents,
-                          OrderMessageRepository orderMessages,
                           ActivityTypeRepository activityTypes,
                           SubscriptionPlanRepository plans,
                           PasswordEncoder passwordEncoder) {
@@ -69,7 +70,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.loyalUsers = loyalUsers;
         this.orders = orders;
         this.orderEvents = orderEvents;
-        this.orderMessages = orderMessages;
         this.activityTypes = activityTypes;
         this.plans = plans;
         this.passwordEncoder = passwordEncoder;
@@ -193,20 +193,16 @@ public class DemoDataSeeder implements CommandLineRunner {
                 null, null, null);
         LoyalUser luRaul     = createLoyalUser(raul.getEmail(),  raul,  List.of(dsFood),
                 null, null, null);
-        LoyalUser luMaria    = createLoyalUser("maria.gomez@correo.com",     null, List.of(rlRetail),
+        createLoyalUser("maria.gomez@correo.com",     null, List.of(rlRetail),
                 "Calle Mallorca 230, Barcelona", 41.3960, 2.1620);
         LoyalUser luIgnacio  = createLoyalUser("ignacio.serrano@correo.com", null, List.of(rlRetail, dsFood),
                 "Av. Diagonal 500, Barcelona",   41.3920, 2.1510);
-        LoyalUser luTeresa   = createLoyalUser("teresa.mendez@correo.com",   null, List.of(dsFood),
+        createLoyalUser("teresa.mendez@correo.com",   null, List.of(dsFood),
                 "Av. Constitución 3, Granada",   37.1770, -3.6000);
         LoyalUser luAlberto  = createLoyalUser("alberto.ibanez@correo.com",  null, List.of(tnLog),
                 "Calle Mayor 18, Bilbao",        43.2620, -2.9340);
 
         // --- 7. Pedidos ---
-        // Distribución homogénea de estados/prioridades/fechas para llenar gráficas.
-        OrderStatus[] st = OrderStatus.values();
-        OrderPriority[] pr = OrderPriority.values();
-
         // Internos RapidLog Central
         createInternalOrder(rlCentral, rlMadridCd, rlValencia, OrderStatus.DELIVERED, OrderPriority.NORMAL, 11, carlos);
         createInternalOrder(rlCentral, rlMadridCd, rlSevilla,  OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   3, marcos);
@@ -267,15 +263,13 @@ public class DemoDataSeeder implements CommandLineRunner {
                 "Paseo Independencia 20, Zaragoza", 41.6510, -0.8840,
                 OrderStatus.DELIVERED, OrderPriority.NORMAL, 9, sofia);
 
-        // (evita warning unused si se reduce el set)
-        if (st.length < 0 || pr.length < 0) { log.debug("noop"); }
-
         log.info("DemoDataSeeder: demo cargada (usuarios={}, empresas={}, unidades={}, pedidos={}).",
                 users.count(), companies.count(), units.count(), orders.count());
     }
 
     // ----- helpers -----
 
+    @SuppressWarnings("java:S107")
     private User createUser(String email, String username, String first, String last, String phone,
                             String address, Double lat, Double lon) {
         User u = new User();
@@ -287,7 +281,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         if (address != null) u.setAddress(address);
         if (lat != null) u.setLatitude(BigDecimal.valueOf(lat));
         if (lon != null) u.setLongitude(BigDecimal.valueOf(lon));
-        u.setPasswordHash(passwordEncoder.encode(PASSWORD));
+        u.setPasswordHash(passwordEncoder.encode(seedPassword));
         return users.save(u);
     }
 
@@ -388,6 +382,7 @@ public class DemoDataSeeder implements CommandLineRunner {
         addEvents(o, status, author);
     }
 
+    @SuppressWarnings("java:S107")
     private void createB2CUnregistered(Company c, OperationalUnit origin, String email, String name,
                                        String address, double lat, double lon,
                                        OrderStatus status, OrderPriority priority, int daysAgo, User author) {

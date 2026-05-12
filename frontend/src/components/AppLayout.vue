@@ -115,33 +115,38 @@ async function switchCompany(companyId) {
   }
 }
 
+async function loadUserProfile() {
+  try {
+    const res = await api.get('/user/profile')
+    if (res.ok) {
+      const profile = await res.json()
+      auth.setUser(profile)
+      applyUserLocale(profile.email)
+    }
+  } catch { /* silencioso */ }
+}
+
+async function loadSubscriptionIfNeeded() {
+  if (auth.planCode) return
+  try {
+    const subRes = await api.get('/settings/subscription')
+    if (subRes.ok) { const sub = await subRes.json(); auth.setPlanCode(sub.planCode) }
+  } catch { /* silencioso */ }
+}
+
 onMounted(async () => {
   document.addEventListener('click', onDocumentClick)
   loadConfig()
 
   if (!auth.user && auth.isAuthenticated) {
-    try {
-      const res = await api.get('/user/profile')
-      if (res.ok) {
-        const profile = await res.json()
-        auth.setUser(profile)
-        applyUserLocale(profile.email)
-      }
-    // eslint-disable-next-line no-empty
-    } catch {}
+    await loadUserProfile()
   } else if (auth.user?.email) {
     applyUserLocale(auth.user.email)
   }
 
   if (auth.isWorker && auth.isCompanyAdmin) {
     auth.loadCompanies()
-    if (!auth.planCode) {
-      try {
-        const subRes = await api.get('/settings/subscription')
-        if (subRes.ok) { const sub = await subRes.json(); auth.setPlanCode(sub.planCode) }
-      // eslint-disable-next-line no-empty
-      } catch {}
-    }
+    await loadSubscriptionIfNeeded()
   }
 })
 

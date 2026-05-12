@@ -9,7 +9,7 @@ import com.delivera.service.UnitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/units")
 @Tag(name = "Unidades", description = "Gestión de unidades operativas")
 public class UnitController {
 
-    @Autowired
-    private UnitService unitService;
+    private final UnitService unitService;
 
     @Operation(summary = "Listar unidades de la empresa")
     @GetMapping

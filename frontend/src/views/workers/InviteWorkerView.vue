@@ -89,12 +89,12 @@ function copyPassword() {
 
         <div class="invite-form">
           <div class="form-field">
-            <label>{{ t('workers.email') }}</label>
-            <InputText v-model="email" type="email" :placeholder="t('fields.emailPlaceholder')" maxlength="255" :invalid="!!error && !email.trim()" @input="error = ''" fluid />
+            <label for="invite-email">{{ t('workers.email') }}</label>
+            <InputText id="invite-email" v-model="email" type="email" :placeholder="t('fields.emailPlaceholder')" maxlength="255" :invalid="!!error && !email.trim()" @input="error = ''" fluid />
           </div>
           <div class="form-field">
-            <label>{{ t('workers.role') }}</label>
-            <PSelect v-model="role" :options="roleOptions" option-label="label" option-value="value" fluid />
+            <label for="invite-role">{{ t('workers.role') }}</label>
+            <PSelect id="invite-role" v-model="role" :options="roleOptions" option-label="label" option-value="value" fluid />
           </div>
         </div>
 

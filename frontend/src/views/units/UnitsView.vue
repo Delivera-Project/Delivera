@@ -60,8 +60,8 @@ function updateMapMarkers() {
   clusterGroup = L.markerClusterGroup(clusterOptions())
   const bounds = []
   items.forEach(u => {
-    const lat = parseFloat(u.latitude)
-    const lng = parseFloat(u.longitude)
+    const lat = Number.parseFloat(u.latitude)
+    const lng = Number.parseFloat(u.longitude)
     const marker = addMarker(map, {
       id: u.id,
       lat, lon: lng,
@@ -134,8 +134,9 @@ watch(units, async () => {
           <span class="filters-label">{{ t('common.filters') }}</span>
           <div class="filters-box">
             <div class="filter-row">
-              <label class="filter-group-label">{{ t('fields.unitName') }}</label>
+              <label for="units-filter-name" class="filter-group-label">{{ t('fields.unitName') }}</label>
               <input
+                id="units-filter-name"
                 v-model="filterText"
                 :placeholder="t('fields.unitName') + '...'"
                 class="filter-search"
@@ -143,8 +144,9 @@ watch(units, async () => {
               />
             </div>
             <div class="filter-row">
-              <label class="filter-group-label">{{ t('fields.type') }}</label>
+              <label for="units-filter-type" class="filter-group-label">{{ t('fields.type') }}</label>
               <PSelect
+                input-id="units-filter-type"
                 v-model="filterType"
                 :options="typeOptions"
                 option-label="label"

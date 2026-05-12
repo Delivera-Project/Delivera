@@ -47,48 +47,68 @@ onMounted(load)
 </script>
 
 <template>
-  <div class="surface-card card-wide">
-    <h1>{{ t('admin.title') }}</h1>
-
-    <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
-
-    <div v-if="metrics && !loading" class="metrics-grid">
-      <div v-for="key in METRIC_KEYS" :key="key" class="metric-card">
-        <i :class="['pi', METRIC_ICONS[key], 'metric-icon']" />
-        <span class="metric-value">{{ metrics[key] }}</span>
-        <span class="metric-label">{{ t('admin.metric.' + key) }}</span>
+  <div class="surface-card card-full">
+    <div class="admin-header">
+      <div class="admin-title-block">
+        <h1>{{ t('admin.title') }}</h1>
+        <p class="admin-subtitle">{{ t('admin.subtitle') }}</p>
+      </div>
+      <div v-if="metrics && !loading" class="stats-inline">
+        <span v-for="key in METRIC_KEYS" :key="key" class="stat-chip">
+          <i :class="['pi', METRIC_ICONS[key]]" />
+          <strong>{{ metrics[key] }}</strong>
+          {{ t('admin.metric.' + key) }}
+        </span>
+      </div>
+      <div v-else-if="loading" class="stats-inline">
+        <span v-for="i in 4" :key="i" class="stat-chip stat-chip--skeleton" />
       </div>
     </div>
 
-    <div v-else-if="loading" class="metrics-grid">
-      <div v-for="i in 4" :key="i" class="metric-card metric-card--skeleton" />
-    </div>
+    <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>
 
-    <div v-if="!loading" class="orgs-section">
+    <div class="orgs-section">
       <h2>{{ t('admin.organizations') }}</h2>
-      <table v-if="organizations.length" class="orgs-table">
-        <thead>
-          <tr>
-            <th>{{ t('admin.orgName') }}</th>
-            <th>{{ t('admin.orgHandle') }}</th>
-            <th>{{ t('admin.companies') }}</th>
-            <th>{{ t('admin.workers') }}</th>
-            <th>{{ t('admin.orders') }}</th>
-            <th>{{ t('admin.createdAt') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="org in organizations" :key="org.id">
-            <td class="org-name">{{ org.name }}</td>
-            <td><code>{{ org.handle }}</code></td>
-            <td class="text-center">{{ org.companyCount }}</td>
-            <td class="text-center">{{ org.workerCount }}</td>
-            <td class="text-center">{{ org.orderCount }}</td>
-            <td>{{ formatDate(org.createdAt) }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <p v-else class="orgs-empty">{{ t('admin.empty') }}</p>
+      <DataTable
+        :value="organizations"
+        :loading="loading"
+        striped-rows
+        row-hover
+        :rows="10"
+        paginator
+      >
+        <template #empty>
+          <EmptyState icon="pi-building" :message="t('admin.empty')" />
+        </template>
+        <Column field="name" :header="t('admin.orgName')">
+          <template #body="{ data }">
+            <span class="org-name">{{ data.name }}</span>
+          </template>
+        </Column>
+        <Column field="handle" :header="t('admin.orgHandle')">
+          <template #body="{ data }">
+            <code class="org-handle">{{ data.handle }}</code>
+          </template>
+        </Column>
+        <Column :header="t('admin.companies')" style="width:120px">
+          <template #body="{ data }">
+            <PTag :value="String(data.companyCount)" severity="secondary" />
+          </template>
+        </Column>
+        <Column :header="t('admin.workers')" style="width:120px">
+          <template #body="{ data }">
+            <PTag :value="String(data.workerCount)" severity="info" />
+          </template>
+        </Column>
+        <Column :header="t('admin.orders')" style="width:120px">
+          <template #body="{ data }">
+            <PTag :value="String(data.orderCount)" severity="warn" />
+          </template>
+        </Column>
+        <Column :header="t('admin.createdAt')" style="width:130px;white-space:nowrap">
+          <template #body="{ data }">{{ formatDate(data.createdAt) }}</template>
+        </Column>
+      </DataTable>
     </div>
   </div>
 </template>

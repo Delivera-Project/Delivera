@@ -28,8 +28,8 @@ const hasCoords = computed(() => unit.value?.latitude != null && unit.value?.lon
 function initMap() {
   if (!mapEl.value || !hasCoords.value) return
   if (map) { map.remove(); map = null }
-  const lat = parseFloat(unit.value.latitude)
-  const lng = parseFloat(unit.value.longitude)
+  const lat = Number.parseFloat(unit.value.latitude)
+  const lng = Number.parseFloat(unit.value.longitude)
   map = createMap(mapEl.value)
   map.setView([lat, lng], 15)
   L.marker([lat, lng], { icon: ownUnitIcon() })

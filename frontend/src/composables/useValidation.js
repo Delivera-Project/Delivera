@@ -28,7 +28,7 @@ export function useValidation() {
 
   function required(value, fieldKey) {
     return () => {
-      if (!value || !value.toString().trim()) {
+      if (!value?.toString().trim()) {
         return { message: t('validation.required', { field: t(`fields.${fieldKey}`) }), type: 'required' }
       }
       return null
@@ -37,7 +37,7 @@ export function useValidation() {
 
   function email(value) {
     return () => {
-      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      const regex = /^[^\s@]+@[^\s@.]+\.[^\s@]+$/
       if (value && !regex.test(value)) {
         return { message: t('validation.email'), type: 'format' }
       }

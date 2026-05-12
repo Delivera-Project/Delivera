@@ -1,7 +1,9 @@
 package com.delivera.dto.order;
 
+import com.delivera.model.OperationalUnit;
 import com.delivera.model.Order;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -31,13 +33,9 @@ public record PublicOrderResponse(
         String hint = claimable && order.getRecipientEmail() != null
                 ? maskEmail(order.getRecipientEmail()) : null;
 
-        var dest = order.getDestination();
-        Double destLat = dest != null && dest.getLatitude() != null
-                ? Double.valueOf(dest.getLatitude().doubleValue())
-                : (order.getRecipientLatitude() != null ? Double.valueOf(order.getRecipientLatitude().doubleValue()) : null);
-        Double destLon = dest != null && dest.getLongitude() != null
-                ? Double.valueOf(dest.getLongitude().doubleValue())
-                : (order.getRecipientLongitude() != null ? Double.valueOf(order.getRecipientLongitude().doubleValue()) : null);
+        OperationalUnit dest = order.getDestination();
+        Double destLat = resolveDestCoord(dest != null ? dest.getLatitude() : null, order.getRecipientLatitude());
+        Double destLon = resolveDestCoord(dest != null ? dest.getLongitude() : null, order.getRecipientLongitude());
 
         return new PublicOrderResponse(
                 order.getId(),
@@ -57,6 +55,11 @@ public record PublicOrderResponse(
                 order.getOrigin().getLongitude() != null ? order.getOrigin().getLongitude().doubleValue() : null,
                 destLat,
                 destLon);
+    }
+
+    private static Double resolveDestCoord(BigDecimal destCoord, BigDecimal recipientCoord) {
+        if (destCoord != null) return destCoord.doubleValue();
+        return recipientCoord != null ? recipientCoord.doubleValue() : null;
     }
 
     private static String maskEmail(String email) {

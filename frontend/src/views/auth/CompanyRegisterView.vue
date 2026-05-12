@@ -126,8 +126,8 @@ const usernameState = computed(() => {
         </div>
 
         <div class="form-field">
-          <label>{{ t('fields.type') }}</label>
-          <div class="activity-grid">
+          <span id="activity-type-label" class="form-field-label">{{ t('fields.type') }}</span>
+          <fieldset class="activity-grid" aria-labelledby="activity-type-label">
             <button
               v-for="at in activityTypes"
               :key="at.value"
@@ -138,7 +138,7 @@ const usernameState = computed(() => {
             >
               <span>{{ at.label }}</span>
             </button>
-          </div>
+          </fieldset>
         </div>
 
         <PMessage v-if="error" severity="error" :closable="false" class="form-message">{{ error }}</PMessage>

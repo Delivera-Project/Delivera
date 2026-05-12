@@ -87,7 +87,8 @@ async function handleRegister() {
     const data = await response.json()
     if (response.ok) {
       auth.setToken(data.token)
-      router.push('/profile')
+      auth.setRole(data.role ?? null)
+      router.push(data.role === 'LOYAL_USER' ? '/my-orders' : '/profile')
     } else {
       error.value = api.translateError(data, 'error.registerFailed')
     }

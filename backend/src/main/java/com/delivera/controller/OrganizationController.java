@@ -4,17 +4,17 @@ import com.delivera.dto.common.AvailabilityCheckResponse;
 import com.delivera.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/organizations")
 @Tag(name = "Organizaciones", description = "Endpoints públicos de organizaciones")
 public class OrganizationController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     @Operation(summary = "Comprobar disponibilidad de handle de organización")
     @GetMapping("/check-handle")

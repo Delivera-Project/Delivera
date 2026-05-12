@@ -72,12 +72,12 @@ async function inviteWorker() {
         <p class="step-hint">{{ t('onboarding.createUnitHint') }}</p>
 
         <div class="form-field">
-          <label>{{ t('fields.unitName') }}</label>
-          <InputText v-model="unitName" :placeholder="t('fields.unitNamePlaceholder')" fluid />
+          <label for="ob-unit-name">{{ t('fields.unitName') }}</label>
+          <InputText id="ob-unit-name" v-model="unitName" :placeholder="t('fields.unitNamePlaceholder')" fluid />
         </div>
         <div class="form-field">
-          <label>{{ t('fields.type') }}</label>
-          <PSelect v-model="unitType" :options="unitTypeOptions" option-label="label" option-value="value" fluid />
+          <label for="ob-unit-type">{{ t('fields.type') }}</label>
+          <PSelect input-id="ob-unit-type" v-model="unitType" :options="unitTypeOptions" option-label="label" option-value="value" fluid />
         </div>
 
         <PMessage v-if="unitError" severity="error" :closable="false" class="form-message">{{ unitError }}</PMessage>
@@ -94,12 +94,12 @@ async function inviteWorker() {
         <p class="step-hint">{{ t('onboarding.inviteWorkerHint') }}</p>
 
         <div class="form-field">
-          <label>{{ t('workers.email') }}</label>
-          <InputText v-model="workerEmail" type="email" :placeholder="t('fields.emailPlaceholder')" fluid />
+          <label for="ob-worker-email">{{ t('workers.email') }}</label>
+          <InputText id="ob-worker-email" v-model="workerEmail" type="email" :placeholder="t('fields.emailPlaceholder')" fluid />
         </div>
         <div class="form-field">
-          <label>{{ t('workers.role') }}</label>
-          <PSelect v-model="workerRole" :options="roleOptions" option-label="label" option-value="value" fluid />
+          <label for="ob-worker-role">{{ t('workers.role') }}</label>
+          <PSelect input-id="ob-worker-role" v-model="workerRole" :options="roleOptions" option-label="label" option-value="value" fluid />
         </div>
 
         <PMessage v-if="workerError" severity="error" :closable="false" class="form-message">{{ workerError }}</PMessage>

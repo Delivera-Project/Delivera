@@ -56,8 +56,8 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         key.setLastUsedAt(Instant.now());
         apiKeyRepository.save(key);
 
-        var authorities = List.of(new SimpleGrantedAuthority(ROLE));
-        var authentication = new UsernamePasswordAuthenticationToken(
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(ROLE));
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 "api-key:" + key.getId(), null, authorities);
         authentication.setDetails(key.getCompany().getId());
         SecurityContextHolder.getContext().setAuthentication(authentication);

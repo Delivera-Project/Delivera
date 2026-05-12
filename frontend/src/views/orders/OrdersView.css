@@ -103,4 +103,3 @@
 .orders-no-coords a { color: #7c3aed; font-weight: 500; text-decoration: none; }
 .orders-no-coords a:hover { text-decoration: underline; }
 .orders-no-coords-meta { color: #64748b; font-size: 0.7rem; }
-.orders-map-panel { position: relative; }

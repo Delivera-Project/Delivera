@@ -366,6 +366,7 @@ nav:
 
 admin:
   title: Administration panel
+  subtitle: Global platform overview
   organizations: Organizations
   orgName: Name
   orgHandle: Code
@@ -399,6 +400,7 @@ validation:
   passwordsDoNotMatch: Passwords do not match
   passwordStrength: Password must include uppercase, lowercase and a number
   phoneFormat: "Only digits, spaces and the symbols + - ( )"
+  addressNeedsCoords: If you enter an address you must also capture the location
   coordinatesIncomplete: Latitude and longitude must both be provided together
   coordinatesInvalid: Coordinates out of range (lat -90–90, lon -180–180)
   orgCodeRequired: Enter an organization code

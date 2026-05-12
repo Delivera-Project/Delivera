@@ -122,11 +122,13 @@ class AuthServiceTest {
         when(userRepository.existsByUsername("newuser")).thenReturn(false);
         when(passwordEncoder.encode("Password1")).thenReturn("hashed");
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(jwtService.generateToken("new@test.com")).thenReturn("token");
+        when(loyalUserRepository.findByEmail("new@test.com")).thenReturn(List.of());
+        when(jwtService.generateToken("new@test.com", (String) null)).thenReturn("token");
 
         RegisterResponse result = authService.register(req);
-        assertThat(result.token()).isEqualTo("token");
-        assertThat(result.email()).isEqualTo("new@test.com");
+        assertThat(result.getToken()).isEqualTo("token");
+        assertThat(result.getEmail()).isEqualTo("new@test.com");
+        assertThat(result.getRole()).isNull();
     }
 
     // --- registerCompany ---
@@ -163,7 +165,7 @@ class AuthServiceTest {
         when(userRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(loyalUserRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         when(orderRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(jwtService.generateToken("juan@gmail.com")).thenReturn("jwt-token");
+        when(jwtService.generateToken("juan@gmail.com", "LOYAL_USER")).thenReturn("jwt-token");
 
         LoginResponse result = authService.claimRegister("testtoken", claimRequest);
 

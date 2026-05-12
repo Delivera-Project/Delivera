@@ -9,8 +9,6 @@ import com.delivera.dto.auth.RegisterResponse;
 import com.delivera.exception.*;
 import com.delivera.model.*;
 import com.delivera.repository.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +21,7 @@ import java.util.UUID;
 @Service
 public class AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    private static final String LOYAL_USER_ROLE = "LOYAL_USER";
 
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
@@ -73,8 +71,8 @@ public class AuthService {
         }
 
         boolean isLoyal = !loyalUserRepository.findByEmail(user.getEmail()).isEmpty();
-        String token = jwtService.generateToken(user.getEmail(), isLoyal ? "LOYAL_USER" : null);
-        return new LoginResponse(token, user.getEmail(), null, isLoyal ? "LOYAL_USER" : null, null, null, null);
+        String token = jwtService.generateToken(user.getEmail(), isLoyal ? LOYAL_USER_ROLE : null);
+        return new LoginResponse(token, user.getEmail(), null, isLoyal ? LOYAL_USER_ROLE : null, null, null, null);
     }
 
     public LoginResponse switchCompany(String email, UUID targetCompanyId) {
@@ -96,8 +94,14 @@ public class AuthService {
         }
         User user = buildUser(request.email(), request.username(), request.firstName(), request.lastName(), request.phone(), request.password());
         userRepository.save(user);
-        String token = jwtService.generateToken(user.getEmail());
-        return new RegisterResponse(token, user.getEmail());
+        List<LoyalUser> loyalUsers = loyalUserRepository.findByEmail(user.getEmail());
+        loyalUsers.forEach(lu -> {
+            lu.setUser(user);
+            loyalUserRepository.save(lu);
+        });
+        String role = loyalUsers.isEmpty() ? null : LOYAL_USER_ROLE;
+        String token = jwtService.generateToken(user.getEmail(), role);
+        return new RegisterResponse(token, user.getEmail(), role);
     }
 
     public boolean isHandleAvailable(String handle) {
@@ -151,7 +155,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse claimRegister(String token, ClaimRegisterRequest request) {
-        var order = orderRepository.findByTrackingToken(token)
+        Order order = orderRepository.findByTrackingToken(token)
                 .orElseThrow(OrderNotFoundException::new);
 
         if (order.getLoyalUser() != null && order.getLoyalUser().getUser() != null) {
@@ -173,7 +177,7 @@ public class AuthService {
         LoyalUser loyalUser = loyalUserRepository
                 .findByCompaniesIdAndEmail(order.getCompany().getId(), email)
                 .orElseGet(() -> {
-                    var lu = new LoyalUser();
+                    LoyalUser lu = new LoyalUser();
                     lu.getCompanies().add(order.getCompany());
                     lu.setEmail(email);
                     return lu;
@@ -184,8 +188,8 @@ public class AuthService {
         order.setLoyalUser(loyalUser);
         orderRepository.save(order);
 
-        String jwtToken = jwtService.generateToken(user.getEmail());
-        return new LoginResponse(jwtToken, user.getEmail(), null, "LOYAL_USER", null, null, null);
+        String jwtToken = jwtService.generateToken(user.getEmail(), LOYAL_USER_ROLE);
+        return new LoginResponse(jwtToken, user.getEmail(), null, LOYAL_USER_ROLE, null, null, null);
     }
 
     private User buildUser(String email, String username, String firstName, String lastName, String phone, String password) {

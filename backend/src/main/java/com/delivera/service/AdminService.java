@@ -18,18 +18,15 @@ public class AdminService {
 
     private final OrganizationRepository organizationRepository;
     private final CompanyRepository companyRepository;
-    private final WorkerRepository workerRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
     public AdminService(OrganizationRepository organizationRepository,
                         CompanyRepository companyRepository,
-                        WorkerRepository workerRepository,
                         OrderRepository orderRepository,
                         UserRepository userRepository) {
         this.organizationRepository = organizationRepository;
         this.companyRepository = companyRepository;
-        this.workerRepository = workerRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
     }

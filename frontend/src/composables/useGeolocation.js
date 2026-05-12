@@ -22,7 +22,7 @@ export function useGeolocation() {
         },
         (err) => {
           locating.value = false
-          reject(err)
+          reject(new Error(err.message))
         },
         { enableHighAccuracy, timeout }
       )

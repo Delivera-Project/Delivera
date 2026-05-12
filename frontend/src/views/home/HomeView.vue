@@ -52,7 +52,7 @@ const chartData = computed(() => {
     labels.push(d.toLocaleDateString(undefined, { day: '2-digit', month: 'short' }))
     indexByDate.set(d.toISOString().slice(0, 10), days - 1 - i)
   }
-  const byStatus = Object.fromEntries(statuses.map(s => [s, Array(days).fill(0)]))
+  const byStatus = Object.fromEntries(statuses.map(s => [s, Array.from({ length: days }, () => 0)]))
   for (const o of orders.value) {
     const idx = indexByDate.get((o.createdAt || '').slice(0, 10))
     if (idx !== undefined && byStatus[o.status]) byStatus[o.status][idx]++
@@ -136,8 +136,8 @@ async function initMap(unitList) {
   }
 
   mapped.forEach(u => {
-    const lat = parseFloat(u.latitude)
-    const lng = parseFloat(u.longitude)
+    const lat = Number.parseFloat(u.latitude)
+    const lng = Number.parseFloat(u.longitude)
     addOnce('u:' + u.id, {
       id: u.id, lat, lon: lng, kind: 'OWN_UNIT',
       title: u.name, subtitle: t('units.' + u.type),
@@ -157,8 +157,8 @@ async function initMap(unitList) {
   routeable.forEach(o => {
     // Origen — si no es de mi empresa, añadirlo como OTHER_UNIT (no está en /units).
     if (!isOwnCompany(o.originCompanyId)) {
-      const oLat = parseFloat(o.originLat)
-      const oLon = parseFloat(o.originLon)
+      const oLat = Number.parseFloat(o.originLat)
+      const oLon = Number.parseFloat(o.originLon)
       addOnce('u:' + o.originId, {
         id: o.originId, lat: oLat, lon: oLon, kind: 'OTHER_UNIT',
         title: o.originName, subtitle: t('units.detail'),
@@ -167,16 +167,18 @@ async function initMap(unitList) {
       bounds.push([oLat, oLon])
     }
 
-    const dLat = parseFloat(o.destinationLat)
-    const dLon = parseFloat(o.destinationLon)
-    const key = o.destinationId ? 'u:' + o.destinationId : (o.loyalUserId ? 'l:' + o.loyalUserId : `c:${dLat},${dLon}`)
+    const dLat = Number.parseFloat(o.destinationLat)
+    const dLon = Number.parseFloat(o.destinationLon)
+    const destSuffix = o.loyalUserId ? 'l:' + o.loyalUserId : `c:${dLat},${dLon}`
+    const key = o.destinationId ? 'u:' + o.destinationId : destSuffix
     const kind = destKindFor(o)
     const navTo = destNavFor(o)
+    const detailLabel = kind === 'OWN_UNIT' ? t('units.detail') : t('loyalUsers.detail')
     addOnce(key, {
       id: key, lat: dLat, lon: dLon, kind,
       title: o.destinationName || o.recipientName || o.recipientEmail || '',
       subtitle: kind === 'CUSTOMER' ? t('orders.recipientName') : t('units.detail'),
-      actionLabel: navTo ? (kind === 'OWN_UNIT' ? t('units.detail') : t('loyalUsers.detail')) : null,
+      actionLabel: navTo ? detailLabel : null,
       navigateTo: navTo, router,
     })
     bounds.push([dLat, dLon])
@@ -190,11 +192,12 @@ async function initMap(unitList) {
   for (const p of routeable) {
     if (!map) return
     const originKey = 'u:' + p.originId
-    const destKey = p.destinationId ? 'u:' + p.destinationId : (p.loyalUserId ? 'l:' + p.loyalUserId : `c:${p.destinationLat},${p.destinationLon}`)
+    const destKeySuffix = p.loyalUserId ? 'l:' + p.loyalUserId : `c:${p.destinationLat},${p.destinationLon}`
+    const destKey = p.destinationId ? 'u:' + p.destinationId : destKeySuffix
     const entry = await addRoute(map, {
       orderId: p.id,
-      origin: { lat: parseFloat(p.originLat), lon: parseFloat(p.originLon) },
-      dest:   { lat: parseFloat(p.destinationLat), lon: parseFloat(p.destinationLon) },
+      origin: { lat: Number.parseFloat(p.originLat), lon: Number.parseFloat(p.originLon) },
+      dest:   { lat: Number.parseFloat(p.destinationLat), lon: Number.parseFloat(p.destinationLon) },
       popupTitle: p.reference,
       popupSubtitle: `${p.originName} → ${p.destinationName || p.recipientName || p.recipientEmail || ''}`,
       actionLabel: t('orders.viewDetail'),

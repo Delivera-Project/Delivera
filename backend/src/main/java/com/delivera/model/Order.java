@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,16 +65,16 @@ public class Order {
     private String recipientAddress;
 
     @Column(name = "recipient_latitude", precision = 9, scale = 6)
-    private java.math.BigDecimal recipientLatitude;
+    private BigDecimal recipientLatitude;
 
     @Column(name = "recipient_longitude", precision = 9, scale = 6)
-    private java.math.BigDecimal recipientLongitude;
+    private BigDecimal recipientLongitude;
 
     @Column(name = "current_lat", precision = 9, scale = 6)
-    private java.math.BigDecimal currentLat;
+    private BigDecimal currentLat;
 
     @Column(name = "current_lon", precision = 9, scale = 6)
-    private java.math.BigDecimal currentLon;
+    private BigDecimal currentLon;
 
     @Column(name = "current_location_at")
     private Instant currentLocationAt;

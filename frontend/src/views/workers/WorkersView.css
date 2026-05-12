@@ -149,7 +149,7 @@
   transition: color 0.12s, background 0.12s;
 }
 .worker-action-btn:hover { color: #1e293b; background: #f1f5f9; }
-.worker-action-btn--danger:hover { color: #ef4444; background: #fef2f2; }
+.worker-action-btn--danger:hover { color: #b91c1c; background: #fef2f2; }
 
 .workers-empty {
   text-align: center;

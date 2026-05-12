@@ -3,7 +3,6 @@ package com.delivera.controller;
 import com.delivera.dto.worker.ChangeRoleRequest;
 import com.delivera.dto.worker.WorkerInviteRequest;
 import com.delivera.dto.worker.WorkerResponse;
-import com.delivera.security.SecurityUtils;
 import com.delivera.service.WorkerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -45,8 +45,8 @@ const unitTypeOptions = computed(() =>
 function initMap() {
   if (!mapEl.value || map) return
 
-  const initLat = latitude.value ? parseFloat(latitude.value) : MAP_DEFAULT_CENTER[0]
-  const initLng = longitude.value ? parseFloat(longitude.value) : MAP_DEFAULT_CENTER[1]
+  const initLat = latitude.value ? Number.parseFloat(latitude.value) : MAP_DEFAULT_CENTER[0]
+  const initLng = longitude.value ? Number.parseFloat(longitude.value) : MAP_DEFAULT_CENTER[1]
   const initZoom = latitude.value ? 13 : MAP_DEFAULT_ZOOM_REGION
 
   map = L.map(mapEl.value).setView([initLat, initLng], initZoom)
@@ -55,7 +55,7 @@ function initMap() {
   }).addTo(map)
 
   if (latitude.value && longitude.value) {
-    placeMarker(parseFloat(latitude.value), parseFloat(longitude.value))
+    placeMarker(Number.parseFloat(latitude.value), Number.parseFloat(longitude.value))
   }
 
   // Click en el mapa para establecer coordenadas (solo si no está bloqueado)
@@ -102,11 +102,11 @@ async function geocodeAddress() {
       const data = await res.json()
       if (data.length > 0) {
         const { lat, lon } = data[0]
-        latitude.value = parseFloat(lat).toFixed(6)
-        longitude.value = parseFloat(lon).toFixed(6)
+        latitude.value = Number.parseFloat(lat).toFixed(6)
+        longitude.value = Number.parseFloat(lon).toFixed(6)
         if (map) {
-          placeMarker(parseFloat(lat), parseFloat(lon))
-          map.setView([parseFloat(lat), parseFloat(lon)], 15)
+          placeMarker(Number.parseFloat(lat), Number.parseFloat(lon))
+          map.setView([Number.parseFloat(lat), Number.parseFloat(lon)], 15)
         }
       } else {
         geocodeError.value = 'units.geocodeNotFound'
@@ -142,9 +142,9 @@ async function reverseGeocode(lat, lng) {
 // Cuando cambien lat/lon manualmente, mover el marcador
 watch([latitude, longitude], ([lat, lng]) => {
   if (!map || !lat || !lng) return
-  const parsedLat = parseFloat(lat)
-  const parsedLng = parseFloat(lng)
-  if (isNaN(parsedLat) || isNaN(parsedLng)) return
+  const parsedLat = Number.parseFloat(lat)
+  const parsedLng = Number.parseFloat(lng)
+  if (Number.isNaN(parsedLat) || Number.isNaN(parsedLng)) return
   placeMarker(parsedLat, parsedLng)
   map.setView([parsedLat, parsedLng], map.getZoom() < 10 ? 13 : map.getZoom())
 })
@@ -166,8 +166,8 @@ async function loadUnit(id) {
     }
     // Actualizar el mapa con la posición cargada
     if (map && unit.latitude && unit.longitude) {
-      const lat = parseFloat(unit.latitude)
-      const lng = parseFloat(unit.longitude)
+      const lat = Number.parseFloat(unit.latitude)
+      const lng = Number.parseFloat(unit.longitude)
       placeMarker(lat, lng)
       map.setView([lat, lng], 13)
     }
@@ -214,7 +214,7 @@ function handleSubmit() {
         <PMessage v-if="locationLocked" severity="warn" :closable="false" class="form-message">{{ t('units.locationLocked') }}</PMessage>
 
         <div class="form-field">
-          <label>{{ t('fields.type') }}</label>
+          <span class="form-field-label">{{ t('fields.type') }}</span>
           <div :class="{ 'selector-invalid': invalids.unitType }">
             <SelectButton
               v-model="unitType"

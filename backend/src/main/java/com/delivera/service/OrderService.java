@@ -8,10 +8,15 @@ import com.delivera.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -71,10 +76,10 @@ public class OrderService {
 
         OrderType orderType = request.orderType();
 
-        var company = companyRepository.findById(companyId)
+        Company company = companyRepository.findById(companyId)
                 .orElseThrow(CompanyContextException::new);
 
-        var origin = unitRepository.findByIdAndCompanyId(request.originId(), companyId)
+        OperationalUnit origin = unitRepository.findByIdAndCompanyId(request.originId(), companyId)
                 .orElseThrow(InvalidOrderUnitsException::new);
 
         OperationalUnit destination = null;
@@ -93,7 +98,7 @@ public class OrderService {
             }
         }
 
-        var order = new Order();
+        Order order = new Order();
         order.setCompany(company);
         order.setOrderType(orderType);
         order.setReference(generateReference());
@@ -110,25 +115,22 @@ public class OrderService {
             order.setRecipientEmail(recipientEmail);
             order.setRecipientName(recipientName);
             order.setTrackingToken(token);
-            var matchedLu = loyalUserRepository.findByCompaniesIdAndEmail(companyId, recipientEmail);
+            Optional<LoyalUser> matchedLu = loyalUserRepository.findByCompaniesIdAndEmail(companyId, recipientEmail);
             matchedLu.ifPresent(order::setLoyalUser);
 
             resolveRecipientAddress(order, request, matchedLu.orElse(null));
-            // DSI-09.5: send tracking link after save (inline lambda to avoid eager flush)
-            final String savedToken = token;
-            final String savedRecipient = recipientEmail;
-            final String savedName = recipientName;
-            org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
-                new org.springframework.transaction.support.TransactionSynchronization() {
+            // Send tracking link after commit to avoid eager flush
+            TransactionSynchronizationManager.registerSynchronization(
+                new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
-                        String url = trackingUrlBase + savedToken;
-                        emailService.sendTrackingLink(savedRecipient, savedName, order.getReference(), url);
+                        String url = trackingUrlBase + token;
+                        emailService.sendTrackingLink(recipientEmail, recipientName, order.getReference(), url);
                     }
                 });
         }
 
-        var initialEvent = new OrderEvent();
+        OrderEvent initialEvent = new OrderEvent();
         initialEvent.setOrder(order);
         initialEvent.setStatus(OrderStatus.PENDING);
         initialEvent.setAuthorEmail(securityUtils.getCurrentEmail());
@@ -149,7 +151,7 @@ public class OrderService {
 
         order.setStatus(request.status());
 
-        var event = new OrderEvent();
+        OrderEvent event = new OrderEvent();
         event.setOrder(order);
         event.setStatus(request.status());
         event.setNote(request.note() != null ? request.note().trim() : null);
@@ -166,7 +168,7 @@ public class OrderService {
                 .orElseThrow(OrderNotFoundException::new);
         order.setCurrentLat(request.lat());
         order.setCurrentLon(request.lon());
-        order.setCurrentLocationAt(java.time.Instant.now());
+        order.setCurrentLocationAt(Instant.now());
         return OrderDetailResponse.from(orderRepository.save(order));
     }
 
@@ -196,41 +198,42 @@ public class OrderService {
         appConfigService.validateTransition(current.name(), next.name());
     }
 
-    /**
-     * Resuelve la dirección del destinatario: prioriza la del request; si falta,
-     * la del fidelizado o la del usuario registrado. Lanza MissingRecipientAddressException
-     * si faltan coordenadas cuando hay dirección o si no hay ninguna dirección disponible.
-     */
+    private record RecipientCoords(String addr, BigDecimal lat, BigDecimal lon) {}
+
     private void resolveRecipientAddress(Order order, OrderRequest request, LoyalUser matchedLu) {
         String addr = request.recipientAddress() != null && !request.recipientAddress().isBlank()
                 ? request.recipientAddress().trim() : null;
-        java.math.BigDecimal lat = request.recipientLatitude();
-        java.math.BigDecimal lon = request.recipientLongitude();
-        if (addr != null && (lat == null || lon == null)) {
-            throw new MissingRecipientAddressException();
-        }
+        BigDecimal lat = request.recipientLatitude();
+        BigDecimal lon = request.recipientLongitude();
+        if (addr != null && (lat == null || lon == null)) throw new MissingRecipientAddressException();
         if (addr == null && matchedLu != null) {
-            addr = matchedLu.getAddress();
-            lat = matchedLu.getLatitude();
-            lon = matchedLu.getLongitude();
-            if ((addr == null || lat == null) && matchedLu.getUser() != null) {
-                if (addr == null) addr = matchedLu.getUser().getAddress();
-                if (lat == null) lat = matchedLu.getUser().getLatitude();
-                if (lon == null) lon = matchedLu.getUser().getLongitude();
-            }
+            RecipientCoords c = resolveFromLoyalUser(matchedLu);
+            addr = c.addr();
+            lat = c.lat();
+            lon = c.lon();
         }
-        if (addr == null) throw new MissingRecipientAddressException();
+        if (addr == null || lat == null) throw new MissingRecipientAddressException();
         order.setRecipientAddress(addr);
         order.setRecipientLatitude(lat);
         order.setRecipientLongitude(lon);
     }
 
-    // Resuelve la prioridad efectiva: petición > unidad origen > empresa > NORMAL.
-    // Cadena de herencia con sobreescritura por unidad (DSI-23.1, DSI-23.2).
-    // Si la empresa bloquea la configuración, ignora la sobreescritura de la unidad (DSI-23.3).
+    private RecipientCoords resolveFromLoyalUser(LoyalUser lu) {
+        String addr = lu.getAddress();
+        BigDecimal lat = lu.getLatitude();
+        BigDecimal lon = lu.getLongitude();
+        if ((addr == null || lat == null) && lu.getUser() != null) {
+            if (addr == null) addr = lu.getUser().getAddress();
+            if (lat == null) lat = lu.getUser().getLatitude();
+            if (lon == null) lon = lu.getUser().getLongitude();
+        }
+        if (lat == null || lon == null) return new RecipientCoords(null, null, null);
+        return new RecipientCoords(addr, lat, lon);
+    }
+
     static OrderPriority resolveDefaultPriority(OrderPriority requested,
-                                                com.delivera.model.OperationalUnit originUnit,
-                                                com.delivera.model.Company company) {
+                                               OperationalUnit originUnit,
+                                               Company company) {
         if (requested != null) return requested;
         boolean locked = company != null && company.isDefaultPriorityLocked();
         if (!locked && originUnit != null && originUnit.getDefaultPriority() != null) return originUnit.getDefaultPriority();

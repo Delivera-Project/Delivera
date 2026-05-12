@@ -366,6 +366,7 @@ nav:
 
 admin:
   title: Panel de administración
+  subtitle: Visión global de la plataforma
   organizations: Organizaciones
   orgName: Nombre
   orgHandle: Código
@@ -399,6 +400,7 @@ validation:
   passwordsDoNotMatch: Las contraseñas no coinciden
   passwordStrength: La contraseña debe incluir mayúscula, minúscula y número
   phoneFormat: "Solo dígitos, espacios y los símbolos + - ( )"
+  addressNeedsCoords: Si introduces una dirección debes capturar también la ubicación
   coordinatesIncomplete: La latitud y la longitud deben indicarse juntas
   coordinatesInvalid: Coordenadas fuera de rango (lat -90–90, lon -180–180)
   orgCodeRequired: Introduce un código de organización

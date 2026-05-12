@@ -1,7 +1,10 @@
 package com.delivera.dto.order;
 
+import com.delivera.model.LoyalUser;
+import com.delivera.model.OperationalUnit;
 import com.delivera.model.Order;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -34,24 +37,22 @@ public record OrderResponse(
         Instant currentLocationAt) {
 
     public static OrderResponse from(Order order) {
-        var lu = order.getLoyalUser();
+        LoyalUser lu = order.getLoyalUser();
+        OperationalUnit dest = order.getDestination();
+        OperationalUnit origin = order.getOrigin();
         boolean claimed = lu != null && lu.getUser() != null;
-        Double destLat = order.getDestination() != null && order.getDestination().getLatitude() != null
-                ? Double.valueOf(order.getDestination().getLatitude().doubleValue())
-                : (order.getRecipientLatitude() != null ? Double.valueOf(order.getRecipientLatitude().doubleValue()) : null);
-        Double destLon = order.getDestination() != null && order.getDestination().getLongitude() != null
-                ? Double.valueOf(order.getDestination().getLongitude().doubleValue())
-                : (order.getRecipientLongitude() != null ? Double.valueOf(order.getRecipientLongitude().doubleValue()) : null);
+        Double destLat = resolveDestCoord(dest != null ? dest.getLatitude() : null, order.getRecipientLatitude());
+        Double destLon = resolveDestCoord(dest != null ? dest.getLongitude() : null, order.getRecipientLongitude());
         return new OrderResponse(
                 order.getId(),
                 order.getReference(),
                 order.getOrderType().name(),
-                order.getOrigin().getId(),
-                order.getOrigin().getName(),
-                order.getOrigin().getCompany() != null ? order.getOrigin().getCompany().getId() : null,
-                order.getDestination() != null ? order.getDestination().getId() : null,
-                order.getDestination() != null ? order.getDestination().getName() : null,
-                order.getDestination() != null && order.getDestination().getCompany() != null ? order.getDestination().getCompany().getId() : null,
+                origin.getId(),
+                origin.getName(),
+                origin.getCompany() != null ? origin.getCompany().getId() : null,
+                dest != null ? dest.getId() : null,
+                dest != null ? dest.getName() : null,
+                dest != null && dest.getCompany() != null ? dest.getCompany().getId() : null,
                 order.getRecipientEmail(),
                 order.getRecipientName(),
                 order.getRecipientAddress(),
@@ -62,12 +63,17 @@ public record OrderResponse(
                 claimed,
                 lu != null ? lu.getId() : null,
                 order.getCreatedAt(),
-                order.getOrigin().getLatitude() != null ? order.getOrigin().getLatitude().doubleValue() : null,
-                order.getOrigin().getLongitude() != null ? order.getOrigin().getLongitude().doubleValue() : null,
+                origin.getLatitude() != null ? origin.getLatitude().doubleValue() : null,
+                origin.getLongitude() != null ? origin.getLongitude().doubleValue() : null,
                 destLat,
                 destLon,
                 order.getCurrentLat() != null ? order.getCurrentLat().doubleValue() : null,
                 order.getCurrentLon() != null ? order.getCurrentLon().doubleValue() : null,
                 order.getCurrentLocationAt());
+    }
+
+    private static Double resolveDestCoord(BigDecimal destCoord, BigDecimal recipientCoord) {
+        if (destCoord != null) return destCoord.doubleValue();
+        return recipientCoord != null ? recipientCoord.doubleValue() : null;
     }
 }

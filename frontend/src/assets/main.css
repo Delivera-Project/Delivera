@@ -108,7 +108,8 @@ body {
   text-align: left;
 }
 
-.form-field label {
+.form-field label,
+.form-field .form-field-label {
   display: block;
   font-size: 12px;
   font-weight: 500;
@@ -304,6 +305,9 @@ body {
   gap: 10px;
   margin-bottom: 24px;
   text-align: left;
+  border: none;
+  padding: 0;
+  margin-top: 0;
 }
 
 .activity-option {
@@ -600,7 +604,7 @@ body {
 }
 .action-btn:hover { color: #1e293b; background: #f1f5f9; }
 .action-btn--danger:hover,
-.delete-btn:hover { color: #ef4444; background: #fef2f2; }
+.delete-btn:hover { color: #b91c1c; background: #fef2f2; }
 
 /* === Mapa: fix Leaflet tiles en Vite === */
 .leaflet-container {

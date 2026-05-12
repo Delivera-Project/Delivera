@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 
@@ -63,5 +63,50 @@ describe('auth store', () => {
     expect(auth.canCreateOrders).toBe(true)
     auth.setRole('OPERATOR')
     expect(auth.canCreateOrders).toBe(false)
+  })
+
+  it('setUser stores the profile in user ref', () => {
+    const auth = useAuthStore()
+    const profile = { email: 'a@b.com', firstName: 'Ana' }
+    auth.setUser(profile)
+    expect(auth.user).toEqual(profile)
+  })
+
+  it('null-path setters remove keys from localStorage', () => {
+    const auth = useAuthStore()
+    auth.setOrganization('org-handle')
+    auth.setOrgName('Org Name')
+    auth.setCompanyName('Co Name')
+    auth.setPlanCode('BASIC')
+    auth.setOrganization(null)
+    auth.setOrgName(null)
+    auth.setCompanyName(null)
+    auth.setPlanCode(null)
+    expect(localStorage.getItem('organizationHandle')).toBeNull()
+    expect(localStorage.getItem('orgName')).toBeNull()
+    expect(localStorage.getItem('companyName')).toBeNull()
+    expect(localStorage.getItem('planCode')).toBeNull()
+  })
+
+  it('loadCompanies fetches and stores companies when role is COMPANY_ADMIN', async () => {
+    const auth = useAuthStore()
+    auth.setToken('tok')
+    auth.setRole('COMPANY_ADMIN')
+    const mockCompanies = [{ id: 'c1', name: 'Acme' }]
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(mockCompanies) }))
+    await auth.loadCompanies()
+    expect(auth.companies).toEqual(mockCompanies)
+    vi.unstubAllGlobals()
+  })
+
+  it('loadCompanies does nothing when not COMPANY_ADMIN', async () => {
+    const auth = useAuthStore()
+    auth.setToken('tok')
+    auth.setRole('ANALYST')
+    const fetchSpy = vi.fn()
+    vi.stubGlobal('fetch', fetchSpy)
+    await auth.loadCompanies()
+    expect(fetchSpy).not.toHaveBeenCalled()
+    vi.unstubAllGlobals()
   })
 })

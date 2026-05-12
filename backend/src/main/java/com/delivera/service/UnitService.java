@@ -52,9 +52,9 @@ public class UnitService {
         if (unitRepository.existsByCompanyIdAndName(companyId, request.name())) {
             throw new UnitNameConflictException();
         }
-        var company = companyRepository.findById(companyId)
+        Company company = companyRepository.findById(companyId)
                 .orElseThrow(CompanyContextException::new);
-        var unit = new OperationalUnit();
+        OperationalUnit unit = new OperationalUnit();
         unit.setCompany(company);
         applyRequest(unit, request);
         try {
@@ -67,7 +67,7 @@ public class UnitService {
     @Transactional
     public UnitResponse update(UUID unitId, UnitRequest request) {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        var unit = unitRepository.findByIdAndCompanyId(unitId, companyId)
+        OperationalUnit unit = unitRepository.findByIdAndCompanyId(unitId, companyId)
                 .orElseThrow(() -> new UnitNotFoundException(unitId));
         if (unitRepository.existsByCompanyIdAndNameAndIdNot(companyId, request.name(), unitId)) {
             throw new UnitNameConflictException();
@@ -109,7 +109,7 @@ public class UnitService {
         return companyRepository.findByOrganizationId(company.getOrganization().getId())
                 .stream()
                 .filter(c -> !c.getId().equals(companyId))
-                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData()))
+                .map(c -> new CompanySummary(c.getId(), c.getName(), c.getActivityType().getCode(), c.getLogoData(), c.getDefaultPriority(), c.isDefaultPriorityLocked()))
                 .toList();
     }
 
@@ -143,7 +143,7 @@ public class UnitService {
     @Transactional
     public void delete(UUID id) {
         UUID companyId = securityUtils.getCurrentCompanyId();
-        var unit = unitRepository.findByIdAndCompanyId(id, companyId)
+        OperationalUnit unit = unitRepository.findByIdAndCompanyId(id, companyId)
                 .orElseThrow(() -> new UnitNotFoundException(id));
         unitRepository.delete(unit);
     }

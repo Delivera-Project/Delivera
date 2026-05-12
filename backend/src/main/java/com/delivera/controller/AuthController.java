@@ -17,26 +17,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Autenticación", description = "Endpoints para registro e inicio de sesión")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
-    @Autowired
-    private SecurityUtils securityUtils;
-    @Autowired
-    private AuthRateLimiter authRateLimiter;
+    private final AuthService authService;
+    private final SecurityUtils securityUtils;
+    private final AuthRateLimiter authRateLimiter;
 
     @Operation(summary = "Iniciar sesión", description = "Autenticación de usuario con email y contraseña")
     @ApiResponses(value = {

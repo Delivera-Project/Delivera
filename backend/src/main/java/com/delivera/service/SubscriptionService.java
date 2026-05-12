@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,7 +89,26 @@ public class SubscriptionService {
 
     @Transactional(readOnly = true)
     public SubscriptionUsageResponse getUsage(UUID companyId) {
+        return buildUsageResponse(getCompany(companyId));
+    }
+
+    @Transactional
+    public SubscriptionUsageResponse changePlan(UUID companyId, String planCode, boolean force) {
+        SubscriptionPlan newPlan = subscriptionPlanRepository.findById(planCode)
+                .orElseThrow(CompanyContextException::new);
         Company company = getCompany(companyId);
+        if (force) {
+            deleteExcessResources(companyId, newPlan);
+        } else {
+            validateLimits(companyId, company, newPlan);
+        }
+        company.setPlan(newPlan);
+        companyRepository.save(company);
+        return buildUsageResponse(company);
+    }
+
+    private SubscriptionUsageResponse buildUsageResponse(Company company) {
+        UUID companyId = company.getId();
         SubscriptionPlan plan = company.getPlan();
         Instant som = startOfMonth();
         return new SubscriptionUsageResponse(
@@ -103,90 +122,94 @@ public class SubscriptionService {
         );
     }
 
-    @Transactional
-    public SubscriptionUsageResponse changePlan(UUID companyId, String planCode, boolean force) {
-        SubscriptionPlan newPlan = subscriptionPlanRepository.findById(planCode)
-                .orElseThrow(CompanyContextException::new);
-        Company company = getCompany(companyId);
+    private void validateLimits(UUID companyId, Company company, SubscriptionPlan plan) {
         Instant som = startOfMonth();
-        if (force) {
-            deleteExcessResources(companyId, newPlan);
-        } else {
-            if (newPlan.getMaxUnits() != -1 && unitRepository.countByCompanyId(companyId) > newPlan.getMaxUnits())
-                throw new SubscriptionLimitException("units");
-            if (newPlan.getMaxWorkers() != -1 && workerRepository.countByCompanyId(companyId) > newPlan.getMaxWorkers())
-                throw new SubscriptionLimitException("workers");
-            if (newPlan.getMaxOrdersPerMonth() != -1 && orderRepository.countByCompanyIdAndCreatedAtAfter(companyId, som) > newPlan.getMaxOrdersPerMonth())
-                throw new SubscriptionLimitException("orders");
-            if (newPlan.getMaxLoyalUsers() != -1 && loyalUserRepository.countByCompaniesId(companyId) > newPlan.getMaxLoyalUsers())
-                throw new SubscriptionLimitException("loyal_users");
-            if (newPlan.getMaxCompanies() != -1 && companyRepository.countByOrganizationId(company.getOrganization().getId()) > newPlan.getMaxCompanies())
-                throw new SubscriptionLimitException("companies");
-        }
-        company.setPlan(newPlan);
-        companyRepository.save(company);
-        return getUsage(companyId);
+        if (plan.getMaxUnits() != -1 && unitRepository.countByCompanyId(companyId) > plan.getMaxUnits())
+            throw new SubscriptionLimitException("units");
+        if (plan.getMaxWorkers() != -1 && workerRepository.countByCompanyId(companyId) > plan.getMaxWorkers())
+            throw new SubscriptionLimitException("workers");
+        if (plan.getMaxOrdersPerMonth() != -1 && orderRepository.countByCompanyIdAndCreatedAtAfter(companyId, som) > plan.getMaxOrdersPerMonth())
+            throw new SubscriptionLimitException("orders");
+        if (plan.getMaxLoyalUsers() != -1 && loyalUserRepository.countByCompaniesId(companyId) > plan.getMaxLoyalUsers())
+            throw new SubscriptionLimitException("loyal_users");
+        if (plan.getMaxCompanies() != -1 && companyRepository.countByOrganizationId(company.getOrganization().getId()) > plan.getMaxCompanies())
+            throw new SubscriptionLimitException("companies");
     }
 
     private void deleteExcessResources(UUID companyId, SubscriptionPlan newPlan) {
-        // Workers: delete newest non-admin first, then admins keeping at least one
-        if (newPlan.getMaxWorkers() != -1) {
-            List<Worker> workers = workerRepository.findByCompanyIdOrderByCreatedAtAsc(companyId);
-            long excess = workers.size() - newPlan.getMaxWorkers();
-            if (excess > 0) {
-                List<Worker> reversed = new ArrayList<>(workers);
-                Collections.reverse(reversed);
-                List<Worker> toDelete = new ArrayList<>();
-                long adminCount = workers.stream().filter(w -> w.getRole() == WorkerRole.COMPANY_ADMIN).count();
-                for (Worker w : reversed) {
-                    if (excess <= 0) break;
-                    if (w.getRole() != WorkerRole.COMPANY_ADMIN) {
-                        toDelete.add(w); excess--;
-                    } else if (adminCount > 1) {
-                        toDelete.add(w); excess--; adminCount--;
-                    }
-                }
-                workerRepository.deleteAll(toDelete);
+        deleteExcessWorkers(companyId, newPlan);
+        deleteExcessLoyalUsers(companyId, newPlan);
+        deleteExcessUnits(companyId, newPlan);
+        deleteExcessCompanies(companyId, newPlan);
+    }
+
+    private void deleteExcessWorkers(UUID companyId, SubscriptionPlan newPlan) {
+        if (newPlan.getMaxWorkers() == -1) return;
+        List<Worker> workers = workerRepository.findByCompanyIdOrderByCreatedAtAsc(companyId);
+        long excess = (long) workers.size() - newPlan.getMaxWorkers();
+        if (excess <= 0) return;
+        List<Worker> reversed = workers.reversed();
+        List<Worker> toDelete = new ArrayList<>();
+        long adminCount = workers.stream().filter(w -> w.getRole() == WorkerRole.COMPANY_ADMIN).count();
+        for (Worker w : reversed) {
+            if (excess <= 0) break;
+            if (w.getRole() != WorkerRole.COMPANY_ADMIN) {
+                toDelete.add(w); excess--;
+            } else if (adminCount > 1) {
+                toDelete.add(w); excess--; adminCount--;
             }
         }
-        // LoyalUsers: remove company association from newest ones
-        if (newPlan.getMaxLoyalUsers() != -1) {
-            List<LoyalUser> loyalUsers = loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId);
-            long excess = loyalUsers.size() - newPlan.getMaxLoyalUsers();
-            for (int i = 0; i < excess && i < loyalUsers.size(); i++) {
-                LoyalUser lu = loyalUsers.get(i);
-                lu.getCompanies().removeIf(c -> c.getId().equals(companyId));
-                loyalUserRepository.save(lu);
-            }
+        workerRepository.deleteAll(toDelete);
+    }
+
+    private void deleteExcessLoyalUsers(UUID companyId, SubscriptionPlan newPlan) {
+        if (newPlan.getMaxLoyalUsers() == -1) return;
+        List<LoyalUser> loyalUsers = loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(companyId);
+        long excess = (long) loyalUsers.size() - newPlan.getMaxLoyalUsers();
+        for (int i = 0; i < excess && i < loyalUsers.size(); i++) {
+            LoyalUser lu = loyalUsers.get(i);
+            lu.getCompanies().removeIf(c -> c.getId().equals(companyId));
+            loyalUserRepository.save(lu);
         }
-        // Units: delete newest ones with no orders (units with orders cannot be deleted safely)
-        if (newPlan.getMaxUnits() != -1) {
-            long excess = unitRepository.countByCompanyId(companyId) - newPlan.getMaxUnits();
-            if (excess > 0) {
-                List<OperationalUnit> deletable = unitRepository.findByCompanyIdWithNoOrdersOrderByCreatedAtDesc(companyId);
-                for (int i = 0; i < excess && i < deletable.size(); i++) {
-                    unitRepository.delete(deletable.get(i));
-                }
-            }
+    }
+
+    private void deleteExcessUnits(UUID companyId, SubscriptionPlan newPlan) {
+        if (newPlan.getMaxUnits() == -1) return;
+        long excess = unitRepository.countByCompanyId(companyId) - newPlan.getMaxUnits();
+        if (excess <= 0) return;
+        List<OperationalUnit> deletable = unitRepository.findByCompanyIdWithNoOrdersOrderByCreatedAtDesc(companyId);
+        for (int i = 0; i < excess && i < deletable.size(); i++) {
+            unitRepository.delete(deletable.get(i));
         }
-        // Companies: delete newest companies in the org (never the current company)
-        if (newPlan.getMaxCompanies() != -1) {
-            Company current = companyRepository.findById(companyId).orElseThrow();
-            UUID orgId = current.getOrganization().getId();
-            List<Company> companies = companyRepository.findByOrganizationIdOrderByCreatedAtDesc(orgId);
-            long excess = companies.size() - newPlan.getMaxCompanies();
-            for (Company c : companies) {
-                if (excess <= 0) break;
-                if (c.getId().equals(companyId)) continue;
-                orderRepository.deleteEventsByCompanyId(c.getId());
-                orderRepository.deleteByCompanyId(c.getId());
-                loyalUserRepository.deleteAll(loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(c.getId()));
-                unitRepository.deleteByCompanyId(c.getId());
-                workerRepository.deleteByCompanyId(c.getId());
-                companyRepository.delete(c);
+    }
+
+    private void deleteExcessCompanies(UUID companyId, SubscriptionPlan newPlan) {
+        if (newPlan.getMaxCompanies() == -1) return;
+        Company current = companyRepository.findById(companyId).orElseThrow();
+        UUID orgId = current.getOrganization().getId();
+        List<Company> companies = companyRepository.findByOrganizationIdOrderByCreatedAtDesc(orgId);
+        long excess = (long) companies.size() - newPlan.getMaxCompanies();
+        for (Company c : companies) {
+            if (excess <= 0) break;
+            if (!c.getId().equals(companyId)) {
+                purgeCompany(c);
                 excess--;
             }
         }
+    }
+
+    private void purgeCompany(Company c) {
+        UUID cId = c.getId();
+        orderRepository.deleteEventsByCompanyId(cId);
+        orderRepository.deleteByCompanyId(cId);
+        for (LoyalUser lu : loyalUserRepository.findByCompaniesIdOrderByCreatedAtDesc(cId)) {
+            lu.getCompanies().removeIf(comp -> comp.getId().equals(cId));
+            if (lu.getCompanies().isEmpty()) loyalUserRepository.delete(lu);
+            else loyalUserRepository.save(lu);
+        }
+        unitRepository.deleteByCompanyId(cId);
+        workerRepository.deleteByCompanyId(cId);
+        companyRepository.delete(c);
     }
 
     private SubscriptionPlan getPlan(UUID companyId) {
@@ -198,7 +221,7 @@ public class SubscriptionService {
     }
 
     private Instant startOfMonth() {
-        return java.time.LocalDate.now(ZoneOffset.UTC)
+        return LocalDate.now(ZoneOffset.UTC)
                 .with(TemporalAdjusters.firstDayOfMonth())
                 .atStartOfDay()
                 .toInstant(ZoneOffset.UTC);
