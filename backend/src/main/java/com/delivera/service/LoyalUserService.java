@@ -6,7 +6,7 @@ import com.delivera.dto.loyaluser.LoyalUserResponse;
 import com.delivera.dto.order.OrderResponse;
 import com.delivera.exception.CompanyContextException;
 import com.delivera.exception.LoyalUserConflictException;
-import com.delivera.exception.OrderNotFoundException;
+import com.delivera.exception.LoyalUserNotFoundException;
 import com.delivera.exception.UserNotFoundException;
 import com.delivera.model.Company;
 import com.delivera.model.LoyalUser;
