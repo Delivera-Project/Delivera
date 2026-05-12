@@ -342,7 +342,7 @@
 
 .profile-dropdown-item:hover { background: #f1f5f9; }
 .profile-dropdown-logout { color: #b91c1c; }
-.profile-dropdown-logout:hover { background: #fef2f2; color: #dc2626; }
+.profile-dropdown-logout:hover { background: #fef2f2; color: #b91c1c; }
 
 .sidebar-profile {
   display: flex;

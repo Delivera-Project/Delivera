@@ -132,6 +132,34 @@ function addOrGetMarker(mapInstance, group, markerByKey, key, opts) {
   return mk
 }
 
+async function addOrderRoutes(routeable, token, markerByKey) {
+  for (const o of routeable) {
+    if (token !== mapToken || !map) return
+    const originKey = 'u:' + o.originId
+    const destSuffix = o.loyalUserId ? 'l:' + o.loyalUserId : `c:${o.destinationLat},${o.destinationLon},${o.recipientEmail || ''}`
+    const destKey = o.destinationId ? 'u:' + o.destinationId : destSuffix
+    const entry = await addRoute(map, {
+      orderId: o.id,
+      origin: { lat: Number.parseFloat(o.originLat), lon: Number.parseFloat(o.originLon) },
+      dest:   { lat: Number.parseFloat(o.destinationLat), lon: Number.parseFloat(o.destinationLon) },
+      popupTitle: o.reference,
+      popupSubtitle: `${o.originName} → ${destinationTitle(o)}`,
+      actionLabel: t('orders.viewDetail'),
+      router,
+      originMarker: markerByKey.get(originKey) || null,
+      destMarker: markerByKey.get(destKey) || null,
+      status: o.status,
+      currentLocation: currentLocationOf(o),
+    })
+    if (token !== mapToken) {
+      if (entry?.layer && map) map.removeLayer(entry.layer)
+      return
+    }
+    routeEntries.push(entry)
+    entry.layer?.bringToFront?.()
+  }
+}
+
 async function updateMapOrders() {
   if (!map) return
   const token = ++mapToken
@@ -186,32 +214,7 @@ async function updateMapOrders() {
 
   // Rutas (todas las que tienen coords completas)
   const routeable = items.filter(o => o.destinationLat != null && o.destinationLon != null)
-  for (const o of routeable) {
-    if (token !== mapToken || !map) return
-    const originKey = 'u:' + o.originId
-    const destRouteSuffix = o.loyalUserId ? 'l:' + o.loyalUserId : `c:${o.destinationLat},${o.destinationLon},${o.recipientEmail || ''}`
-    const destKey = o.destinationId ? 'u:' + o.destinationId : destRouteSuffix
-    const entry = await addRoute(map, {
-      orderId: o.id,
-      origin: { lat: Number.parseFloat(o.originLat), lon: Number.parseFloat(o.originLon) },
-      dest:   { lat: Number.parseFloat(o.destinationLat), lon: Number.parseFloat(o.destinationLon) },
-      popupTitle: o.reference,
-      popupSubtitle: `${o.originName} → ${destinationTitle(o)}`,
-      actionLabel: t('orders.viewDetail'),
-      router,
-      originMarker: markerByKey.get(originKey) || null,
-      destMarker: markerByKey.get(destKey) || null,
-      status: o.status,
-      currentLocation: currentLocationOf(o),
-    })
-    if (token !== mapToken) {
-      if (entry?.layer && map) map.removeLayer(entry.layer)
-      return
-    }
-    routeEntries.push(entry)
-    // Traer rutas al frente para que queden por encima de los tiles.
-    entry.layer?.bringToFront?.()
-  }
+  await addOrderRoutes(routeable, token, markerByKey)
 }
 
 // Debounce: al teclear en el filtro evitamos relanzar updateMapOrders
