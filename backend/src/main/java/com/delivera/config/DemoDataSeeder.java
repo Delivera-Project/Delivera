@@ -41,7 +41,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     private final LoyalUserRepository loyalUsers;
     private final OrderRepository orders;
     private final OrderEventRepository orderEvents;
-    private final OrderMessageRepository orderMessages;
     private final ActivityTypeRepository activityTypes;
     private final SubscriptionPlanRepository plans;
     private final PasswordEncoder passwordEncoder;
@@ -57,7 +56,6 @@ public class DemoDataSeeder implements CommandLineRunner {
                           LoyalUserRepository loyalUsers,
                           OrderRepository orders,
                           OrderEventRepository orderEvents,
-                          OrderMessageRepository orderMessages,
                           ActivityTypeRepository activityTypes,
                           SubscriptionPlanRepository plans,
                           PasswordEncoder passwordEncoder) {
@@ -69,7 +67,6 @@ public class DemoDataSeeder implements CommandLineRunner {
         this.loyalUsers = loyalUsers;
         this.orders = orders;
         this.orderEvents = orderEvents;
-        this.orderMessages = orderMessages;
         this.activityTypes = activityTypes;
         this.plans = plans;
         this.passwordEncoder = passwordEncoder;

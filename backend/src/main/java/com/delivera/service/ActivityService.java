@@ -10,6 +10,7 @@ import com.delivera.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -49,7 +50,7 @@ public class ActivityService {
         Instant from = periodStart(period);
         return orderRepository.countByDayForCompany(companyId, from).stream()
                 .map(row -> {
-                    LocalDate date = row[0] instanceof LocalDate d ? d : ((java.sql.Date) row[0]).toLocalDate();
+                    LocalDate date = row[0] instanceof LocalDate d ? d : ((Date) row[0]).toLocalDate();
                     long count = ((Number) row[1]).longValue();
                     return new OrdersByDayEntry(date, count);
                 })
@@ -68,7 +69,7 @@ public class ActivityService {
                 .toList();
     }
 
-    Instant periodStart(String period) {
+    private Instant periodStart(String period) {
         LocalDate today = LocalDate.now(ZoneOffset.UTC);
         return switch (period) {
             case "TODAY" -> today.atStartOfDay().toInstant(ZoneOffset.UTC);

@@ -1,7 +1,10 @@
 package com.delivera.dto.order;
 
+import com.delivera.model.LoyalUser;
+import com.delivera.model.OperationalUnit;
 import com.delivera.model.Order;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -34,9 +37,9 @@ public record OrderResponse(
         Instant currentLocationAt) {
 
     public static OrderResponse from(Order order) {
-        var lu = order.getLoyalUser();
-        var dest = order.getDestination();
-        var origin = order.getOrigin();
+        LoyalUser lu = order.getLoyalUser();
+        OperationalUnit dest = order.getDestination();
+        OperationalUnit origin = order.getOrigin();
         boolean claimed = lu != null && lu.getUser() != null;
         Double destLat = resolveDestCoord(dest != null ? dest.getLatitude() : null, order.getRecipientLatitude());
         Double destLon = resolveDestCoord(dest != null ? dest.getLongitude() : null, order.getRecipientLongitude());
@@ -69,7 +72,7 @@ public record OrderResponse(
                 order.getCurrentLocationAt());
     }
 
-    private static Double resolveDestCoord(java.math.BigDecimal destCoord, java.math.BigDecimal recipientCoord) {
+    private static Double resolveDestCoord(BigDecimal destCoord, BigDecimal recipientCoord) {
         if (destCoord != null) return destCoord.doubleValue();
         return recipientCoord != null ? recipientCoord.doubleValue() : null;
     }

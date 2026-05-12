@@ -1,6 +1,8 @@
 package com.delivera.service;
 
 import com.delivera.model.WorkerRole;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +32,7 @@ public class JwtService {
     }
 
     public String generateToken(String email, String role) {
-        var builder = Jwts.builder()
+        JwtBuilder builder = Jwts.builder()
                 .subject(email)
                 .issuedAt(new Date())
                 .expiration(Date.from(Instant.now().plusSeconds(expirationSeconds)));
@@ -54,7 +56,7 @@ public class JwtService {
     public record TokenClaims(String email, String role, UUID companyId) {}
 
     public TokenClaims parseTokenWithClaims(String token) {
-        var payload = Jwts.parser()
+        Claims payload = Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)

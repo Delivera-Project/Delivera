@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -88,18 +89,7 @@ public class SubscriptionService {
 
     @Transactional(readOnly = true)
     public SubscriptionUsageResponse getUsage(UUID companyId) {
-        Company company = getCompany(companyId);
-        SubscriptionPlan plan = company.getPlan();
-        Instant som = startOfMonth();
-        return new SubscriptionUsageResponse(
-                plan.getCode(),
-                plan.getName(),
-                new ResourceUsage(unitRepository.countByCompanyId(companyId), plan.getMaxUnits()),
-                new ResourceUsage(workerRepository.countByCompanyId(companyId), plan.getMaxWorkers()),
-                new ResourceUsage(orderRepository.countByCompanyIdAndCreatedAtAfter(companyId, som), plan.getMaxOrdersPerMonth()),
-                new ResourceUsage(loyalUserRepository.countByCompaniesId(companyId), plan.getMaxLoyalUsers()),
-                new ResourceUsage(companyRepository.countByOrganizationId(company.getOrganization().getId()), plan.getMaxCompanies())
-        );
+        return buildUsageResponse(getCompany(companyId));
     }
 
     @Transactional
@@ -114,7 +104,22 @@ public class SubscriptionService {
         }
         company.setPlan(newPlan);
         companyRepository.save(company);
-        return getUsage(companyId);
+        return buildUsageResponse(company);
+    }
+
+    private SubscriptionUsageResponse buildUsageResponse(Company company) {
+        UUID companyId = company.getId();
+        SubscriptionPlan plan = company.getPlan();
+        Instant som = startOfMonth();
+        return new SubscriptionUsageResponse(
+                plan.getCode(),
+                plan.getName(),
+                new ResourceUsage(unitRepository.countByCompanyId(companyId), plan.getMaxUnits()),
+                new ResourceUsage(workerRepository.countByCompanyId(companyId), plan.getMaxWorkers()),
+                new ResourceUsage(orderRepository.countByCompanyIdAndCreatedAtAfter(companyId, som), plan.getMaxOrdersPerMonth()),
+                new ResourceUsage(loyalUserRepository.countByCompaniesId(companyId), plan.getMaxLoyalUsers()),
+                new ResourceUsage(companyRepository.countByOrganizationId(company.getOrganization().getId()), plan.getMaxCompanies())
+        );
     }
 
     private void validateLimits(UUID companyId, Company company, SubscriptionPlan plan) {
@@ -186,9 +191,10 @@ public class SubscriptionService {
         long excess = (long) companies.size() - newPlan.getMaxCompanies();
         for (Company c : companies) {
             if (excess <= 0) break;
-            if (c.getId().equals(companyId)) continue;
-            purgeCompany(c);
-            excess--;
+            if (!c.getId().equals(companyId)) {
+                purgeCompany(c);
+                excess--;
+            }
         }
     }
 
@@ -215,7 +221,7 @@ public class SubscriptionService {
     }
 
     private Instant startOfMonth() {
-        return java.time.LocalDate.now(ZoneOffset.UTC)
+        return LocalDate.now(ZoneOffset.UTC)
                 .with(TemporalAdjusters.firstDayOfMonth())
                 .atStartOfDay()
                 .toInstant(ZoneOffset.UTC);

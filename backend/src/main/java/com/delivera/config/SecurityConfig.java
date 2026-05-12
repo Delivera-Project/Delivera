@@ -26,7 +26,6 @@ public class SecurityConfig {
     private static final String OPERATOR = "OPERATOR";
     private static final String UNITS_ALL = "/units/**";
 
-    // Paths de documentación y endpoints públicos sin prefijo de API
     private static final String[] SWAGGER_PATHS = {
         "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**"
     };
@@ -46,7 +45,6 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> {
-                // Documentación y acceso público
                 auth.requestMatchers(SWAGGER_PATHS).permitAll();
                 auth.requestMatchers(api + "/auth/**").permitAll();
                 auth.requestMatchers(HttpMethod.GET, api + "/organizations/**").permitAll();
@@ -54,16 +52,10 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.GET, api + "/app-config/**").permitAll();
                 auth.requestMatchers(api + "/orders/public/**").permitAll();
 
-                // API externa autenticada con API key
                 auth.requestMatchers(api + "/external/**").hasRole("API_KEY");
-
-                // Administración global
                 auth.requestMatchers(api + "/admin/**").hasRole("GLOBAL_ADMIN");
-
-                // Configuración de empresa — solo admins
                 auth.requestMatchers(api + "/settings/**").hasRole(ADMIN);
 
-                // Unidades operativas
                 auth.requestMatchers(HttpMethod.GET, api + "/units/external").hasAnyRole(ADMIN, ANALYST);
                 auth.requestMatchers(HttpMethod.GET, api + "/units/external-companies").hasAnyRole(ADMIN, ANALYST);
                 auth.requestMatchers(HttpMethod.POST, api + "/units").hasRole(ADMIN);
@@ -72,26 +64,21 @@ public class SecurityConfig {
                 auth.requestMatchers(HttpMethod.DELETE, api + "/units/*/workers/*").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.DELETE, api + UNITS_ALL).hasRole(ADMIN);
 
-                // Pedidos
                 auth.requestMatchers(HttpMethod.POST, api + "/orders").hasAnyRole(ADMIN, ANALYST);
                 auth.requestMatchers(HttpMethod.PATCH, api + "/orders/*/status").hasAnyRole(ADMIN, ANALYST, OPERATOR);
                 auth.requestMatchers(HttpMethod.DELETE, api + "/orders/**").hasRole(ADMIN);
 
-                // Usuarios fidelizados
                 auth.requestMatchers(HttpMethod.POST, api + "/loyal-users").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.PUT, api + "/loyal-users/**").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.GET, api + "/loyal-users/me/orders").hasRole("LOYAL_USER");
 
-                // Trabajadores
                 auth.requestMatchers(HttpMethod.POST, api + "/workers/invite").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.PATCH, api + "/workers/*/role").hasRole(ADMIN);
                 auth.requestMatchers(HttpMethod.DELETE, api + "/workers/**").hasRole(ADMIN);
 
-                // Chat de pedido: trabajadores de empresa y usuarios fidelizados
                 auth.requestMatchers(api + "/orders/*/messages/**").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
                 auth.requestMatchers(HttpMethod.POST, api + "/orders/*/messages").hasAnyRole(ADMIN, ANALYST, OPERATOR, "LOYAL_USER");
 
-                // Endpoints de trabajadores (excluye LOYAL_USER)
                 auth.requestMatchers(api + "/workers/**").hasAnyRole(ADMIN, ANALYST, OPERATOR);
                 auth.requestMatchers(api + UNITS_ALL).hasAnyRole(ADMIN, ANALYST, OPERATOR);
                 auth.requestMatchers(api + "/orders/**").hasAnyRole(ADMIN, ANALYST, OPERATOR);
@@ -109,7 +96,7 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        var config = new CorsConfiguration();
+        CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(
             Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
@@ -120,7 +107,7 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
 
-        var source = new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }

@@ -39,7 +39,7 @@ export function routeColorFor(status) {
 // Devuelve { lat, lon } parseado a partir de los campos currentLat/currentLon del pedido,
 // o null si alguno es nulo. Centralizado para reutilizar en todas las vistas y testear.
 export function currentLocationOf(order) {
-  if (!order || order?.currentLat == null || order?.currentLon == null) return null
+  if (order?.currentLat == null || order?.currentLon == null) return null
   return { lat: Number.parseFloat(order.currentLat), lon: Number.parseFloat(order.currentLon) }
 }
 
@@ -248,7 +248,7 @@ export async function addRoute(map, {
 // Crea un marcador circular con el color del estado sobre la ruta. Aislado para poder
 // testearlo sin instanciar el Map completo.
 export function addCurrentLocationMarker(map, currentLocation, color, popupTitle, popupSubtitle) {
-  if (!map || !currentLocation || currentLocation?.lat == null || currentLocation?.lon == null) return null
+  if (!map || currentLocation?.lat == null || currentLocation?.lon == null) return null
   const marker = L.circleMarker([currentLocation.lat, currentLocation.lon], {
     radius: 7, color: '#fff', weight: 2, fillColor: color, fillOpacity: 1,
   }).addTo(map)
