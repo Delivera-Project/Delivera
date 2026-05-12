@@ -6,6 +6,7 @@ import com.delivera.exception.ForbiddenException;
 import com.delivera.exception.OrderNotFoundException;
 import com.delivera.model.Order;
 import com.delivera.model.OrderMessage;
+import com.delivera.model.User;
 import com.delivera.repository.OrderMessageRepository;
 import com.delivera.repository.OrderRepository;
 import com.delivera.repository.UserRepository;
@@ -44,13 +45,13 @@ public class OrderMessageService {
 
     @Transactional
     public OrderMessageResponse sendMessage(UUID orderId, OrderMessageRequest request) {
-        var order = resolveOrder(orderId);
+        Order order = resolveOrder(orderId);
 
         String email = securityUtils.getCurrentEmail();
-        var sender = userRepository.findByEmail(email)
+        User sender = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ForbiddenException("Sender not found"));
 
-        var message = new OrderMessage();
+        OrderMessage message = new OrderMessage();
 
         message.setOrder(order);
         message.setSender(sender);

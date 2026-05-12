@@ -155,7 +155,7 @@ public class AuthService {
 
     @Transactional
     public LoginResponse claimRegister(String token, ClaimRegisterRequest request) {
-        var order = orderRepository.findByTrackingToken(token)
+        Order order = orderRepository.findByTrackingToken(token)
                 .orElseThrow(OrderNotFoundException::new);
 
         if (order.getLoyalUser() != null && order.getLoyalUser().getUser() != null) {
@@ -177,7 +177,7 @@ public class AuthService {
         LoyalUser loyalUser = loyalUserRepository
                 .findByCompaniesIdAndEmail(order.getCompany().getId(), email)
                 .orElseGet(() -> {
-                    var lu = new LoyalUser();
+                    LoyalUser lu = new LoyalUser();
                     lu.getCompanies().add(order.getCompany());
                     lu.setEmail(email);
                     return lu;

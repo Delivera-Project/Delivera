@@ -1,7 +1,11 @@
 package com.delivera.dto.order;
 
+import com.delivera.model.Company;
+import com.delivera.model.LoyalUser;
+import com.delivera.model.OperationalUnit;
 import com.delivera.model.Order;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -38,11 +42,11 @@ public record OrderDetailResponse(
         Instant currentLocationAt) {
 
     public static OrderDetailResponse from(Order order) {
-        var lu = order.getLoyalUser();
-        var dest = order.getDestination();
-        var origin = order.getOrigin();
-        var originCompany = origin.getCompany();
-        var destCompany = dest != null ? dest.getCompany() : null;
+        LoyalUser lu = order.getLoyalUser();
+        OperationalUnit dest = order.getDestination();
+        OperationalUnit origin = order.getOrigin();
+        Company originCompany = origin.getCompany();
+        Company destCompany = dest != null ? dest.getCompany() : null;
         Double destLat = resolveDestCoord(dest != null ? dest.getLatitude() : null, order.getRecipientLatitude());
         Double destLon = resolveDestCoord(dest != null ? dest.getLongitude() : null, order.getRecipientLongitude());
         List<OrderEventResponse> events = order.getEvents() != null
@@ -80,7 +84,7 @@ public record OrderDetailResponse(
                 order.getCurrentLocationAt());
     }
 
-    private static Double resolveDestCoord(java.math.BigDecimal destCoord, java.math.BigDecimal recipientCoord) {
+    private static Double resolveDestCoord(BigDecimal destCoord, BigDecimal recipientCoord) {
         if (destCoord != null) return destCoord.doubleValue();
         return recipientCoord != null ? recipientCoord.doubleValue() : null;
     }

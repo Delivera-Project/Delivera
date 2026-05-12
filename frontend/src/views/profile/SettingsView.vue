@@ -421,17 +421,17 @@ async function confirmDeleteCompany(id) {
 }
 
 function toggleAddCompany() {
-  if (!addingCompany.value) {
-    const sub = subscription.value
-    if (sub && !sub.companies.unlimited && sub.companies.current >= sub.companies.max) {
-      addError.value = t('settings.companyLimitReached')
-      return
-    }
-    addError.value = ''
-  } else {
-    addError.value = ''
+  addError.value = ''
+  if (addingCompany.value) {
+    addingCompany.value = false
+    return
   }
-  addingCompany.value = !addingCompany.value
+  const sub = subscription.value
+  if (sub && !sub.companies.unlimited && sub.companies.current >= sub.companies.max) {
+    addError.value = t('settings.companyLimitReached')
+    return
+  }
+  addingCompany.value = true
 }
 
 async function addCompany() {

@@ -2,14 +2,23 @@ package com.delivera.exception;
 
 import com.delivera.dto.common.ErrorResponse;
 import com.delivera.dto.common.ValidationErrorResponse;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.*;
@@ -20,7 +29,6 @@ public class GlobalExceptionHandler {
 
     private record Mapping(HttpStatus status, String code) {}
 
-    // Mapa de excepción → (status HTTP, código de error devuelto al frontend)
     private static final Map<Class<?>, Mapping> ERRORS = Map.ofEntries(
         Map.entry(InvalidCredentialsException.class,      new Mapping(UNAUTHORIZED,         "INVALID_CREDENTIALS")),
         Map.entry(UserNotFoundException.class,            new Mapping(NOT_FOUND,            "USER_NOT_FOUND")),
@@ -66,7 +74,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(m.status()).body(new ErrorResponse(m.code()));
     }
 
-    // InvalidPasswordException tiene código dinámico — no encaja en el mapa
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<ErrorResponse> handleInvalidPassword(InvalidPasswordException ex) {
         log.warn("Password validation failed: {}", ex.getCode());
@@ -79,12 +86,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(FORBIDDEN).body(new ErrorResponse(ex.getCode()));
     }
 
-    // DataIntegrityViolationException requiere inspección del cause para distinguir casos
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
         Throwable cause = ex.getCause();
         while (cause != null) {
-            if (cause instanceof java.sql.SQLException sqlEx) {
+            if (cause instanceof SQLException sqlEx) {
                 ResponseEntity<ErrorResponse> typed = resolveSqlCause(sqlEx);
                 if (typed != null) return typed;
             }
@@ -94,7 +100,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(CONFLICT).body(new ErrorResponse("DATA_INTEGRITY_ERROR"));
     }
 
-    private ResponseEntity<ErrorResponse> resolveSqlCause(java.sql.SQLException sqlEx) {
+    private ResponseEntity<ErrorResponse> resolveSqlCause(SQLException sqlEx) {
         String sqlState = sqlEx.getSQLState();
         String msg = sqlEx.getMessage();
         if ("23514".equals(sqlState) && msg != null && msg.contains("does not belong to company")) {
@@ -120,30 +126,29 @@ public class GlobalExceptionHandler {
         return null;
     }
 
-    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErrorResponse> handleMaxUploadSize(org.springframework.web.multipart.MaxUploadSizeExceededException ex) {
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException ex) {
         log.warn("Max upload size exceeded: {}", ex.getMessage());
         return ResponseEntity.status(PAYLOAD_TOO_LARGE).body(new ErrorResponse("FILE_TOO_LARGE"));
     }
 
-    @ExceptionHandler(org.springframework.web.multipart.MultipartException.class)
-    public ResponseEntity<ErrorResponse> handleMultipart(org.springframework.web.multipart.MultipartException ex) {
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ErrorResponse> handleMultipart(MultipartException ex) {
         log.warn("Multipart parsing error: {}", ex.getMessage());
         return ResponseEntity.badRequest().body(new ErrorResponse("MALFORMED_MULTIPART"));
     }
 
-    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ErrorResponse> handleTypeMismatch(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex) {
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         log.warn("Method argument type mismatch: {}={}", ex.getName(), ex.getValue());
         return ResponseEntity.badRequest().body(new ErrorResponse("INVALID_PARAMETER"));
     }
 
-    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleMalformedJson(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedJson(HttpMessageNotReadableException ex) {
         Throwable cause = ex.getMostSpecificCause();
         log.warn("Malformed request body: {}", cause.getMessage());
-        // Diferenciar errores de tipo numérico — típicos por usar coma decimal en vez de punto.
-        if (cause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException ife
+        if (cause instanceof InvalidFormatException ife
                 && ife.getTargetType() != null
                 && Number.class.isAssignableFrom(ife.getTargetType())) {
             return ResponseEntity.badRequest().body(new ErrorResponse("INVALID_NUMBER_FORMAT"));
@@ -151,21 +156,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse("MALFORMED_REQUEST"));
     }
 
-    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException ex) {
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
         log.warn("Method not supported: {}", ex.getMessage());
         return ResponseEntity.status(METHOD_NOT_ALLOWED).body(new ErrorResponse("METHOD_NOT_ALLOWED"));
     }
 
-    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResource(org.springframework.web.servlet.resource.NoResourceFoundException ex) {
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException ex) {
         log.warn("No resource found: {}", ex.getMessage());
         return ResponseEntity.status(NOT_FOUND).body(new ErrorResponse("NOT_FOUND"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-        var errors = ex.getBindingResult().getFieldErrors().stream()
+        List<ValidationErrorResponse.FieldError> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(e -> new ValidationErrorResponse.FieldError(
                         e.getField(),
                         e.getDefaultMessage() != null ? e.getDefaultMessage() : "Invalid value"
