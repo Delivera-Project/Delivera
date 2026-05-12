@@ -126,9 +126,9 @@ class AuthServiceTest {
         when(jwtService.generateToken("new@test.com", (String) null)).thenReturn("token");
 
         RegisterResponse result = authService.register(req);
-        assertThat(result.token()).isEqualTo("token");
-        assertThat(result.email()).isEqualTo("new@test.com");
-        assertThat(result.role()).isNull();
+        assertThat(result.getToken()).isEqualTo("token");
+        assertThat(result.getEmail()).isEqualTo("new@test.com");
+        assertThat(result.getRole()).isNull();
     }
 
     // --- registerCompany ---
