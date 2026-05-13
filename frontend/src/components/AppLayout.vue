@@ -255,7 +255,7 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
     <main class="app-main">
       <RouterView v-slot="{ Component, route }">
         <Transition name="fade" mode="out-in">
-          <component :is="Component" :key="route.fullPath" />
+          <component :is="Component" :key="route.path" />
         </Transition>
       </RouterView>
     </main>

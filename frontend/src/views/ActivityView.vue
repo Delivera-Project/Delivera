@@ -210,7 +210,7 @@ onMounted(load)
               <td class="ranking-count">
                 <div class="count-cell">
                   <div class="count-bar-wrap">
-                    <span class="count-bar" :style="{ width: (entry.orderCount / unitRanking[0].orderCount * 100) + '%' }" />
+                    <span class="count-bar" :style="{ width: Math.min(100, Math.max(0, entry.orderCount / unitRanking[0].orderCount * 100)) + '%' }" />
                   </div>
                   {{ entry.orderCount }}
                 </div>

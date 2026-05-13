@@ -303,6 +303,10 @@ export function attachRouteVisibilityHandler(map, clusterGroup, routeEntriesRef)
   return () => {
     map.off('zoomend', update)
     map.off('moveend', update)
+    if (clusterGroup?.off) {
+      clusterGroup.off('animationend', update)
+      clusterGroup.off('clusterclick', update)
+    }
   }
 }
 

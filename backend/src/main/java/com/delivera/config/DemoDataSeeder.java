@@ -173,8 +173,8 @@ public class DemoDataSeeder implements CommandLineRunner {
         Worker rafaelW = createWorker(rafael, dsFood, WorkerRole.OPERATOR);
 
         // DistriSur Industrial — mismo admin + analista
-        createWorker(elena,  dsInd, WorkerRole.COMPANY_ADMIN);
-        createWorker(javier, dsInd, WorkerRole.ANALYST);
+        Worker elenaWInd  = createWorker(elena,  dsInd, WorkerRole.COMPANY_ADMIN);
+        Worker javierWInd = createWorker(javier, dsInd, WorkerRole.ANALYST);
 
         // --- 6. Unidades operativas ---
         // RapidLog Central (distribución, varias ciudades)
@@ -242,8 +242,8 @@ public class DemoDataSeeder implements CommandLineRunner {
         assignWorker(dsGranada,  javierW);
         assignWorker(dsMurcia,   rafaelW);
         // DistriSur Industrial
-        assignWorker(dsFactory,  elenaW);
-        assignWorker(dsCadizWh,  javierW);
+        assignWorker(dsFactory,  elenaWInd);
+        assignWorker(dsCadizWh,  javierWInd);
 
         // --- 8. Fidelizados ---
         LoyalUser luClara   = createLoyalUser(clara.getEmail(), clara, List.of(rlRetail, dsFood),
