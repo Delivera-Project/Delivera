@@ -35,7 +35,7 @@ const priorityOptions = computed(() => [
       text
       severity="secondary"
       icon="pi pi-arrow-left"
-      class="back-btn"
+      class="form-back-btn"
       @click="router.push('/orders')"
     />
 
@@ -77,6 +77,7 @@ const priorityOptions = computed(() => [
             option-label="name"
             option-value="id"
             :placeholder="t('orders.destinationPlaceholder')"
+            :empty-message="t('orders.noDestinationOptions')"
             :invalid="!!invalids.destinationId"
             fluid
           />
@@ -138,6 +139,7 @@ const priorityOptions = computed(() => [
             option-label="name"
             option-value="id"
             :placeholder="t('orders.destinationCompanyPlaceholder')"
+            :empty-message="t('orders.noB2bCompanies')"
             :invalid="!!invalids.b2bCompanyId"
             fluid
           />
@@ -151,6 +153,7 @@ const priorityOptions = computed(() => [
             option-label="name"
             option-value="id"
             :placeholder="t('orders.destinationUnitPlaceholder')"
+            :empty-message="t('orders.noDestinationOptions')"
             :invalid="!!invalids.b2bDestinationId"
             :disabled="!b2bCompanyId"
             fluid

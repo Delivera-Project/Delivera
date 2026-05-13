@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { fetchPublicOrder, useApi } from '@/composables/useApi'
@@ -45,6 +45,7 @@ async function initMap() {
   const destLon = Number.parseFloat(o.destinationLon)
 
   map = createMap(mapEl.value)
+  map.invalidateSize()
   fitBounds(map, [[originLat, originLon], [destLat, destLon]])
 
   addMarker(map, {
@@ -92,6 +93,11 @@ async function fetchOrder() {
   if (order.value) initMap()
 }
 
+onBeforeRouteLeave(() => {
+  clearTimeout(mapInvalidateTimer)
+  if (map) { map.remove(); map = null }
+})
+
 onUnmounted(() => {
   clearTimeout(mapInvalidateTimer)
   if (map) { map.remove(); map = null }
@@ -138,7 +144,7 @@ onMounted(() => { loadConfig(); fetchOrder() })
           text
           severity="secondary"
           icon="pi pi-arrow-left"
-          class="back-btn"
+          class="detail-back-btn"
           @click="router.push('/my-orders')"
         />
 

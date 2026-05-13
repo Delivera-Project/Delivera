@@ -234,6 +234,8 @@ orders:
   loyalUserExists: Usuario fidelizado conocido
   notes: Notas
   notesPlaceholder: Instrucciones adicionales (opcional)
+  noDestinationOptions: No hay unidades disponibles como destino
+  noB2bCompanies: No hay empresas B2B disponibles
   noUnits: No hay suficientes unidades. Crea al menos dos unidades operativas primero.
   sameUnit: El origen y el destino deben ser unidades diferentes
   timeline: Historial de estados
@@ -389,6 +391,7 @@ common:
   save: Guardar
   cancel: Cancelar
   delete: Eliminar
+  close: Cerrar
   filters: "Filtros:"
 
 validation:

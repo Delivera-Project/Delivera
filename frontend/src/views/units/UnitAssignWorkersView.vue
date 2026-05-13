@@ -13,6 +13,8 @@ const unit = ref(null)
 const allWorkers = ref([])
 const loading = ref(false)
 const error = ref('')
+const toggleError = ref('')
+const togglingIds = ref(new Set())
 
 const assignedIds = computed(() => new Set((unit.value?.workers || []).map(w => w.id)))
 
@@ -34,12 +36,19 @@ async function load() {
 }
 
 async function toggle(worker) {
-  if (assignedIds.value.has(worker.id)) {
-    const res = await api.del(`/units/${route.params.id}/workers/${worker.id}`)
+  if (togglingIds.value.has(worker.id)) return
+  toggleError.value = ''
+  togglingIds.value.add(worker.id)
+  try {
+    const res = assignedIds.value.has(worker.id)
+      ? await api.del(`/units/${route.params.id}/workers/${worker.id}`)
+      : await api.post(`/units/${route.params.id}/workers/${worker.id}`)
     if (res.ok) unit.value = await res.json()
-  } else {
-    const res = await api.post(`/units/${route.params.id}/workers/${worker.id}`)
-    if (res.ok) unit.value = await res.json()
+    else toggleError.value = t('error.saveFailed')
+  } catch {
+    toggleError.value = t('error.connection')
+  } finally {
+    togglingIds.value.delete(worker.id)
   }
 }
 
@@ -55,10 +64,18 @@ onMounted(load)
     <p v-if="unit" class="subtitle">{{ unit.name }}</p>
 
     <PMessage v-if="error" severity="error" :closable="false">{{ error }}</PMessage>
+    <PMessage v-if="toggleError" severity="error" :closable="false">{{ toggleError }}</PMessage>
 
     <div v-if="!loading && allWorkers.length" class="worker-list">
-      <div v-for="w in allWorkers" :key="w.id" class="worker-row" @click="toggle(w)">
-        <PCheckbox :model-value="assignedIds.has(w.id)" :binary="true" @click.stop="toggle(w)" />
+      <div
+        v-for="w in allWorkers"
+        :key="w.id"
+        class="worker-row"
+        :class="{ 'worker-row--busy': togglingIds.has(w.id) }"
+        @click="toggle(w)"
+      >
+        <i v-if="togglingIds.has(w.id)" class="pi pi-spin pi-spinner worker-spinner" />
+        <PCheckbox v-else :model-value="assignedIds.has(w.id)" :binary="true" @click.stop="toggle(w)" />
         <span class="worker-info">
           <span class="worker-name">{{ w.firstName }} {{ w.lastName }}</span>
           <span class="worker-email">{{ w.email }}</span>

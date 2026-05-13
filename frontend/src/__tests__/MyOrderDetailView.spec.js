@@ -32,6 +32,7 @@ let mockRouteQuery = { q: 'DEL-20240101-0001' }
 vi.mock('vue-router', () => ({
   useRoute: () => ({ query: mockRouteQuery }),
   useRouter: () => ({ push: mockPush }),
+  onBeforeRouteLeave: vi.fn(),
 }))
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
@@ -27,6 +27,7 @@ const updateSuccess = ref('')
 const newStatus = ref('')
 const statusNote = ref('')
 const activeTab = ref(0)
+watch(activeTab, () => { newStatus.value = ''; statusNote.value = '' })
 
 const messages = ref([])
 const chatLoading = ref(false)
@@ -182,6 +183,11 @@ onMounted(async () => {
   await loadOrder()
   await nextTick()
   try { await initOrderMap() } catch (e) { console.error('initOrderMap failed', e) }
+})
+
+onBeforeRouteLeave(() => {
+  clearTimeout(mapInvalidateTimer)
+  if (map) { map.remove(); map = null }
 })
 
 onUnmounted(() => {

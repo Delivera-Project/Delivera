@@ -28,9 +28,9 @@ class UnitControllerTest {
         return new UnitResponse(id, "Almacén", "WAREHOUSE", null, null, null, null, null);
     }
 
-    // UnitDetailResponse(id, name, type, address, lat, lon, createdAt, workers)
+    // UnitDetailResponse(id, name, type, address, lat, lon, createdAt, defaultPriority, workers)
     private static UnitDetailResponse sampleDetail(UUID id) {
-        return new UnitDetailResponse(id, "Almacén", "WAREHOUSE", null, null, null, null, List.of());
+        return new UnitDetailResponse(id, "Almacén", "WAREHOUSE", null, null, null, null, null, List.of());
     }
 
     @Test
