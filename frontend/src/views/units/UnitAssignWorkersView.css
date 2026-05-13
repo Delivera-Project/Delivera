@@ -7,3 +7,5 @@
 .worker-name { display: block; font-size: 14px; font-weight: 500; color: #1e293b; }
 .worker-email { display: block; font-size: 12px; color: #94a3b8; }
 .empty { font-size: 13px; color: #94a3b8; }
+.worker-row--busy { opacity: 0.6; cursor: not-allowed; pointer-events: none; }
+.worker-spinner { font-size: 14px; color: #7c3aed; flex-shrink: 0; width: 20px; text-align: center; }

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter, useRoute, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useUnitForm } from '@/composables/useUnitForm'
@@ -186,6 +186,8 @@ onMounted(async () => {
   priorityLockedByCompany.value = !canUnitOverridePriority(s)
   await loadUnit(unitId.value)
 })
+
+onBeforeRouteLeave(() => { if (map) { map.remove(); map = null; marker = null } })
 
 onUnmounted(() => { if (map) { map.remove(); map = null; marker = null } })
 

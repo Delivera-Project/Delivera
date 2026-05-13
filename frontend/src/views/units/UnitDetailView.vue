@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
@@ -31,6 +31,7 @@ function initMap() {
   const lat = Number.parseFloat(unit.value.latitude)
   const lng = Number.parseFloat(unit.value.longitude)
   map = createMap(mapEl.value)
+  map.invalidateSize()
   map.setView([lat, lng], 15)
   L.marker([lat, lng], { icon: ownUnitIcon() })
     .bindPopup(`<strong>${unit.value.name}</strong><br><small>${t('units.' + unit.value.type)}</small>`)
@@ -66,6 +67,8 @@ onMounted(async () => {
   await nextTick()
   initMap()
 })
+
+onBeforeRouteLeave(() => { if (map) { map.remove(); map = null } })
 
 onUnmounted(() => { if (map) { map.remove(); map = null } })
 </script>

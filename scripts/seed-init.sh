@@ -103,7 +103,7 @@ if [[ "$GLOBAL_HTTP" != "201" ]]; then
   echo "ERROR registrando global admin ($GLOBAL_HTTP): $(echo "$GLOBAL_RESPONSE" | sed '$d')"
   exit 1
 fi
-echo "OK — Usuario admin@delivera.com creado."
+echo "OK — Usuario $GLOBAL_ADMIN_EMAIL creado."
 
 echo "Asignando rol GLOBAL_ADMIN en BD..."
 docker exec "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c \

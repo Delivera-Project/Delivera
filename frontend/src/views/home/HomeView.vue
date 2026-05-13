@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useAuthStore } from '@/stores/auth'
 import Chart from 'primevue/chart'
@@ -240,6 +240,11 @@ watch(() => auth.companyId, async (newId, oldId) => {
     await nextTick()
     initMap(units.value)
   }
+})
+
+onBeforeRouteLeave(() => {
+  if (map) { map.remove(); map = null }
+  routeEntries = []
 })
 
 onUnmounted(() => {

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, onBeforeRouteLeave } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useConfirm } from 'primevue/useconfirm'
 import { useApi } from '@/composables/useApi'
@@ -101,6 +101,8 @@ onMounted(async () => {
   await nextTick()
   initMap()
 })
+
+onBeforeRouteLeave(() => { if (map) { map.remove(); map = null } })
 
 onUnmounted(() => { if (map) { map.remove(); map = null } })
 

@@ -15,6 +15,7 @@ public record UnitDetailResponse(
         BigDecimal latitude,
         BigDecimal longitude,
         Instant createdAt,
+        String defaultPriority,
         List<UnitWorkerSummary> workers) {
 
     public static UnitDetailResponse from(OperationalUnit unit) {
@@ -26,6 +27,7 @@ public record UnitDetailResponse(
                 unit.getLatitude(),
                 unit.getLongitude(),
                 unit.getCreatedAt(),
+                unit.getDefaultPriority() != null ? unit.getDefaultPriority().name() : null,
                 unit.getWorkers().stream().map(UnitWorkerSummary::from).toList());
     }
 }

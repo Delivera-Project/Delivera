@@ -736,7 +736,6 @@ async function copyHandle() {
       </PTabs>
     </div>
 
-  </div>
 
   <!-- Modal crop logo -->
   <div v-if="logoCropPreview" class="avatar-modal-backdrop" @click.self="cancelLogoCrop">
@@ -762,6 +761,7 @@ async function copyHandle() {
         <PButton :label="t('profile.avatarConfirm')" icon="pi pi-check" size="small" :loading="logoCropSaving" @click="confirmLogoCrop" />
       </div>
     </div>
+  </div>
   </div>
 </template>
 

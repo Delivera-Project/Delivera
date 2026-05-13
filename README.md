@@ -86,34 +86,22 @@ Las credenciales están en dos sitios sincronizados:
 - `docker/docker-compose.yml` → `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`
 - `backend/src/main/resources/application-dev.yml` → `spring.datasource`
 
-## Seed de datos
+## Datos de demo
 
-Los scripts de seed se encuentran en `scripts/` y requieren que el backend esté arrancado:
+Al arrancar con el perfil `dev` y la base de datos vacía, `DemoDataSeeder` carga automáticamente un conjunto de datos representativo: 3 organizaciones, 6 empresas, 16 unidades operativas, 8 fidelizados y más de 50 pedidos en distintos estados (internos, B2B entre organizaciones y B2C).
 
-```bash
-# 1. Datos iniciales (admin + organización)
-./scripts/seed-init.sh
+**Credenciales (contraseña `demo1234` para todos):**
 
-# 2. Datos de demo encima
-./scripts/seed-demo.sh
-```
+| Rol | Email |
+|---|---|
+| Admin global | `admin@delivera.com` |
+| Admin RapidLog Central / Retail | `carlos@rapidlog.com` |
+| Admin TransNorte Logística | `sofia@transnorte.com` |
+| Admin TransNorte Almacenamiento | `paula@transnorte.com` |
+| Admin DistriSur Alimentación / Industrial | `elena@distrisur.com` |
+| Cliente registrado (mis pedidos) | `clara@cliente.com` |
 
-**Credenciales por defecto del seed:**
-
-| Rol | Email | Contraseña |
-|---|---|---|
-| Admin empresa | `seed@delivera.com` | `Admin1234` |
-| Usuario fidelizado | `user@delivera.com` | `User1234` |
-
-Se pueden sobreescribir con variables de entorno:
-
-```bash
-ADMIN_EMAIL=otro@email.com ADMIN_PASSWORD=MiPass1 ./scripts/seed-init.sh
-```
-
-`seed-demo.sh` crea una organización con 3 empresas, 8 unidades operativas, 8 fidelizados y 9 pedidos en distintos estados.
-
-La contraseña usada por `DemoDataSeeder` (Java) se puede cambiar sin tocar el código con la propiedad `app.demo.seed-password` (o la variable de entorno `APP_DEMO_SEED_PASSWORD`). El valor por defecto es `demo1234`.
+La contraseña se puede cambiar sin tocar el código con la propiedad `app.demo.seed-password` (o la variable de entorno `APP_DEMO_SEED_PASSWORD`).
 
 ## Tests
 
