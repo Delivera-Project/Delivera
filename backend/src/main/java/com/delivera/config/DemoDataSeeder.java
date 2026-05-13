@@ -21,10 +21,18 @@ import java.util.*;
 
 /**
  * Carga datos de demo cuando el backend arranca con el perfil {@code dev} y la BD no tiene
- * todavía usuarios. Pensado para reseñar la aplicación (gráficas, mapas, listados) sin necesidad
+ * todavía usuarios. Pensado para revisar la aplicación (gráficas, mapas, listados) sin necesidad
  * de crear los datos manualmente desde la UI.
  *
  * Contraseña común para todos los usuarios: {@code demo1234}
+ *
+ * Credenciales de acceso:
+ *   admin@delivera.com  — GLOBAL_ADMIN (acceso a todo)
+ *   carlos@rapidlog.com — COMPANY_ADMIN de RapidLog Central y RapidLog Retail
+ *   sofia@transnorte.com — COMPANY_ADMIN de TransNorte Logística
+ *   paula@transnorte.com — COMPANY_ADMIN de TransNorte Almacenamiento
+ *   elena@distrisur.com  — COMPANY_ADMIN de DistriSur Alimentación e Industrial
+ *   clara@cliente.com   — usuario registrado con pedidos propios (/my-orders)
  */
 @Component
 @Profile("dev")
@@ -85,37 +93,41 @@ public class DemoDataSeeder implements CommandLineRunner {
         log.info("DemoDataSeeder: cargando datos de demo...");
 
         // --- 1. Usuarios ---
-        User admin    = createUser("admin@delivera.com",    "admin",    "Ana",    "Navarro",   "+34600000001",
+        User admin  = createUser("admin@delivera.com",    "admin",   "Ana",    "Navarro",   "+34600000001",
                 "Paseo de la Castellana 100, Madrid", 40.4430, -3.6900);
-        User carlos   = createUser("carlos@rapidlog.com",   "carlos",   "Carlos", "García",    "+34600000002",
+        User carlos = createUser("carlos@rapidlog.com",   "carlos",  "Carlos", "García",    "+34600000002",
                 "Calle Goya 60, Madrid",              40.4250, -3.6780);
-        User lucia    = createUser("lucia@rapidlog.com",    "lucia",    "Lucía",  "Pérez",     "+34600000003",
+        User lucia  = createUser("lucia@rapidlog.com",    "lucia",   "Lucía",  "Pérez",     "+34600000003",
                 "Calle Alcalá 210, Madrid",           40.4310, -3.6590);
-        User marcos   = createUser("marcos@rapidlog.com",   "marcos",   "Marcos", "Ruiz",      "+34600000004",
+        User marcos = createUser("marcos@rapidlog.com",   "marcos",  "Marcos", "Ruiz",      "+34600000004",
                 "Av. de América 30, Madrid",          40.4380, -3.6720);
-        User sofia    = createUser("sofia@transnorte.com",  "sofia",    "Sofía",  "Martínez",  "+34600000005",
+        User sofia  = createUser("sofia@transnorte.com",  "sofia",   "Sofía",  "Martínez",  "+34600000005",
                 "Gran Vía 8, Bilbao",                 43.2640, -2.9330);
-        User david    = createUser("david@transnorte.com",  "david",    "David",  "Sánchez",   "+34600000006",
+        User david  = createUser("david@transnorte.com",  "david",   "David",  "Sánchez",   "+34600000006",
                 "Calle Alfonso I 15, Zaragoza",       41.6530, -0.8790);
-        User elena    = createUser("elena@distrisur.com",   "elena",    "Elena",  "Romero",    "+34600000007",
+        User paula  = createUser("paula@transnorte.com",  "paula",   "Paula",  "Fernández", "+34600000007",
+                "Calle Alta 8, Santander",            43.4620, -3.8100);
+        User elena  = createUser("elena@distrisur.com",   "elena",   "Elena",  "Romero",    "+34600000008",
                 "Calle Marqués de Larios 5, Málaga",  36.7200, -4.4200);
-        User javier   = createUser("javier@distrisur.com",  "javier",   "Javier", "Vargas",    "+34600000008",
+        User javier = createUser("javier@distrisur.com",  "javier",  "Javier", "Vargas",    "+34600000009",
                 "Av. Andaluces 2, Granada",           37.1780, -3.6090);
+        User rafael = createUser("rafael@distrisur.com",  "rafael",  "Rafael", "Molina",    "+34600000010",
+                "Av. Juan Carlos I 18, Murcia",       37.9930, -1.1320);
         // usuarios "cliente" / fidelizados registrados — con dirección para recibir B2C
-        User clara    = createUser("clara@cliente.com",     "clara",    "Clara",  "López",     "+34610000001",
-                "Calle Serrano 45, Madrid",     40.4270, -3.6870);
-        User raul     = createUser("raul@cliente.com",      "raul",     "Raúl",   "Moreno",    "+34610000002",
-                "Av. Andalucía 12, Málaga",     36.7170, -4.4240);
+        User clara  = createUser("clara@cliente.com",     "clara",   "Clara",  "López",     "+34610000001",
+                "Calle Serrano 45, Madrid",           40.4270, -3.6870);
+        User raul   = createUser("raul@cliente.com",      "raul",    "Raúl",   "Moreno",    "+34610000002",
+                "Av. Andalucía 12, Málaga",           36.7170, -4.4240);
         // usuario "normal" sin roles (para /my-orders)
         createUser("pedro@example.com", "pedro", "Pedro", "Ortiz", "+34610000003",
-                "Gran Vía 25, Madrid",         40.4200, -3.7060);
+                "Gran Vía 25, Madrid", 40.4200, -3.7060);
 
         // --- 2. Organizaciones ---
-        Organization rapidlog = createOrg("RapidLog",    "rapidlog");
-        Organization transnorte = createOrg("TransNorte", "transnorte");
-        Organization distrisur = createOrg("DistriSur",  "distrisur");
+        Organization rapidlog   = createOrg("RapidLog",    "rapidlog");
+        Organization transnorte = createOrg("TransNorte",  "transnorte");
+        Organization distrisur  = createOrg("DistriSur",   "distrisur");
 
-        // --- 3. Empresas ---
+        // --- 3. Planes y tipos de actividad ---
         ActivityType distribution = activityTypes.findById("DISTRIBUTION").orElseThrow();
         ActivityType food         = activityTypes.findById("FOOD").orElseThrow();
         ActivityType retail       = activityTypes.findById("RETAIL").orElseThrow();
@@ -126,144 +138,204 @@ public class DemoDataSeeder implements CommandLineRunner {
         SubscriptionPlan basic = plans.findById("BASIC").orElseThrow();
         SubscriptionPlan pro   = plans.findById("PRO").orElseThrow();
 
-        Company rlCentral = createCompany(rapidlog,   "RapidLog Central",    distribution, pro);
-        Company rlRetail  = createCompany(rapidlog,   "RapidLog Retail",     retail,       basic);
-        Company tnLog     = createCompany(transnorte, "TransNorte Logística", transport,   basic);
-        Company dsFood    = createCompany(distrisur,  "DistriSur Alimentación", food,     pro);
-        Company dsInd     = createCompany(distrisur,  "DistriSur Industrial",   industry, free);
+        // --- 4. Empresas (2 por organización mínimo) ---
+        Company rlCentral = createCompany(rapidlog,   "RapidLog Central",           distribution, pro);
+        Company rlRetail  = createCompany(rapidlog,   "RapidLog Retail",            retail,       basic);
+        Company tnLog     = createCompany(transnorte, "TransNorte Logística",       transport,    pro);
+        Company tnStore   = createCompany(transnorte, "TransNorte Almacenamiento",  retail,       basic);
+        Company dsFood    = createCompany(distrisur,  "DistriSur Alimentación",     food,         pro);
+        Company dsInd     = createCompany(distrisur,  "DistriSur Industrial",       industry,     free);
 
-        // --- 4. Workers ---
-        createWorker(carlos, rlCentral, WorkerRole.COMPANY_ADMIN);
-        createWorker(lucia,  rlCentral, WorkerRole.ANALYST);
-        createWorker(marcos, rlCentral, WorkerRole.OPERATOR);
-        createWorker(carlos, rlRetail,  WorkerRole.COMPANY_ADMIN);
-        createWorker(lucia,  rlRetail,  WorkerRole.ANALYST);
+        // --- 5. Trabajadores ---
+        // GLOBAL_ADMIN (admin de plataforma, vinculado a la primera empresa)
+        createWorker(admin, rlCentral, WorkerRole.GLOBAL_ADMIN);
 
-        createWorker(sofia,  tnLog,     WorkerRole.COMPANY_ADMIN);
-        createWorker(david,  tnLog,     WorkerRole.OPERATOR);
+        // RapidLog Central — admin, analista y operador
+        Worker carlosW = createWorker(carlos, rlCentral, WorkerRole.COMPANY_ADMIN);
+        Worker luciaW  = createWorker(lucia,  rlCentral, WorkerRole.ANALYST);
+        Worker marcosW = createWorker(marcos, rlCentral, WorkerRole.OPERATOR);
 
-        createWorker(elena,  dsFood,    WorkerRole.COMPANY_ADMIN);
-        createWorker(javier, dsFood,    WorkerRole.ANALYST);
-        createWorker(elena,  dsInd,     WorkerRole.COMPANY_ADMIN);
+        // RapidLog Retail — mismo admin + analista
+        createWorker(carlos, rlRetail, WorkerRole.COMPANY_ADMIN);
+        createWorker(lucia,  rlRetail, WorkerRole.ANALYST);
 
-        // admin global sobre la primera empresa (para revisar)
-        createWorker(admin,  rlCentral, WorkerRole.COMPANY_ADMIN);
+        // TransNorte Logística — admin y operador
+        Worker sofiaW = createWorker(sofia,  tnLog, WorkerRole.COMPANY_ADMIN);
+        Worker davidW = createWorker(david,  tnLog, WorkerRole.OPERATOR);
 
-        // --- 5. Unidades operativas ---
+        // TransNorte Almacenamiento — admin propio, david como analista compartido
+        Worker paulaW = createWorker(paula, tnStore, WorkerRole.COMPANY_ADMIN);
+        createWorker(david, tnStore, WorkerRole.ANALYST);
+
+        // DistriSur Alimentación — admin, analista y operador
+        Worker elenaW  = createWorker(elena,  dsFood, WorkerRole.COMPANY_ADMIN);
+        Worker javierW = createWorker(javier, dsFood, WorkerRole.ANALYST);
+        Worker rafaelW = createWorker(rafael, dsFood, WorkerRole.OPERATOR);
+
+        // DistriSur Industrial — mismo admin + analista
+        createWorker(elena,  dsInd, WorkerRole.COMPANY_ADMIN);
+        createWorker(javier, dsInd, WorkerRole.ANALYST);
+
+        // --- 6. Unidades operativas ---
         // RapidLog Central (distribución, varias ciudades)
-        OperationalUnit rlMadridCd = createUnit(rlCentral, "Centro Madrid",    UnitType.LOGISTICS_CENTER,
+        OperationalUnit rlMadridCd = createUnit(rlCentral, "Centro Madrid",   UnitType.LOGISTICS_CENTER,
                 "Av. de la Logística 12, Madrid",        40.4168, -3.7038);
-        OperationalUnit rlMadridWh = createUnit(rlCentral, "Almacén Getafe",    UnitType.WAREHOUSE,
+        OperationalUnit rlMadridWh = createUnit(rlCentral, "Almacén Getafe",  UnitType.WAREHOUSE,
                 "Pol. Ind. Los Olivos, Getafe",          40.3057, -3.7327);
-        OperationalUnit rlValencia = createUnit(rlCentral, "Centro Valencia",  UnitType.LOGISTICS_CENTER,
+        OperationalUnit rlValencia = createUnit(rlCentral, "Centro Valencia", UnitType.LOGISTICS_CENTER,
                 "Av. del Puerto 200, Valencia",          39.4699, -0.3763);
-        OperationalUnit rlSevilla  = createUnit(rlCentral, "Centro Sevilla",   UnitType.LOGISTICS_CENTER,
+        OperationalUnit rlSevilla  = createUnit(rlCentral, "Centro Sevilla",  UnitType.LOGISTICS_CENTER,
                 "Pol. Ind. Calonge, Sevilla",            37.3891, -5.9845);
 
         // RapidLog Retail (tiendas)
         OperationalUnit rlTiendaMad = createUnit(rlRetail, "Tienda Madrid Sol", UnitType.STORE,
                 "Puerta del Sol 4, Madrid",              40.4167, -3.7037);
         OperationalUnit rlTiendaBcn = createUnit(rlRetail, "Tienda Barcelona",  UnitType.STORE,
-                "Passeig de Gràcia 50, Barcelona",       41.3925, 2.1649);
+                "Passeig de Gràcia 50, Barcelona",       41.3925,  2.1649);
 
-        // TransNorte Logística (norte)
-        OperationalUnit tnBilbao = createUnit(tnLog, "Centro Bilbao", UnitType.LOGISTICS_CENTER,
+        // TransNorte Logística (norte peninsular)
+        OperationalUnit tnBilbao = createUnit(tnLog, "Centro Bilbao",    UnitType.LOGISTICS_CENTER,
                 "Av. del Ferrocarril 22, Bilbao",        43.2630, -2.9350);
         OperationalUnit tnZgz    = createUnit(tnLog, "Almacén Zaragoza", UnitType.WAREHOUSE,
                 "Pol. Malpica, Zaragoza",                41.6488, -0.8891);
-        OperationalUnit tnVigo   = createUnit(tnLog, "Centro Vigo", UnitType.LOGISTICS_CENTER,
+        OperationalUnit tnVigo   = createUnit(tnLog, "Centro Vigo",      UnitType.LOGISTICS_CENTER,
                 "Pol. As Gándaras, Vigo",                42.2406, -8.7207);
 
+        // TransNorte Almacenamiento (Cantabria y Navarra)
+        OperationalUnit tnSantander = createUnit(tnStore, "Almacén Santander", UnitType.WAREHOUSE,
+                "Pol. Ind. Nueva Montaña, Santander",    43.4580, -3.8150);
+        OperationalUnit tnPamplona  = createUnit(tnStore, "Tienda Pamplona",   UnitType.STORE,
+                "Av. de Bayona 2, Pamplona",             42.8180, -1.6430);
+
         // DistriSur Alimentación (sur, alimentación)
-        OperationalUnit dsMalaga   = createUnit(dsFood, "Centro Málaga", UnitType.LOGISTICS_CENTER,
+        OperationalUnit dsMalaga  = createUnit(dsFood, "Centro Málaga",   UnitType.LOGISTICS_CENTER,
                 "Av. Velázquez 180, Málaga",             36.7213, -4.4213);
-        OperationalUnit dsGranada  = createUnit(dsFood, "Almacén Granada", UnitType.WAREHOUSE,
+        OperationalUnit dsGranada = createUnit(dsFood, "Almacén Granada", UnitType.WAREHOUSE,
                 "Pol. Juncaril, Granada",                37.1773, -3.5986);
-        OperationalUnit dsMurcia   = createUnit(dsFood, "Tienda Murcia", UnitType.STORE,
+        OperationalUnit dsMurcia  = createUnit(dsFood, "Tienda Murcia",   UnitType.STORE,
                 "Gran Vía 18, Murcia",                   37.9922, -1.1307);
 
-        // DistriSur Industrial (planta + 1 almacén)
-        OperationalUnit dsFactory  = createUnit(dsInd, "Fábrica Jerez", UnitType.FACTORY,
+        // DistriSur Industrial (fábrica + almacén)
+        OperationalUnit dsFactory = createUnit(dsInd, "Fábrica Jerez",  UnitType.FACTORY,
                 "Pol. El Portal, Jerez",                 36.6850, -6.1261);
-        OperationalUnit dsCadizWh  = createUnit(dsInd, "Almacén Cádiz", UnitType.WAREHOUSE,
+        OperationalUnit dsCadizWh = createUnit(dsInd, "Almacén Cádiz",  UnitType.WAREHOUSE,
                 "Zona Franca, Cádiz",                    36.5297, -6.2927);
 
-        // --- 6. Fidelizados ---
-        LoyalUser luClara    = createLoyalUser(clara.getEmail(), clara, List.of(rlRetail, dsFood),
-                null, null, null);
-        LoyalUser luRaul     = createLoyalUser(raul.getEmail(),  raul,  List.of(dsFood),
-                null, null, null);
-        createLoyalUser("maria.gomez@correo.com",     null, List.of(rlRetail),
-                "Calle Mallorca 230, Barcelona", 41.3960, 2.1620);
-        LoyalUser luIgnacio  = createLoyalUser("ignacio.serrano@correo.com", null, List.of(rlRetail, dsFood),
-                "Av. Diagonal 500, Barcelona",   41.3920, 2.1510);
-        createLoyalUser("teresa.mendez@correo.com",   null, List.of(dsFood),
-                "Av. Constitución 3, Granada",   37.1770, -3.6000);
-        LoyalUser luAlberto  = createLoyalUser("alberto.ibanez@correo.com",  null, List.of(tnLog),
-                "Calle Mayor 18, Bilbao",        43.2620, -2.9340);
+        // --- 7. Asignación de trabajadores a unidades ---
+        // RapidLog Central
+        assignWorker(rlMadridCd, carlosW);
+        assignWorker(rlMadridCd, luciaW);
+        assignWorker(rlMadridWh, marcosW);
+        assignWorker(rlValencia, luciaW);
+        assignWorker(rlValencia, marcosW);
+        assignWorker(rlSevilla,  carlosW);
+        // TransNorte Logística
+        assignWorker(tnBilbao,   sofiaW);
+        assignWorker(tnZgz,      davidW);
+        assignWorker(tnVigo,     sofiaW);
+        // TransNorte Almacenamiento
+        assignWorker(tnSantander, paulaW);
+        assignWorker(tnPamplona,  paulaW);
+        // DistriSur Alimentación
+        assignWorker(dsMalaga,   elenaW);
+        assignWorker(dsMalaga,   rafaelW);
+        assignWorker(dsGranada,  javierW);
+        assignWorker(dsMurcia,   rafaelW);
+        // DistriSur Industrial
+        assignWorker(dsFactory,  elenaW);
+        assignWorker(dsCadizWh,  javierW);
 
-        // --- 7. Pedidos ---
+        // --- 8. Fidelizados ---
+        LoyalUser luClara   = createLoyalUser(clara.getEmail(), clara, List.of(rlRetail, dsFood),
+                null, null, null);
+        LoyalUser luRaul    = createLoyalUser(raul.getEmail(),  raul,  List.of(dsFood),
+                null, null, null);
+        createLoyalUser("maria.gomez@correo.com",        null, List.of(rlRetail),
+                "Calle Mallorca 230, Barcelona",  41.3960,  2.1620);
+        LoyalUser luIgnacio = createLoyalUser("ignacio.serrano@correo.com", null, List.of(rlRetail, dsFood),
+                "Av. Diagonal 500, Barcelona",    41.3920,  2.1510);
+        createLoyalUser("teresa.mendez@correo.com",      null, List.of(dsFood),
+                "Av. Constitución 3, Granada",    37.1770, -3.6000);
+        LoyalUser luAlberto = createLoyalUser("alberto.ibanez@correo.com",  null, List.of(tnLog),
+                "Calle Mayor 18, Bilbao",         43.2620, -2.9340);
+        createLoyalUser("nuria.vidal@correo.com",        null, List.of(tnLog, tnStore),
+                "Calle Ercilla 14, Bilbao",       43.2590, -2.9260);
+        LoyalUser luPablo   = createLoyalUser("pablo.castro@correo.com",    null, List.of(rlRetail, tnStore),
+                "Calle Pelayo 5, Barcelona",      41.3900,  2.1680);
+
+        // --- 9. Pedidos ---
         // Internos RapidLog Central
-        createInternalOrder(rlCentral, rlMadridCd, rlValencia, OrderStatus.DELIVERED, OrderPriority.NORMAL, 11, carlos);
-        createInternalOrder(rlCentral, rlMadridCd, rlSevilla,  OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   3, marcos);
-        createInternalOrder(rlCentral, rlValencia, rlMadridWh, OrderStatus.PENDING,    OrderPriority.NORMAL, 1, lucia);
-        createInternalOrder(rlCentral, rlSevilla,  rlMadridCd, OrderStatus.DELIVERED, OrderPriority.LOW,     9, marcos);
-        createInternalOrder(rlCentral, rlMadridWh, rlValencia, OrderStatus.CANCELLED, OrderPriority.NORMAL,  7, carlos);
+        createInternalOrder(rlCentral, rlMadridCd, rlValencia, OrderStatus.DELIVERED,  OrderPriority.NORMAL, 11, carlos);
+        createInternalOrder(rlCentral, rlMadridCd, rlSevilla,  OrderStatus.IN_TRANSIT, OrderPriority.HIGH,    3, marcos);
+        createInternalOrder(rlCentral, rlValencia, rlMadridWh, OrderStatus.PENDING,    OrderPriority.NORMAL,  1, lucia);
+        createInternalOrder(rlCentral, rlSevilla,  rlMadridCd, OrderStatus.DELIVERED,  OrderPriority.LOW,     9, marcos);
+        createInternalOrder(rlCentral, rlMadridWh, rlValencia, OrderStatus.CANCELLED,  OrderPriority.NORMAL,  7, carlos);
 
-        // Internos TransNorte
-        createInternalOrder(tnLog, tnBilbao, tnZgz,  OrderStatus.DELIVERED,  OrderPriority.NORMAL, 10, sofia);
-        createInternalOrder(tnLog, tnZgz,   tnVigo,  OrderStatus.IN_TRANSIT, OrderPriority.HIGH,    2, david);
-        createInternalOrder(tnLog, tnVigo,  tnBilbao, OrderStatus.PENDING,   OrderPriority.NORMAL,  0, sofia);
+        // Internos TransNorte Logística
+        createInternalOrder(tnLog, tnBilbao, tnZgz,    OrderStatus.DELIVERED,  OrderPriority.NORMAL, 10, sofia);
+        createInternalOrder(tnLog, tnZgz,    tnVigo,   OrderStatus.IN_TRANSIT, OrderPriority.HIGH,    2, david);
+        createInternalOrder(tnLog, tnVigo,   tnBilbao, OrderStatus.PENDING,    OrderPriority.NORMAL,  0, sofia);
+
+        // Internos TransNorte Almacenamiento
+        createInternalOrder(tnStore, tnSantander, tnPamplona,  OrderStatus.DELIVERED, OrderPriority.NORMAL,  5, paula);
+        createInternalOrder(tnStore, tnPamplona,  tnSantander, OrderStatus.PENDING,   OrderPriority.LOW,     0, paula);
 
         // Internos DistriSur Alimentación
-        createInternalOrder(dsFood, dsMalaga, dsGranada, OrderStatus.DELIVERED, OrderPriority.LOW,    13, elena);
-        createInternalOrder(dsFood, dsMalaga, dsMurcia,  OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   4, javier);
-        createInternalOrder(dsFood, dsGranada, dsMalaga, OrderStatus.PENDING,    OrderPriority.NORMAL, 0, javier);
+        createInternalOrder(dsFood, dsMalaga,  dsGranada, OrderStatus.DELIVERED,  OrderPriority.LOW,    13, elena);
+        createInternalOrder(dsFood, dsMalaga,  dsMurcia,  OrderStatus.IN_TRANSIT, OrderPriority.HIGH,    4, javier);
+        createInternalOrder(dsFood, dsGranada, dsMalaga,  OrderStatus.PENDING,    OrderPriority.NORMAL,  0, javier);
 
         // Internos DistriSur Industrial
-        createInternalOrder(dsInd, dsFactory, dsCadizWh, OrderStatus.DELIVERED, OrderPriority.NORMAL, 8, elena);
-        createInternalOrder(dsInd, dsCadizWh, dsFactory, OrderStatus.PENDING,   OrderPriority.NORMAL, 0, elena);
+        createInternalOrder(dsInd, dsFactory, dsCadizWh, OrderStatus.DELIVERED, OrderPriority.NORMAL,  8, elena);
+        createInternalOrder(dsInd, dsCadizWh, dsFactory, OrderStatus.PENDING,   OrderPriority.NORMAL,  0, elena);
 
-        // B2B dentro de la misma org (RapidLog Central → Retail)
+        // B2B mismo org: RapidLog Central → Retail
         createB2BOrder(rlCentral, rlMadridCd, rlTiendaMad, OrderStatus.DELIVERED,  OrderPriority.NORMAL, 6, carlos);
         createB2BOrder(rlCentral, rlValencia, rlTiendaBcn, OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   2, lucia);
         createB2BOrder(rlCentral, rlMadridWh, rlTiendaMad, OrderStatus.PENDING,    OrderPriority.NORMAL, 0, marcos);
 
-        // B2B cross-org (TransNorte ↔ RapidLog) para demostrar "unidad ajena" lila
-        createB2BOrder(tnLog,     tnBilbao,   rlMadridCd,  OrderStatus.IN_TRANSIT, OrderPriority.NORMAL, 1, sofia);
-        createB2BOrder(rlCentral, rlValencia, tnVigo,      OrderStatus.PENDING,    OrderPriority.HIGH,   0, carlos);
-        createB2BOrder(dsFood,    dsMalaga,   rlTiendaMad, OrderStatus.DELIVERED,  OrderPriority.NORMAL, 5, elena);
+        // B2B cross-org (distintas organizaciones)
+        createB2BOrder(tnLog,     tnBilbao,    rlMadridCd,   OrderStatus.IN_TRANSIT, OrderPriority.NORMAL, 1,  sofia);
+        createB2BOrder(rlCentral, rlValencia,  tnVigo,       OrderStatus.PENDING,    OrderPriority.HIGH,   0,  carlos);
+        createB2BOrder(dsFood,    dsMalaga,    rlTiendaMad,  OrderStatus.DELIVERED,  OrderPriority.NORMAL, 5,  elena);
+        createB2BOrder(tnStore,   tnSantander, rlMadridCd,   OrderStatus.DELIVERED,  OrderPriority.NORMAL, 3,  paula);
+        createB2BOrder(dsInd,     dsFactory,   tnZgz,        OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   1,  elena);
+        createB2BOrder(rlCentral, rlSevilla,   dsMalaga,     OrderStatus.PENDING,    OrderPriority.NORMAL, 0,  marcos);
+        createB2BOrder(tnLog,     tnVigo,      dsFactory,    OrderStatus.DELIVERED,  OrderPriority.LOW,    8,  sofia);
+        createB2BOrder(dsFood,    dsGranada,   tnSantander,  OrderStatus.IN_TRANSIT, OrderPriority.NORMAL, 2,  javier);
 
         // B2C registrado (loyal user)
-        createB2CRegistered(rlRetail, rlTiendaMad, luClara,   OrderStatus.DELIVERED, OrderPriority.NORMAL, 12, carlos);
-        createB2CRegistered(rlRetail, rlTiendaBcn, luIgnacio, OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   3, lucia);
-        createB2CRegistered(dsFood,   dsMurcia,    luRaul,    OrderStatus.PENDING,    OrderPriority.NORMAL, 0, javier);
+        createB2CRegistered(rlRetail, rlTiendaMad, luClara,   OrderStatus.DELIVERED,  OrderPriority.NORMAL, 12, carlos);
+        createB2CRegistered(rlRetail, rlTiendaBcn, luIgnacio, OrderStatus.IN_TRANSIT, OrderPriority.HIGH,    3, lucia);
+        createB2CRegistered(dsFood,   dsMurcia,    luRaul,    OrderStatus.PENDING,    OrderPriority.NORMAL,  0, javier);
         createB2CRegistered(dsFood,   dsGranada,   luClara,   OrderStatus.DELIVERED,  OrderPriority.LOW,    10, elena);
-        createB2CRegistered(tnLog,    tnBilbao,    luAlberto, OrderStatus.IN_TRANSIT, OrderPriority.NORMAL, 2, sofia);
-        // Pedidos extra para Clara y Raúl (usuarios registrados) — variedad de estados para /my-orders
+        createB2CRegistered(tnLog,    tnBilbao,    luAlberto, OrderStatus.IN_TRANSIT, OrderPriority.NORMAL,  2, sofia);
         createB2CRegistered(rlRetail, rlTiendaMad, luClara,   OrderStatus.IN_TRANSIT, OrderPriority.HIGH,    1, marcos);
         createB2CRegistered(rlRetail, rlTiendaBcn, luClara,   OrderStatus.PENDING,    OrderPriority.NORMAL,  0, lucia);
         createB2CRegistered(dsFood,   dsMalaga,    luRaul,    OrderStatus.DELIVERED,  OrderPriority.NORMAL,  6, javier);
         createB2CRegistered(dsFood,   dsGranada,   luRaul,    OrderStatus.IN_TRANSIT, OrderPriority.HIGH,    1, elena);
+        createB2CRegistered(tnStore,  tnPamplona,  luPablo,   OrderStatus.DELIVERED,  OrderPriority.NORMAL,  4, paula);
+        createB2CRegistered(tnStore,  tnSantander, luPablo,   OrderStatus.PENDING,    OrderPriority.NORMAL,  0, paula);
 
         // B2C no registrado (email/nombre/dirección)
         createB2CUnregistered(rlRetail, rlTiendaMad, "nuevo.cliente@mail.com", "Jorge Medina",
-                "Calle Alcalá 75, Madrid", 40.4200, -3.6950,
-                OrderStatus.PENDING, OrderPriority.NORMAL, 0, carlos);
+                "Calle Alcalá 75, Madrid",            40.4200, -3.6950, OrderStatus.PENDING,    OrderPriority.NORMAL, 0,  carlos);
         createB2CUnregistered(rlRetail, rlTiendaBcn, "laura.sanchez@mail.com", "Laura Sánchez",
-                "Av. Meridiana 100, Barcelona", 41.4050, 2.1860,
-                OrderStatus.DELIVERED, OrderPriority.HIGH, 7, lucia);
+                "Av. Meridiana 100, Barcelona",       41.4050,  2.1860, OrderStatus.DELIVERED,  OrderPriority.HIGH,   7,  lucia);
         createB2CUnregistered(dsFood,   dsMurcia,    "antonio.duran@mail.com", "Antonio Durán",
-                "Av. Libertad 8, Murcia", 37.9890, -1.1290,
-                OrderStatus.IN_TRANSIT, OrderPriority.NORMAL, 2, elena);
+                "Av. Libertad 8, Murcia",             37.9890, -1.1290, OrderStatus.IN_TRANSIT, OrderPriority.NORMAL, 2,  elena);
         createB2CUnregistered(dsFood,   dsMalaga,    "carmen.salas@mail.com",  "Carmen Salas",
-                "Calle Larios 10, Málaga", 36.7200, -4.4210,
-                OrderStatus.CANCELLED, OrderPriority.LOW, 5, javier);
+                "Calle Larios 10, Málaga",            36.7200, -4.4210, OrderStatus.CANCELLED,  OrderPriority.LOW,    5,  javier);
         createB2CUnregistered(tnLog,    tnZgz,       "manuel.lopez@mail.com",  "Manuel López",
-                "Paseo Independencia 20, Zaragoza", 41.6510, -0.8840,
-                OrderStatus.DELIVERED, OrderPriority.NORMAL, 9, sofia);
+                "Paseo Independencia 20, Zaragoza",   41.6510, -0.8840, OrderStatus.DELIVERED,  OrderPriority.NORMAL, 9,  sofia);
+        createB2CUnregistered(tnStore,  tnSantander, "rosa.garcia@mail.com",   "Rosa García",
+                "Calle Burgos 15, Santander",         43.4610, -3.8080, OrderStatus.IN_TRANSIT, OrderPriority.HIGH,   1,  paula);
+        createB2CUnregistered(dsInd,    dsCadizWh,   "felix.romero@mail.com",  "Félix Romero",
+                "Av. del Puerto 30, Cádiz",           36.5350, -6.2890, OrderStatus.DELIVERED,  OrderPriority.NORMAL, 6,  javier);
+        createB2CUnregistered(rlRetail, rlTiendaBcn, "ana.blanco@mail.com",    "Ana Blanco",
+                "Calle Valencia 200, Barcelona",      41.3950,  2.1640, OrderStatus.PENDING,    OrderPriority.NORMAL, 0,  carlos);
 
-        log.info("DemoDataSeeder: demo cargada (usuarios={}, empresas={}, unidades={}, pedidos={}).",
+        log.info("DemoDataSeeder: demo cargada — {} usuarios, {} empresas, {} unidades, {} pedidos.",
                 users.count(), companies.count(), units.count(), orders.count());
     }
 
@@ -321,6 +393,11 @@ public class DemoDataSeeder implements CommandLineRunner {
         return units.save(u);
     }
 
+    private void assignWorker(OperationalUnit unit, Worker worker) {
+        unit.getWorkers().add(worker);
+        units.save(unit);
+    }
+
     private LoyalUser createLoyalUser(String email, User user, List<Company> cs,
                                       String address, Double lat, Double lon) {
         LoyalUser lu = new LoyalUser();
@@ -369,8 +446,8 @@ public class DemoDataSeeder implements CommandLineRunner {
         BigDecimal lon = loyal.getLongitude();
         if (addr == null && loyal.getUser() != null) {
             addr = loyal.getUser().getAddress();
-            lat = loyal.getUser().getLatitude();
-            lon = loyal.getUser().getLongitude();
+            lat  = loyal.getUser().getLatitude();
+            lon  = loyal.getUser().getLongitude();
         }
         o.setRecipientAddress(addr);
         o.setRecipientLatitude(lat);
@@ -413,13 +490,11 @@ public class DemoDataSeeder implements CommandLineRunner {
 
     private String nextReference(int daysAgo) {
         Instant when = Instant.now().minus(daysAgo, ChronoUnit.DAYS);
-        // ORD-YYYYMMDD-XXXX
         String date = when.toString().substring(0, 10).replace("-", "");
         return "ORD-" + date + "-" + String.format("%04d", RNG.nextInt(9999));
     }
 
     private void backdate(Order o, int daysAgo) {
-        // created_at se asigna en BD (insertable=false), así que lo sobreescribimos con SQL.
         Instant when = Instant.now().minus(daysAgo, ChronoUnit.DAYS);
         em.createNativeQuery("UPDATE orders SET created_at = :ts WHERE id = :id")
                 .setParameter("ts", java.sql.Timestamp.from(when))
@@ -428,7 +503,6 @@ public class DemoDataSeeder implements CommandLineRunner {
     }
 
     private void addEvents(Order o, OrderStatus finalStatus, User author) {
-        // Registro lineal PENDING → IN_TRANSIT → DELIVERED/CANCELLED según status final.
         List<OrderStatus> chain = switch (finalStatus) {
             case PENDING    -> List.of(OrderStatus.PENDING);
             case IN_TRANSIT -> List.of(OrderStatus.PENDING, OrderStatus.IN_TRANSIT);
