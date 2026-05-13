@@ -31,6 +31,7 @@ function initMap() {
   const lat = Number.parseFloat(unit.value.latitude)
   const lng = Number.parseFloat(unit.value.longitude)
   map = createMap(mapEl.value)
+  map.invalidateSize()
   map.setView([lat, lng], 15)
   L.marker([lat, lng], { icon: ownUnitIcon() })
     .bindPopup(`<strong>${unit.value.name}</strong><br><small>${t('units.' + unit.value.type)}</small>`)

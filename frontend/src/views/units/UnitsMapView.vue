@@ -21,46 +21,49 @@ let clusterGroup = null
 onMounted(async () => {
   loading.value = true
   error.value = ''
+  let mapped = []
   try {
     const res = await api.get('/units')
     if (!res.ok) { error.value = t('error.connection'); return }
     const units = await res.json()
-    const mapped = units.filter(u => u.latitude != null && u.longitude != null)
+    mapped = units.filter(u => u.latitude != null && u.longitude != null)
     unitsWithCoords.value = mapped.length
-
-    await nextTick()
-    map = createMap(mapEl.value)
-
-    if (mapped.length === 0) {
-      map.setView(MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION)
-      return
-    }
-
-    clusterGroup = L.markerClusterGroup(clusterOptions())
-    const bounds = []
-    mapped.forEach(u => {
-      const lat = Number.parseFloat(u.latitude)
-      const lng = Number.parseFloat(u.longitude)
-      const marker = addMarker(map, {
-        id: u.id,
-        lat, lon: lng,
-        kind: 'OWN_UNIT',
-        title: u.name,
-        subtitle: `${t('units.' + u.type)}${u.address ? ' · ' + u.address : ''}`,
-        actionLabel: t('units.detail'),
-        navigateTo: `/units/${u.id}`,
-        router,
-      })
-      clusterGroup.addLayer(marker)
-      bounds.push([lat, lng])
-    })
-    map.addLayer(clusterGroup)
-    fitBounds(map, bounds)
   } catch {
     error.value = t('error.connection')
   } finally {
     loading.value = false
   }
+
+  if (error.value) return
+
+  await nextTick()
+  map = createMap(mapEl.value)
+
+  if (mapped.length === 0) {
+    map.setView(MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM_REGION)
+    return
+  }
+
+  clusterGroup = L.markerClusterGroup(clusterOptions())
+  const bounds = []
+  mapped.forEach(u => {
+    const lat = Number.parseFloat(u.latitude)
+    const lng = Number.parseFloat(u.longitude)
+    const marker = addMarker(map, {
+      id: u.id,
+      lat, lon: lng,
+      kind: 'OWN_UNIT',
+      title: u.name,
+      subtitle: `${t('units.' + u.type)}${u.address ? ' · ' + u.address : ''}`,
+      actionLabel: t('units.detail'),
+      navigateTo: `/units/${u.id}`,
+      router,
+    })
+    clusterGroup.addLayer(marker)
+    bounds.push([lat, lng])
+  })
+  map.addLayer(clusterGroup)
+  fitBounds(map, bounds)
 })
 
 onBeforeRouteLeave(() => {

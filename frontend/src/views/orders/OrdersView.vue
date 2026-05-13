@@ -37,6 +37,7 @@ let map = null
 let clusterGroup = null
 let routeEntries = []
 let mapToken = 0
+let detachRouteVisibility = null
 
 const statusOptions = computed(() => [
   { label: t('orders.filterAll'), value: 'ALL' },
@@ -209,8 +210,9 @@ async function updateMapOrders() {
   map.addLayer(clusterGroup)
   fitBounds(map, bounds)
 
-  // Instalamos el handler una vez que tenemos el clusterGroup.
-  attachRouteVisibilityHandler(map, clusterGroup, () => routeEntries)
+  // Instalar el handler limpiando el anterior para evitar acumulación de listeners.
+  if (detachRouteVisibility) { detachRouteVisibility(); detachRouteVisibility = null }
+  detachRouteVisibility = attachRouteVisibilityHandler(map, clusterGroup, () => routeEntries)
 
   // Rutas (todas las que tienen coords completas)
   const routeable = items.filter(o => o.destinationLat != null && o.destinationLon != null)

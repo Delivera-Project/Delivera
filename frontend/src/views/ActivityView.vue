@@ -208,8 +208,12 @@ onMounted(load)
                 <PTag :value="t('units.' + entry.unitType)" severity="secondary" />
               </td>
               <td class="ranking-count">
-                <span class="count-bar" :style="{ width: (entry.orderCount / unitRanking[0].orderCount * 100) + '%' }" />
-                {{ entry.orderCount }}
+                <div class="count-cell">
+                  <div class="count-bar-wrap">
+                    <span class="count-bar" :style="{ width: (entry.orderCount / unitRanking[0].orderCount * 100) + '%' }" />
+                  </div>
+                  {{ entry.orderCount }}
+                </div>
               </td>
             </tr>
           </tbody>

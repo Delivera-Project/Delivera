@@ -212,8 +212,12 @@ export async function addRoute(map, {
   let line
   try {
     const path = await fetchOSRM()
-    if (path) { line = buildSolid(path); entry.solid = true }
-    else { line = buildDashed(); entry.solid = false }
+    if (path) {
+      // OSRM snaps endpoints to the nearest road; prepend/append the exact marker
+      // coordinates so the polyline always starts and ends at the marker position.
+      const anchored = [[origin.lat, origin.lon], ...path, [dest.lat, dest.lon]]
+      line = buildSolid(anchored); entry.solid = true
+    } else { line = buildDashed(); entry.solid = false }
   } catch {
     line = buildDashed(); entry.solid = false
   }
@@ -296,7 +300,10 @@ export function attachRouteVisibilityHandler(map, clusterGroup, routeEntriesRef)
     clusterGroup.on('clusterclick', update)
   }
   update()
-  return update
+  return () => {
+    map.off('zoomend', update)
+    map.off('moveend', update)
+  }
 }
 
 // Alias retrocompatible (nombre viejo).

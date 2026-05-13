@@ -45,6 +45,7 @@ async function initMap() {
   const destLon = Number.parseFloat(o.destinationLon)
 
   map = createMap(mapEl.value)
+  map.invalidateSize()
   fitBounds(map, [[originLat, originLon], [destLat, destLon]])
 
   addMarker(map, {
@@ -143,7 +144,7 @@ onMounted(() => { loadConfig(); fetchOrder() })
           text
           severity="secondary"
           icon="pi pi-arrow-left"
-          class="back-btn"
+          class="detail-back-btn"
           @click="router.push('/my-orders')"
         />
 

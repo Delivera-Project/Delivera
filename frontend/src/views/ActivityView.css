@@ -134,21 +134,20 @@
 }
 .ranking-table td { padding: 10px 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
 .ranking-pos { font-weight: 800; color: var(--p-primary-color, #7c3aed); width: 32px; }
-.ranking-count {
-  font-weight: 700;
-  text-align: right;
+.ranking-count { font-weight: 700; text-align: right; }
+.count-cell {
   display: flex;
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
 }
+.count-bar-wrap { width: 60px; flex-shrink: 0; }
 .count-bar {
-  display: inline-block;
+  display: block;
   height: 6px;
   background: color-mix(in srgb, var(--p-primary-color, #7c3aed) 30%, white);
   border-radius: 4px;
   min-width: 4px;
-  max-width: 80px;
 }
 .ranking-empty { text-align: center; color: #94a3b8; font-size: 14px; margin-top: 12px; }
 .ranking-row:hover td { background: #f8fafc; }
